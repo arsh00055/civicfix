@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Next.js
+nextjs-project/.next/
+nextjs-project/node_modules/
+nextjs-project/.env*.local
