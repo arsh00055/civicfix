@@ -8,6 +8,7 @@ import PrimaryButton from '@/components/UI/buttons/PrimaryButton';
 import SecondaryButton from '@/components/UI/buttons/SecondaryButton';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { issuesAPI } from '@/lib/services/api/endpoints';
+import MainLayout from '@/components/layout/MainLayout';
 
 interface IssueFormData {
   title: string;
@@ -20,7 +21,11 @@ interface IssueFormData {
   images: string[];
 }
 
-const NewIssuePage: React.FC = () => {
+interface NewIssuesProps {
+  userRole: string | null;
+}
+
+const NewIssuePage: React.FC<NewIssuesProps> = ({userRole}) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<IssueFormData>({
     title: '',
@@ -91,68 +96,69 @@ const NewIssuePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Report an Issue</h1>
-        <p className="text-gray-600">
-          Help improve your community by reporting issues that need attention
-        </p>
-      </div>
-
-      {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex items-center justify-center space-x-4">
-          {[1, 2].map(step => (
-            <React.Fragment key={step}>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                step === currentStep 
-                  ? 'bg-blue-600 text-white' 
-                  : step < currentStep 
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-300 text-gray-600'
-              }`}>
-                {step}
-              </div>
-              {step < 2 && (
-                <div className={`w-16 h-1 ${
-                  step < currentStep ? 'bg-green-600' : 'bg-gray-300'
-                }`} />
-              )}
-            </React.Fragment>
-          ))}
+    <MainLayout role={userRole}>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Report an Issue</h1>
+          <p className="text-gray-600">
+            Help improve your community by reporting issues that need attention
+          </p>
         </div>
-        <div className="flex justify-between mt-2 text-sm text-gray-600">
-          <span className={currentStep >= 1 ? 'text-blue-600 font-medium' : ''}>
-            Issue Details
-          </span>
-          <span className={currentStep >= 2 ? 'text-blue-600 font-medium' : ''}>
-            Location
-          </span>
+
+        {/* Progress Steps */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-4">
+            {[1, 2].map(step => (
+              <React.Fragment key={step}>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  step === currentStep 
+                    ? 'bg-blue-600 text-white' 
+                    : step < currentStep 
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {step}
+                </div>
+                {step < 2 && (
+                  <div className={`w-16 h-1 ${
+                    step < currentStep ? 'bg-green-600' : 'bg-gray-300'
+                  }`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="flex justify-between mt-2 text-sm text-gray-600">
+            <span className={currentStep >= 1 ? 'text-blue-600 font-medium' : ''}>
+              Issue Details
+            </span>
+            <span className={currentStep >= 2 ? 'text-blue-600 font-medium' : ''}>
+              Location
+            </span>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          {currentStep === 1 && (
+            <IssueForm
+              formData={formData}
+              onUpdate={updateFormData}
+              onNext={handleNext}
+            />
+          )}
+
+          {currentStep === 2 && (
+            <LocationPicker
+              formData={formData}
+              onUpdate={updateFormData}
+              onBack={handleBack}
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
+          )}
         </div>
       </div>
-
-      {/* Form Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        {currentStep === 1 && (
-          <IssueForm
-            formData={formData}
-            onUpdate={updateFormData}
-            onNext={handleNext}
-          />
-        )}
-
-        {currentStep === 2 && (
-          <LocationPicker
-            formData={formData}
-            onUpdate={updateFormData}
-            onBack={handleBack}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-          />
-        )}
-      </div>
-    </div>
+    </MainLayout>  
   );
 };
 

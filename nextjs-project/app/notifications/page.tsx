@@ -97,7 +97,7 @@ const NotificationsPage: React.FC = () => {
   }
 
   return (
-    <MainLayout role={user?.role || null}>
+    <MainLayout role={user?.role}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

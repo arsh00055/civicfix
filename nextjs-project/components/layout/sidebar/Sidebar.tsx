@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
   };
 
   const commonMenuItems = [
-    { icon: HomeIcon, label: 'Dashboard', href: '/dashboard', badge: null },
+    { icon: HomeIcon, label: 'Dashboard', href: '/', badge: null },
     { icon: MapIcon, label: 'Community Map', href: '/map', badge: null },
     { icon: BellIcon, label: 'Notifications', href: '/notifications', badge: null },
   ];
@@ -55,9 +55,9 @@ const Sidebar: React.FC = () => {
       { icon: ChartBarIcon, label: 'My Assignments', href: '/tasks/assignments', badge: null },
     ],
     admin: [
-      { icon: UsersIcon, label: 'User Management', href: '/dashboard/user-management', badge: null },
-      { icon: ChartBarIcon, label: 'Analytics', href: '/dashboard/admin/analytics', badge: null },
-      { icon: Cog6ToothIcon, label: 'System Settings', href: '/dashboard/admin/settings', badge: null },
+      { icon: UsersIcon, label: 'User Management', href: '/user-management', badge: null },
+      { icon: ChartBarIcon, label: 'Analytics', href: '/admin/analytics', badge: null },
+      { icon: Cog6ToothIcon, label: 'System Settings', href: '/admin/settings', badge: null },
     ],
   };
 
@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
         `}
         aria-label="Sidebar"
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col min-h-screen">
           {/* Close Button - Mobile Only */}
           <div className="lg:hidden flex justify-end p-4 border-b border-gray-200">
             <button

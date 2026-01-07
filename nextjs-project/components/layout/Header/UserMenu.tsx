@@ -58,10 +58,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   };
 
   return (
-    <div className={`relative ${background} cursor-pointer rounded-md p-2 hover:opacity-90 transition-opacity`} ref={menuRef}>
+    <div className={`relative ${background} cursor-pointer rounded-md p-2 transition-opacity`} ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-3 text-sm rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-500"
+        className="flex items-center space-x-3 text-sm rounded-full cursor-pointer"
         aria-label="User menu"
       >
         <UserIcon className="w-6 h-6 text-white" />
@@ -78,13 +78,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
           </div>
           <button
             onClick={handleProfileClick}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            className="block w-full text-left cursor-pointer px-4 py-2 text-sm hover:text-black text-gray-700 transition-colors"
           >
             Your Profile
           </button>
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100"
+            className="block w-full text-left px-4 py-2 text-sm cursor-pointer hover:text-black text-gray-700 transition-colors border-t border-gray-100"
           >
             Sign out
           </button>

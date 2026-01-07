@@ -37,7 +37,8 @@ const IssuesPage: React.FC = () => {
       router.push('/login');
       return;
     }
-    router.push('/issues/new');
+    console.log('User role:', user?.role);
+    router.push('/issues/new?role=' + (user?.role || '') );
   };
 
   const handleIssueClick = (issue: any) => {

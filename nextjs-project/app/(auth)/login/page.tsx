@@ -106,7 +106,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center px-6 pb-8">
+        <div className="flex-1 flex items-center justify-center px-6 pb-2">
           <div className="w-full max-w-4xl mx-auto">
             <div className={`transform transition-all duration-500 ease-out ${
               isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
