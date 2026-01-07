@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "react:dev": "cd . && npm start",
+    "next:dev": "cd nextjs-project && npm run dev",
+    "mockoon:dev": "mockoon-cli start --data .mockoon/mock-api.json --port 3003",
+    "dev:all": "concurrently 'npm run react:dev' 'npm run next:dev' 'npm run mockoon:dev'",
+    "install:all": "npm install && cd nextjs-project && npm install && npm install -g @mockoon/cli"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
