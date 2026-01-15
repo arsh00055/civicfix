@@ -1,4 +1,5 @@
 'use client'
+
 import React from 'react'
 
 export default function AuthLayout({
@@ -8,7 +9,7 @@ export default function AuthLayout({
 }) {
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="overflow-x-auto lg:min-h-screen bg-white">
       <div className="flex flex-col">
         {children}
       </div>

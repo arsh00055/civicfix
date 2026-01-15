@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import LoginHeader from './components/LoginHeader'
 import LoginRoleSelector from './components/LoginRoleSelector'
@@ -25,8 +24,7 @@ const AdminLogin = dynamic(() => import('@/features/auth/components/AdminLogin')
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<'citizen' | 'volunteer' | 'admin' | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const { isLoading, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isLoading } = useAuth()
 
   const handleRoleSelect = (role: 'citizen' | 'volunteer' | 'admin') => {
     setIsTransitioning(true)
@@ -57,15 +55,7 @@ export default function LoginPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="h-screen bg-white flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-white to-purple-50/50"></div>
-        <div className="relative z-10 text-center">
-          <Loading />
-          <p className="mt-6 text-gray-600 font-medium">Preparing your experience...</p>
-        </div>
-      </div>
-    )
+    return (<Loading />)
   }
 
   return (
@@ -106,7 +96,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center px-6 pb-2">
+        <div className="flex-1 flex items-center justify-center px-6 pb-8">
           <div className="w-full max-w-4xl mx-auto">
             <div className={`transform transition-all duration-500 ease-out ${
               isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'

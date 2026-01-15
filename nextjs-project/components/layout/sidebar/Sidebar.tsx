@@ -84,7 +84,7 @@ const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-all duration-300 ease-in-out
+          fixed inset-y-0 left-0 overflow-hidden z-50 w-64 bg-white shadow-xl transform transition-all duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0 lg:static lg:inset-0
           border-r border-gray-200
@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
         `}
         aria-label="Sidebar"
       >
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col h-full">
           {/* Close Button - Mobile Only */}
           <div className="lg:hidden flex justify-end p-4 border-b border-gray-200">
             <button

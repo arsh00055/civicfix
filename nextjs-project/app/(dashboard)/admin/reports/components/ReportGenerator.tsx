@@ -50,8 +50,8 @@ export default function ReportGenerator({ generating, onGenerateReport }: Report
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {reportTypes.map((reportType) => (
           <div key={reportType.type} className="border border-gray-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-3">{reportType.label}</h4>
-            <div className="space-y-2">
+            <h4 className="font-medium text-black mb-3">{reportType.label}</h4>
+            <div className="space-y-2 text-blue-500">
               {reportType.formats.map((format) => {
                 const isGenerating = generating === `${reportType.type}-${format}`
                 return (
@@ -59,7 +59,7 @@ export default function ReportGenerator({ generating, onGenerateReport }: Report
                     key={format}
                     onClick={() => handleGenerateReport(reportType.type, format)}
                     disabled={isGenerating}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm bg-gray-50 hover:bg-gray-300 cursor-pointer rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                     aria-label={`Generate ${reportType.label} in ${format.toUpperCase()} format`}
                   >
                     <span className="font-medium">{format.toUpperCase()}</span>

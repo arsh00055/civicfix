@@ -168,13 +168,13 @@ const AssignmentsPage: React.FC = () => {
                       
                       <div className="flex space-x-3">
                         <button
-                          onClick={() => router.push(`/issues/${assignment.taskId || assignment.id}`)}
+                          onClick={() => router.push(`/issues/${assignment.taskId || assignment.id}?role=` + (user?.role || ''))}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           View Details
                         </button>
                         <button
-                          onClick={() => router.push(`/issues/${assignment.taskId || assignment.id}`)}
+                          onClick={() => router.push(`/issues/${assignment.taskId || assignment.id}?role=` + (user?.role || ''))}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
                           Update Status
@@ -186,22 +186,6 @@ const AssignmentsPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Back to Dashboard */}
-          <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
-            <button
-              onClick={() => router.push('/tasks/available')}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              ← Browse Available Tasks
-            </button>
-            <button
-              onClick={() => router.push('/')}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              Back to Dashboard →
-            </button>
-          </div>
         </div>
       </div>
     </MainLayout>

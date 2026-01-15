@@ -13,8 +13,9 @@ import {
   CalendarIcon,
   ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline';
-import { useIssues } from '@/hooks/api/useIssues';
 import { useVolunteers } from '@/hooks/api/useVolunteers';
+import { issuesAPI } from '@/lib/services/api/endpoints';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 interface IssueCardProps {
   issue: Issue;
@@ -44,9 +45,10 @@ const IssueCard: React.FC<IssueCardProps> = ({
   compact = false
 }) => {
   const router = useRouter();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<Issue['status']>(issue.status);
-  const { voteIssue } = useIssues();
+  const VoteIssue = issuesAPI.voteIssue;
   const { claimTask, updateTaskStatus } = useVolunteers();
 
   const handleVote = async (e: React.MouseEvent) => {
@@ -55,7 +57,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
 
     try {
       setIsLoading(true);
-      await voteIssue(issue.id);
+      await VoteIssue(issue.id);
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Failed to vote:', error);
@@ -66,7 +68,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/issues/${issue.id}`);
+    router.push(`/issues/${issue.id}?role=`  + (user?.role || ''));
   };
 
   const handleClaim = async (e: React.MouseEvent) => {
@@ -285,7 +287,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
             )}
             <button 
               onClick={handleViewDetails}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-blue-100 cursor-pointer text-gray-800 text-sm rounded-lg hover:bg-gray-200 transition-colors"
             >
               View Details
             </button>

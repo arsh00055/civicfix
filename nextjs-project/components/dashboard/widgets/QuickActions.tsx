@@ -18,7 +18,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
   const citizenActions = [
     { label: 'Report Issue', href: '/issues/new', primary: true },
     { label: 'View Map', href: '/map', primary: false },
-    { label: 'My Reports', href: '/profile', primary: false },
+    { label: 'My Reports', href: '/issues', primary: false },
   ];
 
   const volunteerActions = [
@@ -28,9 +28,9 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
   ];
 
   const adminActions = [
-    { label: 'User Management', href: '/dashboard/admin/user-management', primary: true },
-    { label: 'System Settings', href: '/dashboard/admin/settings', primary: false },
-    { label: 'View Reports', href: '/dashboard/admin/reports', primary: false },
+    { label: 'User Management', href: '/user-management', primary: true },
+    { label: 'Analytics', href: '/admin/analytics', primary: false },
+    { label: 'View Reports', href: '/admin/reports', primary: false },
   ];
 
   const getActions = () => {

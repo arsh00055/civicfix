@@ -14,7 +14,6 @@ import {
   UserGroupIcon,
   StarIcon,
 } from '@/components/UI/icons';
-import type { Issue } from '@/types/issue.types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import apiClient from '@/lib/services/api/client';
 
@@ -52,8 +51,7 @@ export default function VolunteerDashboard() {
       setIsLoading(true);
       setError(null);
 
-      // Fetch volunteer dashboard data from API
-      const dashboardResponse = await apiClient.get('/volunteer');
+      const dashboardResponse = await apiClient.get('/dashboard/volunteer');
       const dashboardData = dashboardResponse.data || dashboardResponse;
 
       setStats({
@@ -88,8 +86,7 @@ export default function VolunteerDashboard() {
 
   const handleTaskClaim = async (taskId: string) => {
     try {
-      // Claim the task via API
-      await apiClient.post(`/issues/${taskId}/claim`);
+      await apiClient.post(`/volunteers/tasks/${taskId}/claim`);
       
       // Refresh dashboard data
       loadDashboardData();

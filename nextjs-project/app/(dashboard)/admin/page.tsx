@@ -55,7 +55,7 @@ export default function AdminDashboard() {
       setError(null);
 
       // Fetch admin dashboard data from API
-      const dashboardResponse = await apiClient.get('/admin');
+      const dashboardResponse = await apiClient.get('/dashboard/admin');
       const dashboardData = dashboardResponse.data || dashboardResponse;
       
       // Fetch admin stats separately
@@ -132,7 +132,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section - Exactly like Citizen but with purple theme */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-2xl p-6 text-white">
         <div className="flex justify-between items-start">
           <div>

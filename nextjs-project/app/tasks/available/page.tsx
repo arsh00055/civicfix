@@ -215,22 +215,6 @@ const AvailableTasksPage: React.FC = () => {
               ))}
             </div>
           )}
-
-          {/* Navigation Links */}
-          <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
-            <button
-              onClick={() => router.push('/tasks/assignments')}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              ← View My Assignments
-            </button>
-            <button
-              onClick={() => router.push('/')}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              Back to Dashboard →
-            </button>
-          </div>
         </div>
       </div>
     </MainLayout>

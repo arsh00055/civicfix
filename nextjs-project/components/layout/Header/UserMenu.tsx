@@ -66,7 +66,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
       >
         <UserIcon className="w-6 h-6 text-white" />
         <span className="hidden md:block text-white font-medium">
-          {currentUser?.name || user?.name || 'User'}
+          { user?.name }
         </span>
       </button>
 
@@ -78,7 +78,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
           </div>
           <button
             onClick={handleProfileClick}
-            className="block w-full text-left cursor-pointer px-4 py-2 text-sm hover:text-black text-gray-700 transition-colors"
+            className="block w-full text-left cursor-pointer rounded-full px-4 py-2 text-sm hover:text-black text-gray-700 transition-colors"
           >
             Your Profile
           </button>

@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { DocumentReportIcon, DownloadIcon, CalendarIcon, RefreshIcon } from '@/components/ui/icons'
+import { DocumentReportIcon, DownloadIcon, CalendarIcon, RefreshIcon } from '@/components/UI/icons'
+import { formatFileSize } from '@/lib/utils/helpers/formatters'
 
 type ReportType = 'issues' | 'users' | 'performance' | 'financial' | 'system'
 type ReportFormat = 'pdf' | 'csv' | 'excel'
@@ -62,14 +63,6 @@ export default function ReportsList({ reports, onDownload, onRegenerate }: Repor
       )
     }
     return null
-  }
-
-  const formatFileSize = (bytes?: number): string => {
-    if (!bytes) return 'N/A'
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    if (bytes === 0) return '0 Bytes'
-    const i = Math.floor(Math.log(bytes) / Math.log(1024))
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
   }
 
   const handleDownload = (report: Report) => {

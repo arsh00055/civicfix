@@ -15,6 +15,8 @@ interface InputFieldProps {
   helperText?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  autoComplete?: string;
+  autoFocus?: boolean;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
@@ -32,7 +34,33 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
   helperText,
   leftIcon,
   rightIcon,
+  autoComplete,
+  autoFocus = false,
 }, ref) => {
+  // Determine appropriate autocomplete value based on input type and name
+  const getAutoCompleteValue = () => {
+    // If autoComplete prop is provided, use it
+    if (autoComplete) return autoComplete;
+    
+    // Otherwise, infer from type and name
+    if (type === 'email') return 'email';
+    if (type === 'password') {
+      if (name?.includes('current') || name === 'password') return 'current-password';
+      if (name?.includes('new')) return 'new-password';
+      return 'current-password';
+    }
+    if (name === 'username') return 'username';
+    if (name?.includes('name')) return 'name';
+    if (name?.includes('phone') || name?.includes('tel')) return 'tel';
+    if (name?.includes('address')) return 'street-address';
+    if (name?.includes('city')) return 'address-level2';
+    if (name?.includes('state') || name?.includes('province')) return 'address-level1';
+    if (name?.includes('zip') || name?.includes('postal')) return 'postal-code';
+    if (name?.includes('country')) return 'country-name';
+    
+    return undefined;
+  };
+
   return (
     <div className={className}>
       {label && (
@@ -58,6 +86,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
+          autoComplete={getAutoCompleteValue()}
+          autoFocus={autoFocus}
           className={`
             w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             ${error 

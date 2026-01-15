@@ -104,7 +104,7 @@ const MapPage: React.FC = () => {
   };
 
   const handleIssueClick = (issue: MapIssue) => {
-    router.push(`/issues/${issue.id}`);
+    router.push(`/issues/${issue.id}?role=` + (user?.role || ''));
   };
 
   if (loading) {
@@ -120,7 +120,6 @@ const MapPage: React.FC = () => {
   return (
     <MainLayout role={user?.role || null}>
       <div className="h-screen flex flex-col">
-        {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>

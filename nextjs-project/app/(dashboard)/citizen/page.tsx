@@ -12,9 +12,8 @@ import {
   HomeIcon, 
   MapIcon, 
   PlusIcon, 
-  CheckCircleIcon, 
+  CheckCircleIcon,
 } from '@/components/UI/icons'
-import type { Issue } from '@/types/issue.types'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import apiClient from '@/lib/services/api/client'
 
@@ -35,7 +34,6 @@ export default function CitizenDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check authentication
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -52,8 +50,7 @@ export default function CitizenDashboard() {
       setIsLoading(true);
       setError(null);
 
-      // Fetch citizen dashboard data from API
-      const dashboardResponse = await apiClient.get('/citizen');
+      const dashboardResponse = await apiClient.get('/dashboard/citizen');
       const dashboardData = dashboardResponse.data || dashboardResponse;
 
       setStats({
@@ -71,7 +68,6 @@ export default function CitizenDashboard() {
       console.error('Failed to load citizen dashboard:', err);
       setError(err.message || 'Failed to load dashboard data. Please try again.');
       
-      // Set fallback data on error
       setStats({
         reportsSubmitted: 0,
         issuesResolved: 0,
@@ -92,15 +88,13 @@ export default function CitizenDashboard() {
 
   const handleReportIssue = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push('/issues/new');
+    router.push('/issues/new?role=' + (user?.role || ''));
   };
 
-  // Don't show anything during auth check
   if (authLoading) {
     return null;
   }
 
-  // If not authenticated or wrong role, don't show dashboard
   if (!user || user.role !== 'citizen') {
     return null;
   }
@@ -175,12 +169,12 @@ export default function CitizenDashboard() {
               <h2 className="text-lg font-semibold text-gray-900">Your Recent Reports</h2>
               <button
                 onClick={loadDashboardData}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium"
               >
                 Refresh
               </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-8 flex flex-col">
               {myReports.length > 0 ? (
                 myReports.map(report => (
                   <IssueCard 

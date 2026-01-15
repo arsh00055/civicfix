@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { apiClient } from '@/lib/services/api/client'
+import apiClient from '@/lib/services/api/client'
 import ReportsHeader from './components/ReportsHeader'
 import ReportGenerator from './components/ReportGenerator'
 import ReportsList from './components/ReportsList'
@@ -37,8 +37,8 @@ export default function ReportsPage() {
       setLoading(true)
       setError(null)
       
-      const data = await apiClient.get('/admin/reports')
-      setReports(data)
+      const response = await apiClient.get('/admin/reports')
+      setReports(response.data.reports || response.data.data || []);
     } catch (err: any) {
       console.error('Failed to fetch reports:', err)
       setError(err.message || 'Failed to load reports. Please try again.')
@@ -53,7 +53,7 @@ export default function ReportsPage() {
     setError(null)
 
     try {
-      const data = await apiClient.get('/analytics/export', {
+      const response = await apiClient.get('/analytics/export', {
         params: { format }
       })
 
@@ -65,9 +65,9 @@ export default function ReportsPage() {
         format,
         generatedAt: new Date().toISOString(),
         period: getReportPeriod(),
-        downloadUrl: data.downloadUrl,
+        downloadUrl: response.data.downloadUrl,
         status: 'completed',
-        fileSize: data.fileSize
+        fileSize: response.data.fileSize
       }
 
       setReports(prev => [newReport, ...prev])
@@ -144,12 +144,10 @@ export default function ReportsPage() {
     setError(null)
   }
 
-  // Loading state - Next.js will handle global loading.tsx
   if (loading && !reports.length) {
-    return null // Next.js will show the global loading component
+    return null
   }
 
-  // Error state for initial load
   if (error && !reports.length) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -173,45 +171,45 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ReportsHeader onRefresh={handleRetry} />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ReportsHeader onRefresh={handleRetry} />
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-red-800 font-medium">{error}</p>
-              </div>
-              <div className="flex space-x-2 ml-4">
-                <button
-                  onClick={handleRetry}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                >
-                  Retry
-                </button>
-                <button
-                  onClick={handleDismissError}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-                >
-                  Dismiss
-                </button>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-red-800 font-medium">{error}</p>
+                </div>
+                <div className="flex space-x-2 ml-4">
+                  <button
+                    onClick={handleRetry}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    Retry
+                  </button>
+                  <button
+                    onClick={handleDismissError}
+                    className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <ReportGenerator 
-          generating={generating} 
-          onGenerateReport={generateReport} 
-        />
+          <ReportGenerator 
+            generating={generating} 
+            onGenerateReport={generateReport} 
+          />
 
-        <ReportsList 
-          reports={reports} 
-          onDownload={handleDownload}
-          onRegenerate={handleRegenerate}
-        />
+          <ReportsList 
+            reports={reports} 
+            onDownload={handleDownload}
+            onRegenerate={handleRegenerate}
+          />
+        </div>
       </div>
-    </div>
   )
 }

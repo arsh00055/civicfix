@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import RHFInputField from '@/components/UI/forms/RHFInputField'
-import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
+import RHFInputField from '@/components/ui/forms/RHFInputField'
+import PrimaryButton from '@/components/ui/buttons/PrimaryButton'
 import apiClient from '@/lib/services/api/client'
 
 const volunteerSchema = z.object({

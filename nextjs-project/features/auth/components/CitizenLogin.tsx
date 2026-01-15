@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import InputField from '../../../components/UI/forms/InputField';
+import Error from '@/app/error'
 import PrimaryButton from '../../../components/UI/buttons/PrimaryButton';
 
 const CitizenLogin: React.FC = () => {
@@ -15,8 +16,12 @@ const CitizenLogin: React.FC = () => {
 
     try {
       await login(email, password, 'citizen', {});
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err && typeof (err as any).message === "string") {
+        setError((err as any).message);
+      } else {
+        setError('Login failed');
+      }
     }
   };
 
@@ -44,22 +49,19 @@ const CitizenLogin: React.FC = () => {
           type="password"
           value={password}
           onChange={setPassword}
+          autoComplete="current-password"
           className="text-black"
           placeholder="Enter your password"
           required
         />
         
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
+        {error && (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => {}} />)}
 
         <div className="space-y-3">
           <PrimaryButton
             type="submit"
             disabled={isLoading}
-            className="w-full"
+            className="w-full cursor-pointer"
           >
             {isLoading ? 'Signing in...' : 'Sign in as Citizen'}
           </PrimaryButton>
@@ -67,7 +69,7 @@ const CitizenLogin: React.FC = () => {
           <button
             type="button"
             onClick={useDemoCredentials}
-            className="w-full py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-2 px-4 border cursor-pointer border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Use Demo Credentials
           </button>

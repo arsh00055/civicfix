@@ -72,7 +72,7 @@ const NewIssuePage: React.FC<NewIssuesProps> = ({userRole}) => {
       const response = await issuesAPI.createIssue(issueData);
       
       alert('Issue reported successfully!');
-      router.push(`/issues/${response.data.id}`);
+      router.push(`/issues/${response.data.id}?role=` + (user?.role || ''));
     } catch (error) {
       console.error('Failed to submit issue:', error);
       alert('Failed to report issue. Please try again.');

@@ -6,7 +6,10 @@ import type { Issue, IssueFilters } from '@/types/issue.types';
 
 export const useIssues = (filters?: IssueFilters) => {
   return useApi<Issue[]>(
-    () => issuesAPI.getIssues(filters), 
+    async () => {
+      const response = await issuesAPI.getIssues(filters);
+      return response.data;
+    },
     { 
       immediate: true,
       cacheKey: filters ? `issues-${JSON.stringify(filters)}` : 'issues-all',
@@ -17,7 +20,10 @@ export const useIssues = (filters?: IssueFilters) => {
 
 export const useIssue = (id: string) => {
   return useApi<Issue>(
-    () => issuesAPI.getIssueById(id), 
+    async () => {
+      const response = await issuesAPI.getIssue(id);
+      return response.data;
+    }, 
     { 
       immediate: !!id,
       cacheKey: `issue-${id}`,
@@ -26,21 +32,36 @@ export const useIssue = (id: string) => {
   );
 };
 
-export const useCreateIssue = () => {
-  return useApi<Issue>(issuesAPI.createIssue);
+export const useCreateIssue = (id: string) => {
+  return useApi<Issue>(
+    async () => {
+      const response = await issuesAPI.createIssue(id)
+    return response.data;
+  });
 };
 
-export const useUpdateIssue = () => {
-  return useApi<Issue>(issuesAPI.updateIssue);
+export const useUpdateIssue = (id: string, data: any) => {
+  return useApi<Issue>(
+    async () => {
+      const response = await issuesAPI.updateIssue(id, data)
+    return response.data;
+  });
 };
 
-export const useDeleteIssue = () => {
-  return useApi<void>(issuesAPI.deleteIssue);
+export const useDeleteIssue = (id: string) => {
+  return useApi<Issue>(
+    async () => {
+      const response = await issuesAPI.deleteIssue(id)
+    return response.data;
+  });
 };
 
 export const useMyReports = () => {
   return useApi<Issue[]>(
-    () => issuesAPI.getMyReports(), 
+    async () => {
+      const response = await issuesAPI.getMyReports()
+    return response.data;
+  }, 
     { 
       immediate: true,
       cacheKey: 'my-reports',
@@ -49,10 +70,18 @@ export const useMyReports = () => {
   );
 };
 
-export const useVoteIssue = () => {
-  return useApi<Issue>(issuesAPI.voteIssue);
+export const useVoteIssue = (id: string) => {
+  return useApi<Issue>(
+    async () => {
+      const response = await issuesAPI.voteIssue(id)
+    return response.data;
+  });
 };
 
-export const useClaimIssue = () => {
-  return useApi<Issue>(issuesAPI.claimIssue);
+export const useClaimIssue = (id: string) => {
+  return useApi<Issue>(
+    async () => {
+      const response = await issuesAPI.claimIssue(id)
+    return response.data;
+  });
 };

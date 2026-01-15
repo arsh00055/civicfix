@@ -1,5 +1,3 @@
-import { DATE_FORMATS } from '../constants/constants';
-
 export const formatDate = (date: string | Date, options: Intl.DateTimeFormatOptions = {}): string => {
   try {
     const defaultOptions: Intl.DateTimeFormatOptions = {

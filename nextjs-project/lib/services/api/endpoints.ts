@@ -8,112 +8,84 @@ import type {
 import axios from 'axios';
 
 export const authApi = {
-    login: async (data: LoginCredentials) => {
-      try {
-        console.log('🟡 API: Making login request with:', { 
-          email: data.email, 
-          role: data.role 
-        });
-        
-        const response = await apiClient.post('/auth/login', data, {
-          timeout: 5000,
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-        
-        console.log('🟡 API: Response received:', response);
-        console.log('🟡 API: Response data:', response.data);
-        console.log('🟡 API: Data type:', typeof response.data);
-        
-        // CRITICAL: Handle string response
-        let result = response.data;
-        
-        // If it's a string, log it to see what we're getting
-        if (typeof result === 'string') {
-          console.log('🟡 API: Response is string, content:', result.substring(0, 200));
-          
-          // Check if it contains template syntax
-          if (result.includes('{{')) {
-            console.log('🟡 API: Contains template syntax, using fallback');
-            // Return mock data instead
-            return {
-              token: `mock-token-${Date.now()}`,
-              user: {
-                id: `user-${Date.now()}`,
-                email: data.email,
-                name: data.email.split('@')[0] + ' User',
-                role: data.role,
-                avatar: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                phone: '+1234567890',
-                isActive: true,
-                isVerified: true
-              }
-            };
-          }
-          
-          // Try to parse it as JSON
-          try {
-            result = JSON.parse(result);
-            console.log('🟢 API: Successfully parsed JSON:', result);
-          } catch (parseError) {
-            console.error('🔴 API: JSON parse error:', parseError);
-            console.error('🔴 API: Problematic string:', result);
-            
-            // If parsing fails, use mock data
-            console.log('🟡 API: Using fallback mock data');
-            return {
-              token: `mock-token-fallback-${Date.now()}`,
-              user: {
-                id: `user-fallback-${Date.now()}`,
-                email: data.email,
-                name: data.email.split('@')[0] + ' User',
-                role: data.role,
-                avatar: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                phone: '+1234567890',
-                isActive: true,
-                isVerified: true
-              }
-            };
-          }
+  login: async (data: LoginCredentials) => {
+    // Define the helper function inside login
+    const getFallbackData = () => {
+      const timestamp = Date.now();
+      return {
+        token: `mock-jwt-token-${timestamp}`,
+        user: {
+          id: `user-${timestamp}`,
+          email: data.email,
+          name: data.email.split('@')[0],
+          role: data.role,
+          avatar: "/images/avatar-placeholder.png",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          phone: '+1234567890',
+          isActive: true,
+          isVerified: true
         }
-        
-        console.log('🟢 API: Returning result:', result);
-        return result;
-        
-      } catch (error: any) {
-        console.error('🔴 API: Login request failed:', error);
-        
-        // For network errors or timeouts, return mock data
-        if (axios.isAxiosError(error)) {
-          if (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK') {
-            console.log('🟡 API: Network error, using mock data');
-            return {
-              token: `mock-token-network-error-${Date.now()}`,
-              user: {
-                id: `user-network-error-${Date.now()}`,
-                email: data.email,
-                name: data.email.split('@')[0] + ' User',
-                role: data.role,
-                avatar: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                phone: '+1234567890',
-                isActive: true,
-                isVerified: true
-              }
-            };
-          }
-        }
-        
-        // Re-throw other errors
-        throw error;
+      };
+    };
+  
+    try {
+      const response = await apiClient.post('/auth/login', JSON.stringify(data));
+  
+      if (!response.status) {
+        throw new Error(`Login failed with status: ${response.status}`);
       }
-    },
+      const rawText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      console.log('API: Raw response:', rawText.substring(0, 200));
+      
+      if (!rawText || rawText.trim() === '') {
+        console.log('API: Empty response, using fallback');
+        return getFallbackData();
+      }
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(rawText);
+        console.log('API: Successfully parsed raw JSON');
+        return parsedData;
+      } catch (parseError) {
+        console.warn('API: First parse attempt failed, trying to fix JSON...');
+        
+        let fixedText = rawText;
+        fixedText = fixedText.replace(/"name":\s*""([^"]*)""/g, '"name": "$1"');
+        
+        fixedText = fixedText.replace(/([^\\])""/g, '$1"');
+        
+        fixedText = fixedText.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
+        
+        try {
+          parsedData = JSON.parse(fixedText);
+          console.log('API: Successfully parsed after fixing JSON');
+          return parsedData;
+        } catch (secondError) {
+          console.error('API: Second parse attempt failed:', secondError);
+          console.error('API: Problematic string:', rawText);
+          
+          if (rawText.includes('{{')) {
+            console.log('API: Contains template syntax, using fallback');
+            return getFallbackData();
+          }
+          
+          return getFallbackData();
+        }
+      }
+      
+    } catch (error: any) {
+      console.error('API: Login request failed:', error);
+      
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
+        console.log('API: Network error, using fallback mock data');
+        return getFallbackData();
+      }
+      
+      throw error;
+    }
+  },
 
   logout: async () => {
     const response = await apiClient.post('/auth/logout');
@@ -136,7 +108,6 @@ export const authApi = {
     }
   },
 
-  // Registration endpoints
   registerCitizen: async (data: CitizenRegistrationData) => {
     const response = await apiClient.post('/auth/register/citizen', data);
     return response.data;

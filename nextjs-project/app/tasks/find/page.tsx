@@ -225,12 +225,6 @@ const FindTasksPage: React.FC = () => {
               <p className="text-gray-600 mb-6">
                 This page is only accessible to volunteers. If you're a volunteer, please log in with your volunteer account.
               </p>
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Back to Dashboard
-              </button>
             </div>
           </div>
         </div>
@@ -296,30 +290,6 @@ const FindTasksPage: React.FC = () => {
                 onClearFilters={clearFilters} filteredTasks={[]}              />
             </>
           )}
-
-          {/* Navigation Links */}
-          <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => router.push('/tasks/available')}
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                ← View Available Tasks
-              </button>
-              <button
-                onClick={() => router.push('/tasks/assignments')}
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                ← My Assignments
-              </button>
-            </div>
-            <button
-              onClick={() => router.push('/')}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
-            >
-              Back to Dashboard →
-            </button>
-          </div>
         </div>
       </div>
     </MainLayout>

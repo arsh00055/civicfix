@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import apiClient from '@/lib/services/api/client';
 import Loading from '@/app/loading';
 import Error from '@/app/error';
+import MainLayout from '@/components/layout/MainLayout';
 
 const IssuesPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -37,12 +38,11 @@ const IssuesPage: React.FC = () => {
       router.push('/login');
       return;
     }
-    console.log('User role:', user?.role);
     router.push('/issues/new?role=' + (user?.role || '') );
   };
 
   const handleIssueClick = (issue: any) => {
-    router.push(`/issues/${issue.id}`);
+    router.push(`/issues/${issue.id}?role=` + (user?.role || ''));
   };
 
   if (loading) {
@@ -58,54 +58,56 @@ const IssuesPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Issues</h1>
-        <p className="text-gray-600">
-          Browse and contribute to issues reported in your community. Help make a difference!
-        </p>
-      </div>
+    <MainLayout role={user?.role || ''}>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Issues</h1>
+          <p className="text-gray-600">
+            Browse and contribute to issues reported in your community. Help make a difference!
+          </p>
+        </div>
 
-      <IssueList 
-        showFilters={true}
-        showSort={true}
-        showPagination={true}
-        showActions={isAuthenticated}
-        showVoting={isAuthenticated}
-        title=""
-        emptyStateTitle="No issues found"
-        emptyStateDescription="Be the first to report an issue in your community"
-        onIssueClick={handleIssueClick}
-        issues={issues}
-      />
-      
-      <div className="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Want to contribute more?</h3>
-            <p className="text-gray-600">
-              Report issues, vote on important problems, or volunteer to help fix them.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleReportIssue}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-            >
-              Report New Issue
-            </button>
-            {isAuthenticated && user?.role === 'volunteer' && (
+        <IssueList 
+          showFilters={true}
+          showSort={true}
+          showPagination={true}
+          showActions={isAuthenticated}
+          showVoting={isAuthenticated}
+          title=""
+          emptyStateTitle="No issues found"
+          emptyStateDescription="Be the first to report an issue in your community"
+          onIssueClick={handleIssueClick}
+          issues={issues}
+        />
+        
+        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-xl p-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Want to contribute more?</h3>
+              <p className="text-gray-600">
+                Report issues, vote on important problems, or volunteer to help fix them.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => router.push('/tasks/available')}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                onClick={handleReportIssue}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                View Available Tasks
+                Report New Issue
               </button>
-            )}
+              {isAuthenticated && user?.role === 'volunteer' && (
+                <button
+                  onClick={() => router.push('/tasks/available')}
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  View Available Tasks
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

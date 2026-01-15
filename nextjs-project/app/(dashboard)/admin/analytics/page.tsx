@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { apiClient } from '@/lib/services/api/client'
+import apiClient from '@/lib/services/api/client'
 import AnalyticsHeader from './components/AnalyticsHeader'
 import KeyMetrics from './components/KeyMetrics'
 import IssuesByStatus from './components/IssuesByStatus'
@@ -40,23 +40,23 @@ export default function AnalyticsPage() {
       setLoading(true)
       setError(null)
 
-      const data = await apiClient.get('/admin/analytics/overview', {
+      const response = await apiClient.get('/admin/analytics/overview', {
         params: { timeframe: timeRange }
       })
 
       const analyticsData: AnalyticsData = {
         overview: {
-          totalUsers: data.overview?.totalUsers || 0,
-          totalIssues: data.overview?.totalIssues || 0,
-          resolvedIssues: data.overview?.resolvedIssues || 0,
-          activeVolunteers: data.overview?.activeVolunteers || 0,
-          newUsersThisWeek: data.overview?.newUsersThisWeek || 0,
-          issuesThisWeek: data.overview?.issuesThisWeek || 0
+          totalUsers: response.data.overview?.totalUsers || 0,
+          totalIssues: response.data.overview?.totalIssues || 0,
+          resolvedIssues: response.data.overview?.resolvedIssues || 0,
+          activeVolunteers: response.data.overview?.activeVolunteers || 0,
+          newUsersThisWeek: response.data.overview?.newUsersThisWeek || 0,
+          issuesThisWeek: response.data.overview?.issuesThisWeek || 0
         },
-        issuesByStatus: data.issuesByStatus || [],
-        issuesByCategory: data.issuesByCategory || [],
-        userGrowth: data.userGrowth || [],
-        issueTrends: transformTrendsData(data)
+        issuesByStatus: response.data.issuesByStatus || [],
+        issuesByCategory: response.data.issuesByCategory || [],
+        userGrowth: response.data.userGrowth || [],
+        issueTrends: transformTrendsData(response.data)
       }
 
       setAnalytics(analyticsData)

@@ -119,7 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authApi.login({ email, password, role, ...additionalData });
       
-      const responseData = response.data || response;
+      const responseData = response;
+      console.log('Login response:', responseData);
 
       if (responseData && responseData.token && responseData.user) {
         updateAuthState(responseData.user, responseData.token);
@@ -229,6 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearAuth();
     }
   };
+  
 
   const refreshUser = async () => {
     try {

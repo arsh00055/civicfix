@@ -2,8 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { UserGroupIcon, WrenchScrewdriverIcon, Cog6ToothIcon } from '@heroicons/react/24/outline'
 
 interface LoginRoleSelectorProps {
@@ -12,9 +11,6 @@ interface LoginRoleSelectorProps {
 
 export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorProps) {
   const router = useRouter()
-  const pathname = usePathname()
-  const isLoginPage = pathname === '/login'
-  const isRegisterPage = pathname === '/register'
 
   const roles = [
     {
@@ -43,6 +39,10 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
     },
   ]
 
+  const pathname = usePathname()
+  const isLoginPage = pathname === '/login'
+  const isRegisterPage = pathname === '/register'
+
   const handleRegisterClick = (e: React.MouseEvent) => {
     e.preventDefault()
     router.push('/register')
@@ -50,7 +50,7 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-2xl p-4 pt-4 shadow-xl border border-gray-100">
+      <div className="bg-white rounded-2xl p-8 pt-4 shadow-xl border border-gray-100">
         <div className="text-center mb-5">
           <h2 className="text-1xl font-bold text-gray-900 mb-1">
             Welcome back
@@ -109,24 +109,25 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
             )
           })}
         </div>
+
         <footer className="py-4 px-6 text-center text-gray-500 text-sm border-t border-gray-100">
           <p>© {new Date().getFullYear()} CivicFix. All rights reserved.</p>
           {isLoginPage && (
-          <p className="mt-2">
-            Don&apos;t have an account?{' '}
-            <a href="/register" className="text-blue-600 hover:text-blue-500 font-medium">
-              Sign up here
-            </a>
-          </p>
-        )}
-        {isRegisterPage && (
-          <p className="mt-2">
-            Already have an account?{' '}
-            <a href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-              Sign in here
-            </a>
-          </p>
-        )}
+            <p className="mt-2">
+              Don&apos;t have an account?{' '}
+              <a href="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+                Sign up here
+              </a>
+            </p>
+          )}
+          {isRegisterPage && (
+            <p className="mt-2">
+              Already have an account?{' '}
+              <a href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+                Sign in here
+              </a>
+            </p>
+          )}
         </footer>
       </div>
     </div>
