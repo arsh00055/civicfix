@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   userRole: 'citizen' | 'volunteer' | 'admin' | null;
   isLoading: boolean;
-  login: (email: string, password: string, role: string, additionalData?: any) => Promise<void>;
+  login: (email: string, password: string, role: string, additionalData?: any) => Promise<any>;
   register: (data: any, role: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -164,70 +164,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string, role: string, additionalData?: any) => {
     setIsLoading(true);
     dispatch(setLoading(true));
-    
+  
     try {
-      console.log('Attempting login with:', { email, role });
-      
-      const response = await authApi.login({ email, password, role, ...additionalData });
-      
-      console.log('Login API response:', response);
-
-      if (response && response.token && response.user) {
-        console.log('✅ Login successful, updating auth state');
-        
-        updateAuthState(response.user, response.token);
-
-        // Wait a moment for state to update before redirecting
-        setTimeout(() => {
-          switch (role) {
-            case 'admin':
-              router.push('/admin');
-              break;
-            case 'volunteer':
-              router.push('/volunteer');
-              break;
-            case 'citizen':
-            default:
-              router.push('/citizen');
-              break;
-          }
-        }, 100);
-        
-        return response;
-      } else {
-        console.error('❌ Invalid response structure:', response);
-        throw new Error('Invalid response from server: Missing token or user data');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      
-      // For development/testing, you can use mock fallback
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Using mock login fallback for development');
-        const mockToken = `dev-mock-token-${Date.now()}`;
-        const mockUser: User = {
-          id: `user-${Date.now()}`,
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  
+      const response = await fetch(`${baseUrl}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           email,
-          name: email.split('@')[0],
-          role: role as any,
-          avatar: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          phone: '+1234567890',
-          isActive: true,
-          isVerified: true
-        };
-        
-        updateAuthState(mockUser, mockToken);
-        
-        setTimeout(() => {
-          router.push(`/${role}`);
-        }, 100);
-        
-        return { user: mockUser, token: mockToken };
+          password,
+          role,
+          securityKey: additionalData?.securityKey // 👈 YEH ADD KARO
+        }),
+      });
+  
+      const data = await response.json();
+      console.log("🔎 Login API response:", data);
+  
+      if (!data.success) {
+        return data;
       }
-      
-      throw new Error(error?.message || 'Login failed. Please check your credentials.');
+  
+      updateAuthState(data.data.user, data.data.token);
+  
+      setTimeout(() => {
+        switch (role) {
+          case "admin":
+            router.push("/admin");
+            break;
+          case "volunteer":
+            router.push("/volunteer");
+            break;
+          case "citizen":
+          default:
+            router.push("/citizen");
+            break;
+        }
+      }, 100);
+  
+      return data;
+  
+    } catch (error: any) {
+      console.error("❌ Login error:", error);
+      return { 
+        success: false, 
+        message: error?.message || "Network error. Please try again." 
+      };
     } finally {
       setIsLoading(false);
       dispatch(setLoading(false));
@@ -275,7 +260,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (response.token && response.user) {
         updateAuthState(response.user, response.token);
-        
         setTimeout(() => {
           switch (role) {
             case 'volunteer':
@@ -286,8 +270,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               router.push('/citizen');
           }
         }, 100);
-        
-        return response;
       }
     } catch (error: any) {
       console.error('Registration failed:', error);

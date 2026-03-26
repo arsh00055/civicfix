@@ -24,7 +24,7 @@ const IssuesPage: React.FC = () => {
     try {
       console.log(user?.role);
       setLoading(true);
-      const response = await apiClient.get('/issues');
+      const response = await apiClient.get('/api/issues');
       setIssues(response.data?.issues || response.data.issues || []);
     } catch (err) {
       console.error('Failed to fetch issues:', err);

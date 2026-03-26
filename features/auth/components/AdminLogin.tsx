@@ -20,7 +20,7 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      await login(email, password, 'admin', { adminKey });
+      await login(email, password, 'admin', { securityKey: adminKey });
       router.push('/admin');
     } catch (err: unknown) {
       if (err && typeof err === "object" && "message" in err && typeof (err as any).message === "string") {
@@ -65,7 +65,7 @@ const AdminLogin: React.FC = () => {
           label="Admin Security Key"
           type="password"
           value={adminKey}
-          onChange={setAdminKey}
+          onChange={(value: string) => setAdminKey(value)}
           className="text-black"
           placeholder="Enter admin security key"
           required

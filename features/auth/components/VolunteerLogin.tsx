@@ -72,13 +72,6 @@ const VolunteerLogin: React.FC = () => {
             {isLoading ? 'Signing in...' : 'Sign in as Volunteer'}
           </PrimaryButton>
 
-          <button
-            type="button"
-            onClick={useDemoCredentials}
-            className="w-full py-2 px-4 cursor-pointer border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Use Demo Credentials
-          </button>
         </div>
       </form>
 

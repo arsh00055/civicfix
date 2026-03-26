@@ -30,7 +30,7 @@ export const authApi = {
     };
   
     try {
-      const response = await apiClient.post('/auth/login', JSON.stringify(data));
+      const response = await apiClient.post('/api/auth/login/', JSON.stringify(data));
   
       if (!response.status) {
         throw new Error(`Login failed with status: ${response.status}`);

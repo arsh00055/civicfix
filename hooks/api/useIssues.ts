@@ -21,13 +21,12 @@ export const useIssues = (filters?: IssueFilters) => {
 export const useIssue = (id: string) => {
   return useApi<Issue>(
     async () => {
-      const response = await issuesAPI.getIssue(id);
+      const response = await issuesAPI.getIssue(id); // 👈 Eh API call karega
       return response.data;
     }, 
     { 
       immediate: !!id,
       cacheKey: `issue-${id}`,
-      cacheDuration: 5 * 60 * 1000, // 5 minutes for single issue
     }
   );
 };
