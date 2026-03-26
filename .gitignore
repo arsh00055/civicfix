@@ -7,15 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -23,7 +24,60 @@ dist-ssr
 *.sln
 *.sw?
 
-# Next.js
-nextjs-project/.next/
-nextjs-project/node_modules/
-nextjs-project/.env*.local
+# Next.js (ignore everything in .next folder)
+.next/
+**/.next/
+.next/**
+**/.next/**
+out/
+**/out/
+build/
+**/build/
+.nuxt/
+**/.nuxt/
+.cache/
+**/.cache/
+
+# Environment files
+.env.local
+.env*.local
+.env*.development
+.env*.production
+.env.test
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+jest-output.json
+*.test.log
+
+# Build outputs
+/build/
+/dist/
+/.vercel/
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+Thumbs.db
+.DS_Store
+._*
+
+# Next.js specific (extra safety)
+.next/cache
+.next/dev
+.next/server
+.next/static
+.next/types
+.next/trace
+.next/build-manifest.json
+.next/package.json
+.next/react-loadable-manifest.json
+.next/routes-manifest.json
