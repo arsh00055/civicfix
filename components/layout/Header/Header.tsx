@@ -117,7 +117,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { usePathname, useParams } from 'next/navigation';
 
 interface headerProps{
-  role: 'citizen' | 'volunteer' | 'admin' | null;
+  role: string | null;
 }
 
 const Header: React.FC<headerProps> = ({ role }) => {

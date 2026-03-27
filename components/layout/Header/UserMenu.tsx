@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { UserIcon } from '@heroicons/react/24/outline';
 import { useAppSelector } from '@/lib/store/hooks';
 
 interface UserMenuProps {
@@ -57,39 +56,63 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
     router.push('/login');
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   return (
-    <div className={`relative ${background} cursor-pointer rounded-md p-2 transition-opacity`} ref={menuRef}>
+    <div className="relative" ref={menuRef}>
+      
+      {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-3 text-sm rounded-full cursor-pointer"
-        aria-label="User menu"
+        className={`flex items-center gap-3 px-3 py-2 rounded-xl ${background}
+          hover:opacity-90 cursor-pointer transition-all duration-200 shadow-md`}
       >
-        <UserIcon className="w-6 h-6 text-white" />
+        {/* Avatar */}
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-sm font-semibold backdrop-blur">
+          {getInitials(user?.name)}
+        </div>
+
         <span className="hidden md:block text-white font-medium">
-          { user?.name }
+          {user?.name}
         </span>
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-          <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-            <div className="font-medium text-gray-700">{currentUser?.email || user?.email}</div>
-            <div className="mt-1">Signed in as {role || 'user'}</div>
+      {/* Dropdown */}
+      <div
+        className={`absolute right-0 mt-3 w-56 origin-top-right transform transition-all duration-200
+        ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'}`}
+      >
+        <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-gray-200 overflow-hidden">
+          
+          {/* User Info */}
+          <div className="px-4 py-3 border-b text-sm">
+            <div className="font-semibold text-gray-800 truncate">
+              {currentUser?.email || user?.email}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Signed in as <span className="capitalize">{role || 'user'}</span>
+            </div>
           </div>
+
+          {/* Menu Items */}
           <button
             onClick={handleProfileClick}
-            className="block w-full text-left cursor-pointer rounded-full px-4 py-2 text-sm hover:text-black text-gray-700 transition-colors"
+            className="w-full text-left cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
           >
-            Your Profile
+            👤 Your Profile
           </button>
+
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 text-sm cursor-pointer hover:text-black text-gray-700 transition-colors border-t border-gray-100"
+            className="w-full text-left cursor-pointer px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition border-t"
           >
-            Sign out
+            🚪 Sign out
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

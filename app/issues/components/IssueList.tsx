@@ -25,6 +25,8 @@ interface IssueListProps {
   emptyStateTitle?: string;
   emptyStateDescription?: string;
   onIssueClick?: (issue: Issue) => void;
+  onVote?: (issueId: string) => Promise<void>; // Add this
+  getUserVoteStatus?: (issueId: string) => boolean; // Add this
 }
 
 const IssueList: React.FC<IssueListProps> = ({ 
@@ -38,7 +40,9 @@ const IssueList: React.FC<IssueListProps> = ({
   title = "Community Issues",
   emptyStateTitle = "No issues found",
   emptyStateDescription,
-  onIssueClick
+  onIssueClick,
+  onVote, // Add this
+  getUserVoteStatus, // Add this
 }) => {
   const router = useRouter();
   
@@ -143,7 +147,7 @@ const IssueList: React.FC<IssueListProps> = ({
           {showSort && <IssueSort sortBy={sortBy} onSortChange={setSortBy} />}
           <button 
             onClick={handleViewMap}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex cursor-pointer items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <MapIcon className="h-4 w-4" />
             <span>View on Map</span>
@@ -212,6 +216,8 @@ const IssueList: React.FC<IssueListProps> = ({
                 showActions={showActions}
                 showVoting={showVoting}
                 onClick={() => handleIssueClick(issue)}
+                onVote={onVote ? () => onVote(issue.id) : undefined}
+                isVoted={getUserVoteStatus ? getUserVoteStatus(issue.id) : false}
               />
             ))}
           </div>

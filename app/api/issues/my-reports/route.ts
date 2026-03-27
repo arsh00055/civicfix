@@ -1,101 +1,72 @@
-import { connectToDatabase } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
-import { ObjectId } from "mongodb";
-import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/db';
+import { ObjectId } from 'mongodb';
+import jwt from 'jsonwebtoken';
 
-export async function GET(request: NextRequest) {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+function getCurrentUser(req: NextRequest): { id: string; role: string; name: string } | null {
   try {
-    // 🔐 Token check karo (authorization header ton)
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    
-    if (!token) {
-      return NextResponse.json({
-        success: false,
-        message: "Unauthorized - No token provided"
-      }, { status: 401 });
-    }
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : req.cookies.get('auth_token')?.value;
+    if (!token) return null;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name };
+  } catch {
+    return null;
+  }
+}
 
-    // Token verify karo
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-    
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json({
-        success: false,
-        message: "Unauthorized - Invalid token"
-      }, { status: 401 });
+function normaliseIssue(doc: any) {
+  const { _id, ...rest } = doc;
+  return { ...rest, id: _id.toString() };
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const user = getCurrentUser(req);
+    if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get('status') || '';
+    const search = searchParams.get('search') || '';
+    const page   = Math.max(1, parseInt(searchParams.get('page')  || '1'));
+    const limit  = Math.min(50, parseInt(searchParams.get('limit') || '10'));
+
+    const filter: Record<string, any> = { reporterId: user.id };
+    if (status && status !== 'all') filter.status = status;
+    if (search) {
+      filter.$or = [
+        { title:    { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const { db } = await connectToDatabase();
-    
-    // URL se pagination nikal lo
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
-    // Sirf is user de reports lai ke aao
-    const query = { reporterId: decoded.userId };
-    
-    console.log('🔍 My reports query for user:', decoded.userId);
-
-    const issues = await db.collection('issues')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .toArray();
-
-    const total = await db.collection('issues').countDocuments(query);
-
-    // Format issues for frontend
-    const formattedIssues = issues.map(issue => ({
-      id: issue._id.toString(),
-      title: issue.title,
-      description: issue.description,
-      category: issue.category,
-      priority: issue.priority,
-      status: issue.status,
-      location: issue.location,
-      latitude: issue.latitude,
-      longitude: issue.longitude,
-      images: issue.images || [],
-      votes: issue.votes || 0,
-      commentsCount: issue.commentCount || 0,
-      createdAt: issue.createdAt,
-      updatedAt: issue.updatedAt,
-      volunteerId: issue.volunteerId
-    }));
+    const [issues, total] = await Promise.all([
+      db.collection('issues')
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection('issues').countDocuments(filter),
+    ]);
 
     return NextResponse.json({
-      success: true,
-      issues: formattedIssues,
+      issues: issues.map(normaliseIssue),
       total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
-
   } catch (error: any) {
-    console.error("❌ Error fetching my reports:", error);
-
-    // JWT error handling
-    if (error.name === 'JsonWebTokenError') {
-      return NextResponse.json({
-        success: false,
-        message: "Unauthorized - Invalid token"
-      }, { status: 401 });
-    }
-
-    if (error.name === 'TokenExpiredError') {
-      return NextResponse.json({
-        success: false,
-        message: "Unauthorized - Token expired"
-      }, { status: 401 });
-    }
-
-    return NextResponse.json({
-      success: false,
-      message: "Failed to fetch your reports"
-    }, { status: 500 });
+    console.error('GET /api/issues/my-reports error:', error);
+    return NextResponse.json(
+      { message: 'Failed to fetch your reports', error: error.message },
+      { status: 500 }
+    );
   }
 }

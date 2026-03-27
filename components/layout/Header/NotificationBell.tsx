@@ -23,7 +23,7 @@ const NotificationBell: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full relative transition-colors"
+        className="p-2 text-gray-600 cursor-pointer hover:text-gray-900 hover:bg-gray-100 rounded-full relative transition-colors"
         aria-label="Notifications"
       >
         <BellIcon className="h-6 w-6" />

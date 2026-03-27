@@ -33,7 +33,7 @@ export interface Issue {
     rating?: number;
   };
   upvotes: number;
-  downvotes?: number;
+  voters: string[];
   views: number;
   commentsCount: number;
   comments?: Comment[];
@@ -74,12 +74,15 @@ export interface Comment {
 }
 
 export interface IssueFilters {
-  status: string;
+  status?: string;
   category?: string;
   priority?: string;
   severity?: string;
   location?: string;
   search?: string;
+  page?: number;
+  limit?: number;
+  userId?: string;
   dateRange?: {
     start: string;
     end: string;
@@ -94,6 +97,22 @@ export interface IssueFilters {
   };
   sortBy?: 'createdAt' | 'updatedAt' | 'priority' | 'votes' | 'comments';
   sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Shape your backend returns for paginated issue lists.
+ * Supports both { issues: [], total: N } and { data: [], total: N } conventions.
+ */
+export interface IssuesListResponse {
+  issues?: Issue[];
+  data?: Issue[];
+  total?: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface IssueStats {
@@ -175,4 +194,14 @@ export interface IssueHistory {
   newValue?: any;
   timestamp: string;
   metadata?: Record<string, any>;
+}
+
+export interface PaginatedResponse<T> {
+  issues: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }

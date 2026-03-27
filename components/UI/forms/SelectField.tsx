@@ -52,7 +52,7 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           className={`
-            w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+            w-full px-3 py-2 border rounded-lg cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             appearance-none bg-white
             ${error 
               ? 'border-red-300 focus:border-red-300 focus:ring-red-200' 

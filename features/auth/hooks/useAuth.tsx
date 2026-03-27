@@ -22,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const COOKIE_CONFIG = {
-  expires: 7, // Changed from 1 to 7 days
+  expires: 1,
   path: '/',
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,

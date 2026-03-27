@@ -7,7 +7,7 @@ import Sidebar from './sidebar/Sidebar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  role: 'citizen' | 'volunteer' | 'admin' | null;
+  role: string | null;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {

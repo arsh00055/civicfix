@@ -74,6 +74,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
           <SearchBox
             value={filters.search}
             onChange={(value) => updateFilter('search', value)}
+            className='text-black '
             placeholder="Search by title, description, or location..."
           />
         </div>
@@ -109,7 +110,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
           <div className="w-full lg:w-auto">
             <button
               onClick={clearFilters}
-              className="w-full lg:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+              className="w-full cursor-pointer lg:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
             >
               Clear All
             </button>

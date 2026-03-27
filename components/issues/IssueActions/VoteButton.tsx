@@ -2,14 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { HandThumbUpIcon } from '@heroicons/react/24/outline';
+import { HandThumbUpIcon as HandThumbUpSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { HeartIcon } from '@/components/UI/icons';
 import { issuesAPI } from '@/lib/services/api/endpoints';
 import notificationService from '@/lib/services/notificationService';
 
 interface VoteButtonProps {
   issueId: string;
   initialVotes: number;
+  initialHasVoted?: boolean;
   onVote?: (issueId: string, voted: boolean) => void;
   className?: string;
   showCount?: boolean;
@@ -18,12 +20,13 @@ interface VoteButtonProps {
 const VoteButton: React.FC<VoteButtonProps> = ({ 
   issueId, 
   initialVotes, 
+  initialHasVoted = false,
   onVote,
   className = '',
   showCount = true
 }) => {
   const [votes, setVotes] = useState(initialVotes);
-  const [hasVoted, setHasVoted] = useState(false);
+  const [hasVoted, setHasVoted] = useState(initialHasVoted);
   const [isLoading, setIsLoading] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const { isAuthenticated, user } = useAuth();
@@ -32,16 +35,12 @@ const VoteButton: React.FC<VoteButtonProps> = ({
   // Check if user has already voted on this issue
   useEffect(() => {
     const checkUserVote = async () => {
-      if (user?.id && issueId) {
+      if (user?.id && issueId && !initialHasVoted) {
         try {
-          // Use getIssue endpoint to check if user has voted
-          // In a real app, you might need to check the issue data
-          // or have a separate endpoint for checking votes
           const issueResponse = await issuesAPI.getIssue(issueId);
           const issueData = issueResponse.data;
           
-          // Assuming issueData has a voters array or similar
-          // This is a simplified check - adjust based on your actual API response
+          // Check if user has voted based on voters array
           if (issueData && issueData.voters && Array.isArray(issueData.voters)) {
             setHasVoted(issueData.voters.includes(user.id));
           }
@@ -56,7 +55,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({
     };
 
     checkUserVote();
-  }, [user?.id, issueId]);
+  }, [user?.id, issueId, initialHasVoted]);
 
   const handleVote = async () => {
     if (!isAuthenticated || !user?.id) {
@@ -68,27 +67,19 @@ const VoteButton: React.FC<VoteButtonProps> = ({
 
     setIsLoading(true);
     try {
-      // Use the existing voteIssue endpoint
       const response = await issuesAPI.voteIssue(issueId);
+      const result = response.data;
       
-      // Toggle vote state
-      if (hasVoted) {
-        // Vote removed - your API should handle toggling
-        setVotes(prev => Math.max(0, prev - 1));
-        setHasVoted(false);
-        onVote?.(issueId, false);
-        notificationService.showInfoNotification('Vote removed');
+      // Update based on API response
+      setHasVoted(result.voted);
+      setVotes(result.upvotes);
+      
+      onVote?.(issueId, result.voted);
+      
+      if (result.voted) {
+        notificationService.showSuccessNotification('Vote added!');
       } else {
-        // Vote added
-        setVotes(prev => prev + 1);
-        setHasVoted(true);
-        onVote?.(issueId, true);
-        notificationService.showSuccessNotification('Vote recorded!');
-      }
-      
-      // Optionally update from response if available
-      if (response.data && response.data.votes !== undefined) {
-        setVotes(response.data.votes);
+        notificationService.showInfoNotification('Vote removed');
       }
       
     } catch (error) {
@@ -101,12 +92,12 @@ const VoteButton: React.FC<VoteButtonProps> = ({
 
   const buttonClass = `flex items-center justify-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${
     hasVoted
-      ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+      ? 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100'
       : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
   } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`;
 
   const iconClass = `h-5 w-5 transition-transform ${
-    hasVoted ? 'fill-red-600 scale-110' : ''
+    hasVoted ? 'scale-110' : ''
   } ${isLoading ? 'animate-pulse' : ''}`;
 
   return (
@@ -117,7 +108,11 @@ const VoteButton: React.FC<VoteButtonProps> = ({
       title={hasVoted ? 'Remove vote' : 'Vote for this issue'}
       aria-label={hasVoted ? 'Remove vote' : 'Vote for this issue'}
     >
-      <HeartIcon className={iconClass} />
+      {hasVoted ? (
+        <HandThumbUpSolid className={iconClass} />
+      ) : (
+        <HandThumbUpIcon className={iconClass} />
+      )}
       {showCount && (
         <span className="text-sm font-medium min-w-[20px] text-center">
           {votes}

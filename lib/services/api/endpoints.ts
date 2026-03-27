@@ -5,11 +5,9 @@ import type {
   AdminRegistrationData,
   LoginCredentials
 } from '@/types/auth.types';
-import axios from 'axios';
 
 export const authApi = {
   login: async (data: LoginCredentials) => {
-    // Define the helper function inside login
     const getFallbackData = () => {
       const timestamp = Date.now();
       return {
@@ -19,70 +17,42 @@ export const authApi = {
           email: data.email,
           name: data.email.split('@')[0],
           role: data.role,
-          avatar: "/images/avatar-placeholder.png",
+          avatar: '/images/avatar-placeholder.png',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           phone: '+1234567890',
           isActive: true,
-          isVerified: true
-        }
+          isVerified: true,
+        },
       };
     };
-  
+
     try {
       const response = await apiClient.post('/api/auth/login/', JSON.stringify(data));
-  
-      if (!response.status) {
-        throw new Error(`Login failed with status: ${response.status}`);
-      }
-      const rawText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-      console.log('API: Raw response:', rawText.substring(0, 200));
-      
-      if (!rawText || rawText.trim() === '') {
-        console.log('API: Empty response, using fallback');
-        return getFallbackData();
-      }
+      const rawText =
+        typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
 
-      let parsedData;
+      if (!rawText || rawText.trim() === '') return getFallbackData();
+
       try {
-        parsedData = JSON.parse(rawText);
-        console.log('API: Successfully parsed raw JSON');
-        return parsedData;
-      } catch (parseError) {
-        console.warn('API: First parse attempt failed, trying to fix JSON...');
-        
-        let fixedText = rawText;
-        fixedText = fixedText.replace(/"name":\s*""([^"]*)""/g, '"name": "$1"');
-        
-        fixedText = fixedText.replace(/([^\\])""/g, '$1"');
-        
-        fixedText = fixedText.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-        
+        return JSON.parse(rawText);
+      } catch {
+        // Try to fix malformed JSON
+        const fixed = rawText
+          .replace(/"name":\s*""([^"]*)""/g, '"name": "$1"')
+          .replace(/([^\\])""/g, '$1"')
+          .replace(/,\s*}/g, '}')
+          .replace(/,\s*]/g, ']');
         try {
-          parsedData = JSON.parse(fixedText);
-          console.log('API: Successfully parsed after fixing JSON');
-          return parsedData;
-        } catch (secondError) {
-          console.error('API: Second parse attempt failed:', secondError);
-          console.error('API: Problematic string:', rawText);
-          
-          if (rawText.includes('{{')) {
-            console.log('API: Contains template syntax, using fallback');
-            return getFallbackData();
-          }
-          
+          return JSON.parse(fixed);
+        } catch {
           return getFallbackData();
         }
       }
-      
     } catch (error: any) {
-      console.error('API: Login request failed:', error);
-      
       if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
-        console.log('API: Network error, using fallback mock data');
         return getFallbackData();
       }
-      
       throw error;
     }
   },
@@ -98,157 +68,130 @@ export const authApi = {
   },
 
   register: async (data: any, role: string) => {
-    switch(role){
-      case 'citizen':
-        return authApi.registerCitizen(data as CitizenRegistrationData);
-      case 'volunteer':
-        return authApi.registerVolunteer(data as VolunteerRegistrationData);
-      case 'admin':
-        return authApi.registerAdmin(data as AdminRegistrationData);
+    switch (role) {
+      case 'citizen':   return authApi.registerCitizen(data as CitizenRegistrationData);
+      case 'volunteer': return authApi.registerVolunteer(data as VolunteerRegistrationData);
+      case 'admin':     return authApi.registerAdmin(data as AdminRegistrationData);
     }
   },
 
-  registerCitizen: async (data: CitizenRegistrationData) => {
-    const response = await apiClient.post('/auth/register/citizen', data);
-    return response.data;
-  },
+  registerCitizen:  async (data: CitizenRegistrationData)  => (await apiClient.post('/auth/register/citizen', data)).data,
+  registerVolunteer: async (data: VolunteerRegistrationData) => (await apiClient.post('/auth/register/volunteer', data)).data,
+  registerAdmin:    async (data: AdminRegistrationData)    => (await apiClient.post('/auth/register/admin', data)).data,
 
-  registerVolunteer: async (data: VolunteerRegistrationData) => {
-    const response = await apiClient.post('/auth/register/volunteer', data);
-    return response.data;
-  },
+  verifyEmail: async (token: string) =>
+    (await apiClient.post('/auth/verify-email', { token })).data,
 
-  registerAdmin: async (data: AdminRegistrationData) => {
-    const response = await apiClient.post('/auth/register/admin', data);
-    return response.data;
-  },
-
-  // Verification endpoints
-  verifyEmail: async (token: string) => {
-    const response = await apiClient.post('/auth/verify-email', { token });
-    return response.data;
-  },
-
-  resendVerification: async (email: string) => {
-    const response = await apiClient.post('/auth/resend-verification', { email });
-    return response.data;
-  },
+  resendVerification: async (email: string) =>
+    (await apiClient.post('/auth/resend-verification', { email })).data,
 };
 
 export const notificationsAPI = {
-  getNotifications: () => apiClient.get('/notifications'),
-  getUnreadCount: () => apiClient.get('/notifications/unread/count'),
-  markAsRead: (notificationId: string) => 
-    apiClient.patch(`/notifications/${notificationId}/read`),
-  markAllAsRead: () => apiClient.patch('/notifications/read-all'),
-  deleteNotification: (notificationId: string) =>
-    apiClient.delete(`/notifications/${notificationId}`),
+  getNotifications:  () => apiClient.get('/notifications'),
+  getUnreadCount:    () => apiClient.get('/notifications/unread/count'),
+  markAsRead:        (id: string) => apiClient.patch(`/notifications/${id}/read`),
+  markAllAsRead:     () => apiClient.patch('/notifications/read-all'),
+  deleteNotification:(id: string) => apiClient.delete(`/notifications/${id}`),
 };
 
 export const achievementsAPI = {
-  getAchievements: () => apiClient.get('/achievements'),
-  getUserAchievements: (userId: string) => 
-    apiClient.get(`/users/${userId}/achievements`),
-  unlockAchievement: (achievementId: string) =>
-    apiClient.post(`/achievements/${achievementId}/unlock`),
+  getAchievements:     () => apiClient.get('/achievements'),
+  getUserAchievements: (userId: string) => apiClient.get(`/users/${userId}/achievements`),
+  unlockAchievement:   (achievementId: string) => apiClient.post(`/achievements/${achievementId}/unlock`),
 };
 
 export const dashboardAPI = {
-  getCitizenDashboard: () => apiClient.get('/citizen'),
-  getVolunteerDashboard: () => apiClient.get('/volunteer'),
-  getAdminDashboard: () => apiClient.get('/admin'),
+  getCitizenDashboard:  () => apiClient.get('/citizen'),
+  getVolunteerDashboard:() => apiClient.get('/volunteer'),
+  getAdminDashboard:    () => apiClient.get('/admin'),
 };
 
 export const issuesAPI = {
-  getIssues: (params?: any) => apiClient.get('/issues', { params }),
-  getMyReports: () => apiClient.get('/issues/my-reports'),
-  getIssue: (id: string) => apiClient.get(`/issues/${id}`),
-  createIssue: (issueData: any) => apiClient.post('/issues', issueData),
-  updateIssue: (id: string, issueData: any) => apiClient.put(`/issues/${id}`, issueData),
-  deleteIssue: (id: string) => apiClient.delete(`/issues/${id}`),
-  voteIssue: (id: string) => apiClient.post(`/issues/${id}/vote`),
-  claimIssue: (id: string) => apiClient.post(`/issues/${id}/claim`),
-  getIssueComments: (issueId: string) => apiClient.get(`/issues/${issueId}/comments`),
-  addComment: (issueId: string, commentData: any) => 
-    apiClient.post(`/issues/${issueId}/comments`, commentData),
+  getIssues: (params?: Record<string, any>) =>
+    apiClient.get('/api/issues', { params }),
+  getAvailableTasks: (params?: Record<string, any>) =>
+    apiClient.get('/api/issues/available', { params }),
+  getMyReports: () =>
+    apiClient.get('/api/issues/my-reports'),
+  getIssue: (id: string) =>
+    apiClient.get(`/api/issues/${id}`),
+  createIssue: (issueData: any) =>
+    apiClient.post('/api/issues', issueData),
+  updateIssue: (id: string, issueData: any) =>
+    apiClient.put(`/api/issues/${id}`, issueData),
+  deleteIssue: (id: string) =>
+    apiClient.delete(`/api/issues/${id}`),
+  voteIssue: (id: string) =>
+    apiClient.post(`/api/issues/${id}/vote`),
+  claimIssue: (id: string) =>
+    apiClient.post(`/api/issues/${id}/claim`),
+  getIssueComments: (issueId: string) =>
+    apiClient.get(`/api/issues/${issueId}/comments`),
+  addComment: (issueId: string, commentData: any) =>
+    apiClient.post(`/api/issues/${issueId}/comments`, commentData),
 };
 
 export const volunteersAPI = {
-  getAvailableTasks: () => apiClient.get('/volunteers/tasks/available'),
-  getMyAssignments: () => apiClient.get('/volunteers/assignments'),
-  claimTask: (taskId: string) => apiClient.post(`/volunteers/tasks/${taskId}/claim`),
+  getAvailableTasks: () => apiClient.get('/api/issues/available'),
+  getMyAssignments: () => apiClient.get('/api/volunteers/assignments'),
+  claimTask: (taskId: string) => apiClient.post(`/api/issues/${taskId}/claim`),
   updateTaskStatus: (taskId: string, status: string) =>
-    apiClient.put(`/volunteers/tasks/${taskId}/status`, { status }),
-  findTasks: (filters?: any) => 
-    apiClient.get('/volunteers/tasks/find', { params: filters }),
+    apiClient.put(`/api/issues/${taskId}`, { status }),
+  findTasks: (filters?: any) =>
+    apiClient.get('/api/issues', { params: filters }),
 };
 
+
 export const adminAPI = {
-  getStats: () => apiClient.get('/admin/stats'),
-  getUsers: (params?: any) => apiClient.get('/admin/users', { params }),
-  updateUser: (userId: string, userData: any) =>
-    apiClient.put(`/admin/users/${userId}`, userData),
-  getSystemHealth: () => apiClient.get('/admin/health'),
-  getReports: (filters?: any) => apiClient.get('/admin/reports', { params: filters }),
-  deactivateUser: (userId: string) =>
-    apiClient.patch(`/admin/users/${userId}/deactivate`),
-  activateUser: (userId: string) =>
-    apiClient.patch(`/admin/users/${userId}/activate`),
-  deleteUser: (userId: string) =>
-    apiClient.delete(`/admin/users/${userId}`),
-  getUserStats: (userId: string) =>
-    apiClient.get(`/admin/users/${userId}/stats`),
+  getStats:         () => apiClient.get('/admin/stats'),
+  getUsers:         (params?: any) => apiClient.get('/admin/users', { params }),
+  updateUser:       (userId: string, userData: any) => apiClient.put(`/admin/users/${userId}`, userData),
+  getSystemHealth:  () => apiClient.get('/admin/health'),
+  getReports:       (filters?: any) => apiClient.get('/admin/reports', { params: filters }),
+  deactivateUser:   (userId: string) => apiClient.patch(`/admin/users/${userId}/deactivate`),
+  activateUser:     (userId: string) => apiClient.patch(`/admin/users/${userId}/activate`),
+  deleteUser:       (userId: string) => apiClient.delete(`/admin/users/${userId}`),
+  getUserStats:     (userId: string) => apiClient.get(`/admin/users/${userId}/stats`),
   getAnalyticsOverview: (timeframe?: string) =>
     apiClient.get('/admin/analytics/overview', { params: { timeframe } }),
-  getIssueAnalytics: (params?: any) =>
-    apiClient.get('/admin/analytics/issues', { params }),
-  getUserAnalytics: (params?: any) =>
-    apiClient.get('/admin/analytics/users', { params }),
+  getIssueAnalytics: (params?: any) => apiClient.get('/admin/analytics/issues', { params }),
+  getUserAnalytics:  (params?: any) => apiClient.get('/admin/analytics/users', { params }),
 };
 
 export const usersAPI = {
-  getProfile: () => apiClient.get('/users/profile'),
-  updateProfile: (profileData: any) => apiClient.put('/users/profile', profileData),
-  getUsers: (params?: any) => apiClient.get('/users', { params }),
-  getUser: (id: string) => apiClient.get(`/users/${id}`),
+  getProfile:     () => apiClient.get('/users/profile'),
+  updateProfile:  (profileData: any) => apiClient.put('/users/profile', profileData),
+  getUsers:       (params?: any) => apiClient.get('/users', { params }),
+  getUser:        (id: string) => apiClient.get(`/users/${id}`),
   updateUserRole: (userId: string, role: string) =>
     apiClient.patch(`/admin/users/${userId}/role`, { role }),
-  searchUsers: (query: string) =>
-    apiClient.get('/users/search', { params: { query } }),
-  getUserActivity: (userId: string) =>
-    apiClient.get(`/users/${userId}/activity`),
+  searchUsers:    (query: string) => apiClient.get('/users/search', { params: { query } }),
+  getUserActivity:(userId: string) => apiClient.get(`/users/${userId}/activity`),
 };
 
 export const analyticsAPI = {
-  getOverview: (params?: any) => 
-    apiClient.get('/analytics/overview', { params }),
-  getUserStats: () => apiClient.get('/admin/analytics/users'),
-  getIssueStats: () => 
-    apiClient.get('/admin/analytics/issues'),
-  getGeographicData: () => apiClient.get('/analytics/geographic'),
+  getOverview:        (params?: any) => apiClient.get('/analytics/overview', { params }),
+  getUserStats:       () => apiClient.get('/admin/analytics/users'),
+  getIssueStats:      () => apiClient.get('/admin/analytics/issues'),
+  getGeographicData:  () => apiClient.get('/analytics/geographic'),
   getPlatformMetrics: () => apiClient.get('/analytics/platform-metrics'),
-  getTrends: (period: string) => 
-    apiClient.get('/analytics/trends', { params: { period } }),
-  exportAnalytics: (format: string): Promise<string> =>
-    apiClient.get('/analytics/export', { params: { format } }).then(response => response.data as string),
+  getTrends:          (period: string) => apiClient.get('/analytics/trends', { params: { period } }),
+  exportAnalytics:    (format: string): Promise<string> =>
+    apiClient.get('/analytics/export', { params: { format } }).then(r => r.data as string),
 };
 
 export const activityAPI = {
-  getRecentActivity: () => 
-    apiClient.get('/activity/recent'),
-  createActivity: () => 
-    apiClient.post('/activity'),
-  getActivityStats: () => 
-    apiClient.get('/activity/stats'),
-  getUserActivity: (userId: string) =>
-    apiClient.get(`/activity/user/${userId}`),
+  getRecentActivity: () => apiClient.get('/activity/recent'),
+  createActivity:    () => apiClient.post('/activity'),
+  getActivityStats:  () => apiClient.get('/activity/stats'),
+  getUserActivity:   (userId: string) => apiClient.get(`/activity/user/${userId}`),
   getSystemActivity: () => apiClient.get('/activity/system'),
 };
 
 export const commentsAPI = {
-  getComments: (issueId: string) => apiClient.get(`/issues/${issueId}/comments`),
-  addComment: (issueId: string, commentData: any) =>
-    apiClient.post(`/issues/${issueId}/comments`, commentData),
+  getComments:   (issueId: string) => apiClient.get(`/api/issues/${issueId}/comments`),
+  addComment:    (issueId: string, commentData: any) =>
+    apiClient.post(`/api/issues/${issueId}/comments`, commentData),
   updateComment: (commentId: string, commentData: any) =>
     apiClient.put(`/comments/${commentId}`, commentData),
   deleteComment: (commentId: string) => apiClient.delete(`/comments/${commentId}`),

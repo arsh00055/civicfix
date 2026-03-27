@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Issue } from '@/types/issue.types';
 import { 
   CheckCircleIcon, 
@@ -12,13 +13,21 @@ import {
   MapPinIcon,
   CalendarIcon,
   ChatBubbleLeftIcon,
+  ArrowPathIcon,
+  HandThumbUpIcon,
+  FlagIcon,
+  ArrowTopRightOnSquareIcon,
+  BriefcaseIcon,
 } from '@heroicons/react/24/outline';
+import { HandThumbUpIcon as HandThumbUpSolid } from '@heroicons/react/24/solid';
 import { useVolunteers } from '@/hooks/api/useVolunteers';
-import { issuesAPI } from '@/lib/services/api/endpoints';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface IssueCardProps {
   issue: Issue;
+  isVoted?: boolean; // Vote status from parent
+  onVote?: () => Promise<void>; // Vote handler from parent
   showActions?: boolean;
   showVoting?: boolean;
   showClaimButton?: boolean;
@@ -29,10 +38,13 @@ interface IssueCardProps {
   onClick?: () => void;
   className?: string;
   compact?: boolean;
+  variant?: 'default' | 'featured' | 'minimal';
 }
 
 const IssueCard: React.FC<IssueCardProps> = ({
   issue,
+  isVoted: propIsVoted,
+  onVote,
   showActions = true,
   showVoting = true,
   showClaimButton = false,
@@ -42,25 +54,51 @@ const IssueCard: React.FC<IssueCardProps> = ({
   onUpdate,
   onClick,
   className = "",
-  compact = false
+  compact = false,
+  variant = 'default'
 }) => {
   const router = useRouter();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<Issue['status']>(issue.status);
-  const VoteIssue = issuesAPI.voteIssue;
+  const [isVoted, setIsVoted] = useState(propIsVoted || false);
+  const [voteCount, setVoteCount] = useState(issue.upvotes || 0);
+  const [isHovered, setIsHovered] = useState(false);
   const { claimTask, updateTaskStatus } = useVolunteers();
+
+  // Update local state when props change
+  useEffect(() => {
+    setIsVoted(propIsVoted || false);
+  }, [propIsVoted]);
+
+  useEffect(() => {
+    setVoteCount(issue.upvotes || 0);
+  }, [issue.upvotes]);
 
   const handleVote = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isLoading) return;
+    if (isLoading || !onVote) return;
 
+    // Optimistic update
+    const previousVoted = isVoted;
+    const previousVoteCount = voteCount;
+    
+    setIsVoted(!previousVoted);
+    setVoteCount(prev => previousVoted ? prev - 1 : prev + 1);
+    
     try {
       setIsLoading(true);
-      await VoteIssue(issue.id);
+      await onVote();
+      
+      toast.success(previousVoted ? 'Vote removed' : 'Vote added!');
+      
       if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Failed to vote:', error);
+      // Rollback optimistic update
+      setIsVoted(previousVoted);
+      setVoteCount(previousVoteCount);
+      toast.error('Failed to vote. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +106,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/issues/${issue.id}?role=`  + (user?.role || ''));
+    router.push(`/issues/${issue.id}?role=${user?.role || ''}`);
   };
 
   const handleClaim = async (e: React.MouseEvent) => {
@@ -81,10 +119,12 @@ const IssueCard: React.FC<IssueCardProps> = ({
         onClaim(issue.id);
       } else {
         await claimTask(issue.id);
+        toast.success('Task claimed successfully!');
         if (onUpdate) onUpdate();
       }
     } catch (error) {
       console.error('Failed to claim task:', error);
+      toast.error('Failed to claim task. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -101,196 +141,339 @@ const IssueCard: React.FC<IssueCardProps> = ({
       } else {
         await updateTaskStatus(issue.id, newStatus);
         setCurrentStatus(newStatus);
+        toast.success(`Status updated to ${newStatus.replace('_', ' ')}`);
         if (onUpdate) onUpdate();
       }
     } catch (error) {
       console.error('Failed to update status:', error);
+      toast.error('Failed to update status. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getPriorityStyles = (priority: string) => {
-    switch (priority) {
-      case 'critical':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'high':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low':
-        return 'bg-green-100 text-green-800 border-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const getPriorityConfig = (priority: string) => {
+    const configs = {
+      critical: { 
+        color: 'bg-red-50 text-red-700 border-red-200', 
+        icon: FlagIcon,
+        label: 'Critical',
+        dotColor: 'bg-red-500'
+      },
+      high: { 
+        color: 'bg-orange-50 text-orange-700 border-orange-200', 
+        icon: ExclamationTriangleIcon,
+        label: 'High',
+        dotColor: 'bg-orange-500'
+      },
+      medium: { 
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200', 
+        icon: ClockIcon,
+        label: 'Medium',
+        dotColor: 'bg-yellow-500'
+      },
+      low: { 
+        color: 'bg-green-50 text-green-700 border-green-200', 
+        icon: CheckCircleIcon,
+        label: 'Low',
+        dotColor: 'bg-green-500'
+      },
+      default: { 
+        color: 'bg-gray-50 text-gray-700 border-gray-200', 
+        icon: ExclamationTriangleIcon,
+        label: 'Normal',
+        dotColor: 'bg-gray-500'
+      }
+    };
+    return configs[priority as keyof typeof configs] || configs.default;
   };
 
-  const getStatusStyles = (status: string) => {
-    switch (status) {
-      case 'resolved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'assigned':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'reported':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'resolved':
-        return CheckCircleIcon;
-      case 'in_progress':
-        return ClockIcon;
-      default:
-        return ExclamationTriangleIcon;
-    }
+  const getStatusConfig = (status: string) => {
+    const configs = {
+      resolved: { 
+        color: 'bg-green-50 text-green-700 border-green-200', 
+        icon: CheckCircleIcon,
+        label: 'Resolved',
+        dotColor: 'bg-green-500'
+      },
+      in_progress: { 
+        color: 'bg-blue-50 text-blue-700 border-blue-200', 
+        icon: ArrowPathIcon,
+        label: 'In Progress',
+        dotColor: 'bg-blue-500'
+      },
+      assigned: { 
+        color: 'bg-purple-50 text-purple-700 border-purple-200', 
+        icon: BriefcaseIcon,
+        label: 'Assigned',
+        dotColor: 'bg-purple-500'
+      },
+      pending: { 
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200', 
+        icon: ClockIcon,
+        label: 'Pending',
+        dotColor: 'bg-yellow-500'
+      },
+      reported: { 
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200', 
+        icon: ExclamationTriangleIcon,
+        label: 'Reported',
+        dotColor: 'bg-yellow-500'
+      },
+      default: { 
+        color: 'bg-gray-50 text-gray-700 border-gray-200', 
+        icon: ClockIcon,
+        label: status,
+        dotColor: 'bg-gray-500'
+      }
+    };
+    return configs[status as keyof typeof configs] || configs.default;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const priorityConfig = getPriorityConfig(issue.priority);
+  const statusConfig = getStatusConfig(currentStatus);
+  const PriorityIcon = priorityConfig.icon;
+  const StatusIcon = statusConfig.icon;
+  
   const canClaimTask = showClaimButton && !issue.assignedTo && currentStatus === 'reported';
-  const isAssignedToMe = issue.assignedTo?.id === 'current-user-id'; // Get from auth context
+  const isAssignedToMe = issue.assignedTo?.id === user?.id;
   const canUpdateStatus = isAssignedToMe && ['assigned', 'in_progress'].includes(currentStatus);
 
+  // Animation variants
+  const cardVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    hover: { 
+      y: -4,
+      transition: { duration: 0.2 }
+    }
+  };
+
   const cardContent = (
-    <div 
-      className={`bg-white rounded-xl border border-gray-200 transition-all duration-200 ${
-        compact ? 'p-4 hover:shadow-md' : 'p-6 hover:shadow-lg'
-      } ${className} ${isLoading ? 'opacity-50' : ''}`}
-      onClick={onClick}
+    <motion.div
+      variants={cardVariants}
+      initial="initial"
+      animate="animate"
+      className={`
+        relative bg-white rounded-2xl border transition-all duration-300
+        ${variant === 'featured' ? 'border-blue-200 shadow-lg shadow-blue-100' : 'border-gray-200 hover:shadow-lg'}
+        ${compact ? 'p-4' : 'p-6'}
+        ${isLoading ? 'opacity-60 pointer-events-none' : ''}
+        ${className}
+      `}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
+      {/* Featured Badge */}
+      {variant === 'featured' && (
+        <div className="absolute -top-3 left-6">
+          <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-md">
+            Featured
+          </span>
+        </div>
+      )}
+
+      {/* Status Dot Animation */}
+      {currentStatus === 'in_progress' && (
+        <div className="absolute top-4 right-4">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-start justify-between gap-4">
+        {/* Left content */}
         <div className="flex-1">
-          <h3 className={`font-semibold text-gray-900 mb-2 line-clamp-2 ${
-            compact ? 'text-sm' : 'text-lg'
-          }`}>
+          {/* Title */}
+          <h3 className={`
+            font-bold text-gray-900 mb-3 line-clamp-2
+            ${compact ? 'text-base' : 'text-xl'}
+            ${variant === 'featured' ? 'text-blue-900' : ''}
+          `}>
             {issue.title}
           </h3>
-          <div className="flex flex-wrap gap-2 mb-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full font-medium border ${
-              compact ? 'text-xs px-2 py-1' : 'text-sm'
-            } ${getPriorityStyles(issue.priority)}`}>
-              <ExclamationTriangleIcon className="w-3 h-3 mr-1" />
-              {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className={`
+              inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border
+              ${priorityConfig.color}
+            `}>
+              <PriorityIcon className="w-3.5 h-3.5" />
+              {priorityConfig.label}
             </span>
+            
             {showStatus && (
-              <span className={`inline-flex items-center px-3 py-1 rounded-full font-medium border ${
-                compact ? 'text-xs px-2 py-1' : 'text-sm'
-              } ${getStatusStyles(currentStatus)}`}>
-                {React.createElement(getStatusIcon(currentStatus), { className: "w-3 h-3 mr-1" })}
-                {currentStatus.replace('_', ' ').charAt(0).toUpperCase() + currentStatus.replace('_', ' ').slice(1)}
+              <span className={`
+                inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border
+                ${statusConfig.color}
+              `}>
+                <div className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor}`} />
+                {statusConfig.label}
+              </span>
+            )}
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-medium">
+              {issue.category.charAt(0).toUpperCase() + issue.category.slice(1)}
+            </span>
+          </div>
+
+          {/* Description - Not shown in compact mode */}
+          {!compact && (
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              {issue.description}
+            </p>
+          )}
+        </div>
+
+        {/* Voting Section */}
+        {showVoting && !compact && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleVote}
+            disabled={isLoading || !onVote}
+            className={`
+              flex flex-col cursor-pointer items-center justify-center min-w-[60px] p-3 rounded-xl transition-all
+              ${isVoted 
+                ? 'bg-blue-50 border-blue-200' 
+                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+              } border
+            `}
+          >
+            {isVoted ? (
+              <HandThumbUpSolid className="w-6 h-6 text-blue-600" />
+            ) : (
+              <HandThumbUpIcon className="w-6 h-6 text-gray-500" />
+            )}
+            <span className={`
+              text-sm font-bold mt-1
+              ${isVoted ? 'text-blue-600' : 'text-gray-700'}
+            `}>
+              {voteCount}
+            </span>
+            <span className="text-xs text-gray-500">votes</span>
+          </motion.button>
+        )}
+      </div>
+
+      {/* Metadata Grid */}
+      <div className={`
+        grid gap-3 text-sm text-gray-500 border-t pt-4 mt-4
+        ${compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'}
+      `}>
+        <div className="flex items-center gap-2 group">
+          <MapPinIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <span className="truncate text-xs">{issue.location || 'Location not specified'}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 group">
+          <CalendarIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <span className="text-xs">{formatDate(issue.createdAt)}</span>
+        </div>
+        
+        {!compact && issue.reporter && (
+          <div className="flex items-center gap-2 group">
+            <UserIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+            <span className="text-xs truncate">By {issue.reporter.name}</span>
+          </div>
+        )}
+        
+        {!compact && issue.commentsCount !== undefined && (
+          <div className="flex items-center gap-2 group">
+            <ChatBubbleLeftIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+            <span className="text-xs">{issue.commentsCount} comments</span>
+          </div>
+        )}
+      </div>
+
+      {/* Volunteer Assignment Badge */}
+      {!compact && issue.assignedTo && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <UserIcon className="w-4 h-4 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-blue-600 font-medium">Assigned Volunteer</p>
+              <p className="text-sm font-semibold text-blue-900">{issue.assignedTo.name}</p>
+            </div>
+            {isAssignedToMe && (
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                Assigned to you
               </span>
             )}
           </div>
-        </div>
-        
-        {showVoting && !compact && (
-          <button
-            onClick={handleVote}
-            disabled={isLoading}
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 ml-4 flex-shrink-0"
-          >
-            <span className="text-lg">▲</span>
-            <span className="font-semibold text-gray-700">{issue.upvotes || 0}</span>
-          </button>
-        )}
-      </div>
-
-      {/* Description - Not shown in compact mode */}
-      {!compact && (
-        <p className="text-gray-600 mb-4 line-clamp-3">
-          {issue.description}
-        </p>
-      )}
-
-      {/* Metadata */}
-      <div className={`grid gap-3 text-sm text-gray-500 ${
-        compact ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 mb-4'
-      }`}>
-        <div className="flex items-center space-x-2">
-          <MapPinIcon className="w-4 h-4 text-gray-400" />
-          <span className="truncate">{issue.location}</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <CalendarIcon className="w-4 h-4 text-gray-400" />
-          <span>Reported {formatDate(issue.createdAt)}</span>
-        </div>
-        {!compact && issue.reporter && (
-          <div className="flex items-center space-x-2">
-            <UserIcon className="w-4 h-4 text-gray-400" />
-            <span>By {issue.reporter.name}</span>
-          </div>
-        )}
-        {!compact && issue.commentsCount && issue.commentsCount > 0 && (
-          <div className="flex items-center space-x-2">
-            <ChatBubbleLeftIcon className="w-4 h-4 text-gray-400" />
-            <span>{issue.commentsCount} comments</span>
-          </div>
-        )}
-      </div>
-
-      {/* Volunteer Assignment */}
-      {!compact && issue.assignedTo && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <div className="flex items-center space-x-2 text-sm text-blue-700">
-            <UserIcon className="w-4 h-4" />
-            <span>Assigned to <strong>{issue.assignedTo.name}</strong></span>
-          </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Actions */}
       {showActions && !compact && (
-        <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-          <div className="flex space-x-2">
+        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+          <div className="flex gap-2">
             {canUpdateStatus && (
               <>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={(e) => handleStatusUpdate('in_progress', e)}
                   disabled={isLoading || currentStatus === 'in_progress'}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
                   Start Work
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={(e) => handleStatusUpdate('resolved', e)}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 shadow-sm"
                 >
                   Mark Resolved
-                </button>
+                </motion.button>
               </>
             )}
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             {canClaimTask && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleClaim}
                 disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-5 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-medium rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-sm flex items-center gap-2"
               >
+                <BriefcaseIcon className="w-4 h-4" />
                 Claim Task
-              </button>
+              </motion.button>
             )}
-            <button 
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleViewDetails}
-              className="px-4 py-2 bg-blue-100 cursor-pointer text-gray-800 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-5 py-2 cursor-pointer bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2"
             >
               View Details
-            </button>
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            </motion.button>
           </div>
         </div>
       )}
@@ -298,25 +481,34 @@ const IssueCard: React.FC<IssueCardProps> = ({
       {/* Compact mode actions */}
       {compact && canClaimTask && (
         <div className="flex justify-end mt-3">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleClaim}
             disabled={isLoading}
-            className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-all disabled:opacity-50"
           >
             Claim
-          </button>
+          </motion.button>
         </div>
       )}
-    </div>
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/50 rounded-2xl flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </motion.div>
   );
 
-  // If there's an onClick handler, wrap with div, otherwise wrap with Link
+  // Wrap with Link if no onClick
   if (onClick) {
     return cardContent;
   }
 
   return (
-    <Link href={`/issues/${issue.id}`}>
+    <Link href={`/issues/${issue.id}`} className="block">
       {cardContent}
     </Link>
   );

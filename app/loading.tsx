@@ -44,7 +44,7 @@ export default function Loading({
   // Layout
   className = '',
   overlay = false,
-}: LoadingProps) {  // ✅ Fixed: Proper TypeScript syntax for props
+}: LoadingProps) {
   // Error State
   if (isError) {
     return (

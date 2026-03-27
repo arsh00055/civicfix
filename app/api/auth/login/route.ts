@@ -1,9 +1,7 @@
-// app/api/auth/login/route.ts
 import { connectToDatabase } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { success } from "zod";
 
 export async function POST(request: NextRequest) {
   try {

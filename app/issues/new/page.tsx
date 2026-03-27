@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import IssueForm from './components/IssueForm';
 import LocationPicker from './components/LocationPicker';
 import PrimaryButton from '@/components/UI/buttons/PrimaryButton';
-import SecondaryButton from '@/components/UI/buttons/SecondaryButton';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { issuesAPI } from '@/lib/services/api/endpoints';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAppSelector } from '@/lib/store/hooks';
+import { toast } from 'sonner';
 
 interface IssueFormData {
   title: string;
@@ -21,7 +21,6 @@ interface IssueFormData {
   longitude?: number;
   images: string[];
 }
-
 
 const NewIssuePage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -42,81 +41,68 @@ const NewIssuePage: React.FC = () => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleNext = () => {
-    setCurrentStep(2);
-  };
-
-  const handleBack = () => {
-    setCurrentStep(1);
-  };
-
   const handleSubmit = async () => {
     if (!isAuthenticated || !user) {
-      alert('Please log in to report an issue');
+      toast.warning('Please log in to report an issue');
       router.push('/login');
+      return;
+    }
+
+    if (!formData.latitude || !formData.longitude) {
+      toast.warning('Please select a location on the map');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Prepare data for API
+
+      let finalLocation = formData.location;
+      if (!finalLocation && formData.latitude && formData.longitude) {
+        finalLocation = `${formData.latitude}, ${formData.longitude}`;
+      }
+
       const issueData = {
-        ...formData,
-        reporterId: user.id,
-        status: 'reported',
-        votes: 0,
-        comments: []
+        title:       formData.title,
+        description: formData.description,
+        category:    formData.category,
+        priority:    formData.priority,
+        location:    finalLocation,
+        latitude:    formData.latitude,
+        longitude:   formData.longitude,
+        images:      formData.images,
+        reporterId:  user.id,
+        status:      'reported',
       };
 
       const response = await issuesAPI.createIssue(issueData);
-      
-      alert('Issue reported successfully!');
-      router.push(`/issues/${response.data.id}?role=` + (user?.role || ''));
-    } catch (error) {
+      const created = response.data?.id ? response.data : response.data?.data;
+      const newId = created?.id || created?._id;
+
+      toast.success('Issue reported successfully!');
+      router.push(`/issues/${newId}?role=${user?.role || ''}`);
+    } catch (error: any) {
       console.error('Failed to submit issue:', error);
-      alert('Failed to report issue. Please try again.');
+      toast.error(error.message || 'Failed to report issue. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Get role-based color classes
-  const getRoleColor = (type: 'bg' | 'text' | 'hover' | 'bg-light' | 'bg-50') => {
-    const currentRole = user?.role || 'citizen';
-    
-    switch (currentRole) {
-      case 'volunteer':
-        return type === 'bg' ? 'bg-green-600' : 
-               type === 'hover' ? 'hover:bg-green-700' :
-               type === 'text' ? 'text-green-600' :
-               type === 'bg-light' ? 'bg-green-100' :
-               'bg-green-50';
-      
-      case 'admin':
-        return type === 'bg' ? 'bg-purple-600' : 
-               type === 'hover' ? 'hover:bg-purple-700' :
-               type === 'text' ? 'text-purple-600' :
-               type === 'bg-light' ? 'bg-purple-100' :
-               'bg-purple-50';
-      
-      case 'citizen':
-      default:
-        return type === 'bg' ? 'bg-blue-600' : 
-               type === 'hover' ? 'hover:bg-blue-700' :
-               type === 'text' ? 'text-blue-600' :
-               type === 'bg-light' ? 'bg-blue-100' :
-               'bg-blue-50';
-    }
+  // Role-aware colour helpers
+  const currentRole = user?.role || 'citizen';
+  const roleColors = {
+    volunteer: { bg: 'bg-green-600',  hover: 'hover:bg-green-700',  text: 'text-green-600',  light: 'bg-green-100',  faint: 'bg-green-50'  },
+    admin:     { bg: 'bg-purple-600', hover: 'hover:bg-purple-700', text: 'text-purple-600', light: 'bg-purple-100', faint: 'bg-purple-50' },
+    citizen:   { bg: 'bg-blue-600',   hover: 'hover:bg-blue-700',   text: 'text-blue-600',   light: 'bg-blue-100',   faint: 'bg-blue-50'   },
   };
+  const c = roleColors[currentRole as keyof typeof roleColors] ?? roleColors.citizen;
 
   if (!isAuthenticated) {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-        <p className="text-gray-600 mb-6">
-          You need to be logged in to report an issue.
-        </p>
-        <PrimaryButton onClick={() => router.push('/login')} role={user?.role as any || 'citizen'}>
+        <p className="text-gray-600 mb-6">You need to be logged in to report an issue.</p>
+        <PrimaryButton onClick={() => router.push('/login')} role={(user?.role as any) || 'citizen'}>
           Log In to Continue
         </PrimaryButton>
       </div>
@@ -138,56 +124,48 @@ const NewIssuePage: React.FC = () => {
           <div className="flex items-center justify-center space-x-4">
             {[1, 2].map(step => (
               <React.Fragment key={step}>
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  step === currentStep 
-                    ? `${getRoleColor('bg')} text-white` 
-                    : step < currentStep 
-                    ? `${getRoleColor('bg')} text-white`
-                    : 'bg-gray-300 text-gray-700'
-                }`}>
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-full font-medium text-sm ${
+                    step <= currentStep ? `${c.bg} text-white` : 'bg-gray-300 text-gray-700'
+                  }`}
+                >
                   {step}
                 </div>
                 {step < 2 && (
-                  <div className={`w-16 h-1 ${
-                    step < currentStep ? getRoleColor('bg') : 'bg-gray-300'
-                  }`} />
+                  <div className={`w-16 h-1 ${step < currentStep ? c.bg : 'bg-gray-300'}`} />
                 )}
               </React.Fragment>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-600">
-            <span className={currentStep >= 1 ? `${getRoleColor('text')} font-medium` : ''}>
-              Issue Details
-            </span>
-            <span className={currentStep >= 2 ? `${getRoleColor('text')} font-medium` : ''}>
-              Location
-            </span>
+          <div className="flex justify-between mt-2 text-sm text-gray-600 max-w-[8rem] mx-auto">
+            <span className={currentStep >= 1 ? `${c.text} font-medium` : ''}>Details</span>
+            <span className={currentStep >= 2 ? `${c.text} font-medium` : ''}>Location</span>
           </div>
         </div>
 
-        {/* Form Content */}
+        {/* Form */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {currentStep === 1 && (
             <IssueForm
               formData={formData}
               onUpdate={updateFormData}
-              onNext={handleNext}
-              userRole={user?.role || 'citizen'}
+              onNext={() => setCurrentStep(2)}
+              userRole={currentRole as 'citizen' | 'volunteer' | 'admin'}
             />
           )}
-
           {currentStep === 2 && (
             <LocationPicker
               formData={formData}
               onUpdate={updateFormData}
-              onBack={handleBack}
+              onBack={() => setCurrentStep(1)}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
+              userRole={currentRole as 'citizen' | 'volunteer' | 'admin'}
             />
           )}
         </div>
       </div>
-    </MainLayout>  
+    </MainLayout>
   );
 };
 

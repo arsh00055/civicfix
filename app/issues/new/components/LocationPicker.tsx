@@ -210,11 +210,12 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
       </div>
 
       <div className="flex justify-between pt-6 border-t border-gray-200">
-        <SecondaryButton type="button" onClick={onBack}>
+        <SecondaryButton type="button" className='cursor-pointer' onClick={onBack}>
           Back to Details
         </SecondaryButton>
         <PrimaryButton 
           type="submit" 
+          className='cursor-pointer'
           disabled={!selectedLocation || isSubmitting}
           isLoading={isSubmitting}
           role={userRole} // Pass the actual userRole prop here

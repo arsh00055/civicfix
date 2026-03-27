@@ -1,0 +1,264 @@
+.
+├── app
+│   ├── (auth)
+│   │   ├── layout.tsx
+│   │   ├── login
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   └── register
+│   │       ├── components
+│   │       └── page.tsx
+│   ├── (dashboard)
+│   │   ├── admin
+│   │   │   ├── analytics
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── reports
+│   │   │   └── user-management
+│   │   ├── citizen
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   ├── layout.tsx
+│   │   ├── user-management
+│   │   │   └── page.tsx
+│   │   └── volunteer
+│   │       ├── components
+│   │       └── page.tsx
+│   ├── api
+│   │   ├── auth
+│   │   │   └── login
+│   │   ├── issues
+│   │   │   ├── [id]
+│   │   │   ├── my-reports
+│   │   │   └── route.ts
+│   │   └── test-db
+│   │       └── route.ts
+│   ├── error.tsx
+│   ├── favicon.ico
+│   ├── globals.css
+│   ├── help
+│   │   ├── components
+│   │   │   ├── ContactSection.tsx
+│   │   │   ├── FAQSection.tsx
+│   │   │   ├── HelpHeader.tsx
+│   │   │   ├── HelpTabs.tsx
+│   │   │   ├── QuickActions.tsx
+│   │   │   ├── ResourcesSection.tsx
+│   │   │   ├── SearchBar.tsx
+│   │   │   └── SupportCTA.tsx
+│   │   └── page.tsx
+│   ├── issues
+│   │   ├── [id]
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   ├── components
+│   │   │   ├── IssueCard.tsx
+│   │   │   ├── IssueFilters.tsx
+│   │   │   ├── IssueList.tsx
+│   │   │   ├── IssueSort.tsx
+│   │   │   ├── MyReportsHeader.tsx
+│   │   │   ├── ReportsFilters.tsx
+│   │   │   └── ReportsStats.tsx
+│   │   ├── new
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── loading.tsx
+│   ├── map
+│   │   ├── components
+│   │   │   ├── MapControls.tsx
+│   │   │   └── MapLegend.tsx
+│   │   └── page.tsx
+│   ├── not-found.tsx
+│   ├── notifications
+│   │   ├── components
+│   │   │   ├── NotificationCenter.tsx
+│   │   │   ├── NotificationItem.tsx
+│   │   │   └── NotificationList.tsx
+│   │   └── page.tsx
+│   ├── page.tsx
+│   ├── profile
+│   │   ├── achievements
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   ├── components
+│   │   │   ├── AchievementsSection.tsx
+│   │   │   ├── ActitivityTimeline.tsx
+│   │   │   ├── ProfileHeader.tsx
+│   │   │   ├── ProfileSidebar.tsx
+│   │   │   └── SkillsSection.tsx
+│   │   ├── edit
+│   │   │   └── page.tsx
+│   │   └── page.tsx
+│   ├── StoreProvider.tsx
+│   ├── tasks
+│   │   ├── assignments
+│   │   │   ├── [id]
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   ├── available
+│   │   │   ├── components
+│   │   │   └── page.tsx
+│   │   └── find
+│   │       ├── components
+│   │       └── page.tsx
+│   └── template.tsx
+├── components
+│   ├── common
+│   │   ├── EmptyState.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── Pagination.tsx
+│   │   └── SearchBox.tsx
+│   ├── dashboard
+│   │   └── widgets
+│   │       ├── IssueHeatmap.tsx
+│   │       ├── PerformanceMetrics.tsx
+│   │       ├── QuickActions.tsx
+│   │       ├── RecentActivity.tsx
+│   │       └── TaskBoard.tsx
+│   ├── issues
+│   │   ├── IssueActions
+│   │   │   ├── ClaimButton.tsx
+│   │   │   ├── ShareButton.tsx
+│   │   │   └── VoteButton.tsx
+│   │   └── PostIssue
+│   │       ├── IssueForm.tsx
+│   │       └── LocationPicker.tsx
+│   ├── layout
+│   │   ├── Header
+│   │   │   ├── Header.tsx
+│   │   │   ├── NotificationBell.tsx
+│   │   │   └── UserMenu.tsx
+│   │   ├── MainLayout.tsx
+│   │   └── sidebar
+│   │       ├── Sidebar.tsx
+│   │       ├── SidebarHeader.tsx
+│   │       └── SidebarItem.tsx
+│   ├── map
+│   │   └── mapComponent.tsx
+│   ├── three
+│   │   ├── Achievement3D.tsx
+│   │   ├── LoadingAnimation.tsx
+│   │   ├── ParticleBackground.tsx
+│   │   ├── StatsVisualization.tsx
+│   │   └── ThreeScene.tsx
+│   └── UI
+│       ├── buttons
+│       │   ├── IconButton.tsx
+│       │   ├── PrimaryButton.tsx
+│       │   └── SecondaryButton.tsx
+│       ├── cards
+│       │   ├── IssueCard.tsx
+│       │   ├── ProfileCard.tsx
+│       │   └── StatCard.tsx
+│       ├── forms
+│       │   ├── InputField.tsx
+│       │   ├── RHFInputField.tsx
+│       │   ├── SearchBar.tsx
+│       │   └── SelectField.tsx
+│       ├── icons
+│       │   └── index.tsx
+│       └── modals
+│           ├── BaseModal.tsx
+│           ├── ConfirmModal.tsx
+│           └── ImageModal.tsx
+├── eslint.config.mjs
+├── features
+│   ├── auth
+│   │   ├── components
+│   │   │   ├── AdminLogin.tsx
+│   │   │   ├── AuthGuard.tsx
+│   │   │   ├── CitizenLogin.tsx
+│   │   │   └── VolunteerLogin.tsx
+│   │   ├── hooks
+│   │   │   ├── useAuth.tsx
+│   │   │   └── useSession.tsx
+│   │   └── utils
+│   │       └── authHelpers.ts
+│   ├── issues
+│   │   ├── hooks
+│   │   │   ├── useIssue.tsx
+│   │   │   ├── useIssueActions.ts
+│   │   │   └── useIssueFilters.tsx
+│   │   └── utils
+│   │       └── issueHelpers.ts
+│   └── notifications
+│       ├── hooks
+│       │   └── useNotifications.ts
+│       └── utils
+│           └── notificationService.ts
+├── hooks
+│   ├── api
+│   │   ├── useActivity.ts
+│   │   ├── useApi.ts
+│   │   ├── useIssues.ts
+│   │   ├── useUsers.ts
+│   │   └── useVolunteers.ts
+│   ├── useAuthPersistence.ts
+│   ├── useDebounce.ts
+│   ├── useGeoLocation.ts
+│   ├── useInfiniteScroll.ts
+│   ├── useLocalStorage.ts
+│   ├── useTheme.ts
+│   └── useWebSocket.ts
+├── lib
+│   ├── db.ts
+│   ├── services
+│   │   ├── api
+│   │   │   ├── client.ts
+│   │   │   ├── endpoints.ts
+│   │   │   └── interceptors.ts
+│   │   ├── imageService.ts
+│   │   ├── mapService.ts
+│   │   ├── notificationService.ts
+│   │   └── storageService.ts
+│   ├── store
+│   │   ├── hooks.ts
+│   │   ├── index.ts
+│   │   └── slices
+│   │       ├── authSlice.ts
+│   │       ├── issuesSlice.ts
+│   │       ├── uiSlice.ts
+│   │       └── userSlice.ts
+│   └── utils
+│       ├── animations
+│       │   └── transitions.ts
+│       ├── constants
+│       │   └── appConstants.ts
+│       ├── helpers
+│       │   ├── constants.ts
+│       │   ├── formatters.ts
+│       │   ├── helpers.ts
+│       │   └── validators.ts
+│       └── routes
+│           ├── ProtectedRoute.tsx
+│           └── RoleBasedRoute.tsx
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── structure.txt
+├── temp_auto_push.bat
+├── tsconfig.json
+└── types
+    ├── api.types.ts
+    ├── auth.types.ts
+    ├── base.types.ts
+    ├── index.ts
+    ├── issue.types.ts
+    ├── notification.types.ts
+    ├── profile.types.ts
+    ├── reports.type.ts
+    ├── user.types.ts
+    └── volunteer.types.ts
+
+92 directories, 170 files
