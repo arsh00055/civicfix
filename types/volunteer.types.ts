@@ -19,6 +19,9 @@ export interface Volunteer {
     joinedAt: string;
     lastActive: string;
     assignedToIssue?: string;
+    approvalStatus: 'pending' | 'approved' | 'rejected';
+    approvedAt?: Date;  
+    rejectionReason?: string;
   }
   
   export interface VolunteerTask {

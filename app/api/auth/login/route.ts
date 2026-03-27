@@ -119,10 +119,28 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        if (volunteer.isActive === false ) {
+        if (volunteer.approvalStatus == 'pending') {
           return NextResponse.json({
             success: false,
-            message: "Your account has been deactivated , Please contact to the administrator",
+            message: "Your account is pending admin approval. You will receive an email once approved.",
+            code: "ACCOUNT_PENDING_APPROVAL"
+          }, { status : 403});
+        }
+
+        if (volunteer.approvalStatus === 'rejected') {
+          return NextResponse.json({
+            success: false,
+            message: volunteer.rejectionReason 
+              ? `Your application was rejected: ${volunteer.rejectionReason}. Please contact support.`
+              : "Your volunteer application has been rejected. Please contact support for more information.",
+            code: "ACCOUNT_REJECTED"
+          }, { status: 403 });
+        }
+
+        if (volunteer.isActive === false && volunteer.approvalStatus !== 'approved') {
+          return NextResponse.json({
+            success: false,
+            message: "Your account has been deactivated. Please contact administrator.",
           });
         }
 
@@ -142,13 +160,14 @@ export async function POST(request: NextRequest) {
             role: 'volunteer',
             email: volunteer.email,
             name: volunteer.name,
+            approvalStatus: volunteer.approvalStatus 
           },
           process.env.JWT_SECRET as string,
           { expiresIn: "7d"}
         );
 
         await db.collection("volunteers").updateOne(
-          {id: volunteer._id},
+          {_id: volunteer._id},
           {
             $set: {
               lastLoginAt: new Date(),
@@ -168,6 +187,7 @@ export async function POST(request: NextRequest) {
               role: 'volunteer',
               avatar: volunteer.avatar || null,
               skills: volunteer.skills || [], // 👈 VOLUNTEER SPECIFIC FIELD
+              approvalStatus: volunteer.approvalStatus,
               isEmailVerified: volunteer.isEmailVerified || false,
             },
             token: token

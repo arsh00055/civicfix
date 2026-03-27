@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import RHFInputField from '@/components/UI/forms/RHFInputField'
 import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
 import apiClient from '@/lib/services/api/client'
+import RegistrationSuccess from './RegistrationSuccess'
 
 const citizenSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -38,6 +39,8 @@ export default function CitizenRegistration({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const [showSuccess, setShowSuccess] = useState(false)
+const [registeredEmail, setRegisteredEmail] = useState('')
 
   const { 
     register, 
@@ -50,17 +53,18 @@ export default function CitizenRegistration({
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     setError('')
-
+  
     try {
-      // Remove confirmPassword from the data sent to API
       const { confirmPassword, agreeToTerms, ...registrationData } = data
       
-      await apiClient.post('/auth/register/citizen', {
+      await apiClient.post('/api/auth/register', {
         ...registrationData,
         role: 'citizen'
       })
       
-      onSuccess()
+      setRegisteredEmail(data.email)  // 👈 ADD THIS
+      setShowSuccess(true)             // 👈 ADD THIS
+      
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
@@ -71,6 +75,15 @@ export default function CitizenRegistration({
   const handleSwitchToLogin = (e: React.MouseEvent) => {
     e.preventDefault()
     onSwitchToLogin()
+  }
+
+  if (showSuccess) {
+    return (
+      <RegistrationSuccess
+        email={registeredEmail}
+        onContinue={onSuccess}
+      />
+    )
   }
 
   return (
