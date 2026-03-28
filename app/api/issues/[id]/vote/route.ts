@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
+import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
+import { notifyReporterIssueVoted } from '@/lib/helpers/notification.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -31,7 +33,7 @@ export async function POST(
     const user = getCurrentUser(req);
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-    const { id } = await params; // ✅ Await params
+    const { id } = await params;
     const oid = toObjectId(id);
     if (!oid) return NextResponse.json({ message: 'Invalid issue ID' }, { status: 400 });
 
@@ -45,26 +47,39 @@ export async function POST(
     let update: any;
     if (hasVoted) {
       update = {
-        $pull:  { voters: user.id },
-        $inc:   { upvotes: -1 },
-        $set:   { updatedAt: new Date().toISOString() },
+        $pull: { voters: user.id },
+        $inc: { upvotes: -1 },
+        $set: { updatedAt: new Date().toISOString() },
       };
     } else {
       update = {
         $addToSet: { voters: user.id },
-        $inc:      { upvotes: 1 },
-        $set:      { updatedAt: new Date().toISOString() },
+        $inc: { upvotes: 1 },
+        $set: { updatedAt: new Date().toISOString() },
       };
     }
 
     await db.collection('issues').updateOne({ _id: oid }, update);
+
+    if (issue.reporterId !== user.id && !hasVoted) {
+      const totalVotes = (voters.length || 0);
+      await notifyReporterIssueVoted(issue.reporterId, id, issue.title, user.name, totalVotes);
+    }
+
+    // Update user stats for voting
+    await updateUserStatsAndCheckAchievements(
+      user.id,
+      user.role as 'citizen' | 'volunteer',
+      { totalVotes: 1, points: 5 } // +5 points for voting
+    );
+
     const updated = await db.collection('issues').findOne({ _id: oid });
     const { _id, ...rest } = updated!;
 
     return NextResponse.json({
       ...rest,
-      id:      _id.toString(),
-      voted:   !hasVoted,
+      id: _id.toString(),
+      voted: !hasVoted,
       upvotes: updated?.upvotes || 0,
       message: hasVoted ? 'Vote removed' : 'Vote recorded',
     });

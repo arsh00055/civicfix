@@ -103,7 +103,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       onClick={onClick}
       disabled={disabled || isLoading}
       className={`
-        inline-flex items-center justify-center
+        inline-flex items-center justify-center cursor-pointer
         ${roleClasses[role]}
         disabled:bg-green-600 disabled:cursor-not-allowed disabled:hover:bg-gray-400
         text-white font-medium rounded-lg

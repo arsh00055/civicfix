@@ -8,8 +8,10 @@ import {
   notifyCitizenIssueResolved,
   notifyVolunteerTaskStarted,
   notifyVolunteerTaskCompleted,
-  notifyAdminIssueResolved
+  notifyAdminIssueResolved,
+  notifyIssueStatusChanged
 } from '@/lib/helpers/notification.helper';
+import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -114,6 +116,8 @@ export async function PUT(
 
     // 🔔 Send notifications based on status change
     if (newStatus && newStatus !== oldStatus) {
+      // Notify everyone about status change
+      await notifyIssueStatusChanged(id, existing.title, oldStatus, newStatus, user.name, user.role);
       // Notify volunteer about status update
       if (user.role === 'volunteer') {
         await notifyVolunteerStatusUpdate(user.id, id, existing.title, newStatus);
@@ -128,10 +132,20 @@ export async function PUT(
       if (newStatus === 'resolved' && oldStatus !== 'resolved') {
         // Notify the citizen who reported the issue
         if (existing.reporterId) {
+          await updateUserStatsAndCheckAchievements(
+            existing.reporterId,
+            'citizen',
+            { resolvedReports: 1, points: 20 } // +20 points for having issue resolved
+          );
           await notifyCitizenIssueResolved(existing.reporterId, id, existing.title, user.name);
         }
         // Notify volunteer who completed the task
         if (user.role === 'volunteer') {
+          await updateUserStatsAndCheckAchievements(
+            user.id,
+            'volunteer',
+            { tasksCompleted: 1, points: 50 } // +50 points for completing task
+          );
           await notifyVolunteerTaskCompleted(user.id, id, existing.title);
         }
         // Notify admins

@@ -1,13 +1,34 @@
 // lib/services/notificationService.ts
 'use client';
 
+import apiClient from './api/client';
+import { notificationsAPI } from './api/endpoints';
+
+interface Notification {
+  _id: string;
+  id?: string;
+  type: string;
+  title: string;
+  message: string;
+  targetRole: string;
+  targetType: string;
+  targetUserId?: string;
+  actionUrl?: string;
+  actionText?: string;
+  isRead: boolean;
+  isArchived: boolean;
+  metadata?: Record<string, any>;
+  createdAt: string;
+}
+
 class NotificationService {
   private static instance: NotificationService;
   private permission: NotificationPermission = 'default';
+  private notifications: Notification[] = [];
+  private listeners: (() => void)[] = [];
+  private unreadCount: number = 0;
 
-  private constructor() {
-    // Don't call requestPermission() here
-  }
+  private constructor() {}
 
   static getInstance(): NotificationService {
     if (!NotificationService.instance) {
@@ -16,63 +37,97 @@ class NotificationService {
     return NotificationService.instance;
   }
 
-  // ADD THIS METHOD to fix the hook error
+  subscribe(listener: () => void): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  }
+
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener());
+  }
+
   async hasPermission(): Promise<boolean> {
     return this.permission === 'granted';
   }
 
-  // Remove this duplicate static method
-  // static getUnreadCount() {
-  //   throw new Error('Method not implemented.');
-  // }
+  // Alias for fetchNotifications - maintains backward compatibility
+  async getNotifications(): Promise<Notification[]> {
+    return this.fetchNotifications();
+  }
 
-  async getNotifications(): Promise<any[]> {
-    // Mock data - replace with actual API call
-    return [
-      {
-        id: '1',
-        title: 'Welcome to CivicFix!',
-        message: 'Start reporting community issues today.',
-        type: 'info',
-        read: false,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        title: 'New Issue Near You',
-        message: 'Pothole reported on Main Street needs attention.',
-        type: 'alert',
-        read: false,
-        createdAt: new Date().toISOString(),
-      },
-    ];
+  async fetchNotifications(): Promise<Notification[]> {
+    try {
+      const response = await notificationsAPI.getNotifications();
+      this.notifications = response.data?.notifications || [];
+      this.notifyListeners();
+      return this.notifications;
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      return [];
+    }
+  }
+
+  getCachedNotifications(): Notification[] {
+    return this.notifications;
   }
 
   async getUnreadCount(): Promise<number> {
-    const notifications = await this.getNotifications();
-    return notifications.filter(n => !n.read).length;
+    try {
+      const response = await notificationsAPI.getUnreadCount();
+      this.unreadCount = response.data?.count || 0;
+      return this.unreadCount;
+    } catch (error) {
+      console.error('Failed to get unread count:', error);
+      return this.notifications.filter(n => !n.isRead).length;
+    }
   }
 
   async markAsRead(notificationId: string): Promise<void> {
-    console.log('Marked notification as read:', notificationId);
-    // In a real app, call API: await apiClient.patch(`/notifications/${notificationId}/read`)
+    try {
+      await notificationsAPI.markAsRead(notificationId);
+      this.notifications = this.notifications.map(n => 
+        n._id === notificationId || n.id === notificationId 
+          ? { ...n, isRead: true } 
+          : n
+      );
+      this.unreadCount = Math.max(0, this.unreadCount - 1);
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
   }
 
   async markAllAsRead(): Promise<void> {
-    console.log('Marked all notifications as read');
-    // In a real app: await apiClient.patch('/notifications/read-all')
+    try {
+      await notificationsAPI.markAllAsRead();
+      this.notifications = this.notifications.map(n => ({ ...n, isRead: true }));
+      this.unreadCount = 0;
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
   }
 
   async deleteNotification(notificationId: string): Promise<void> {
-    console.log('Deleted notification:', notificationId);
-    // In a real app: await apiClient.delete(`/notifications/${notificationId}`)
+    try {
+      await notificationsAPI.deleteNotification(notificationId);
+      const deleted = this.notifications.find(n => n._id === notificationId || n.id === notificationId);
+      this.notifications = this.notifications.filter(n => 
+        n._id !== notificationId && n.id !== notificationId
+      );
+      if (deleted && !deleted.isRead) {
+        this.unreadCount = Math.max(0, this.unreadCount - 1);
+      }
+      this.notifyListeners();
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    }
   }
 
   async requestPermission(): Promise<boolean> {
-    if (typeof window === 'undefined') {
-      console.log('Running on server, skipping notification permission');
-      return false;
-    }
+    if (typeof window === 'undefined') return false;
     
     if (!('Notification' in window)) {
       console.log('This browser does not support notifications');
@@ -86,43 +141,38 @@ class NotificationService {
     return this.permission === 'granted';
   }
 
-  showNotification(title: string, options?: NotificationOptions): void {
+  showBrowserNotification(title: string, body: string, tag?: string, url?: string): void {
     if (this.permission !== 'granted') return;
 
     const notification = new Notification(title, {
+      body,
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-192x192.png',
-      ...options,
+      tag,
+      requireInteraction: true,
     });
 
     notification.onclick = () => {
       window.focus();
+      if (url) {
+        window.location.href = url;
+      }
       notification.close();
     };
 
-    setTimeout(() => {
-      notification.close();
-    }, 5000);
-  }
-
-  showBrowserNotification(title: string, body: string, tag?: string): void {
-    this.showNotification(title, {
-      body,
-      tag,
-      requireInteraction: true,
-    });
+    setTimeout(() => notification.close(), 8000);
   }
 
   showSuccessNotification(message: string): void {
-    this.showBrowserNotification('Success', message, 'success');
+    this.showBrowserNotification('✅ Success', message, 'success');
   }
 
   showErrorNotification(message: string): void {
-    this.showBrowserNotification('Error', message, 'error');
+    this.showBrowserNotification('❌ Error', message, 'error');
   }
 
   showInfoNotification(message: string): void {
-    this.showBrowserNotification('Information', message, 'info');
+    this.showBrowserNotification('ℹ️ Info', message, 'info');
   }
 }
 

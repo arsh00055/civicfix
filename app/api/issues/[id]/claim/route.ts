@@ -4,8 +4,10 @@ import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 import { 
   notifyVolunteerTaskClaimed, 
-  notifyAdminIssueClaimed 
+  notifyAdminIssueClaimed, 
+  notifyIssueClaimed
 } from '@/lib/helpers/notification.helper';
+import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -48,6 +50,13 @@ export async function POST(
 
     const { db } = await connectToDatabase();
     const issue = await db.collection('issues').findOne({ _id: oid });
+
+    await updateUserStatsAndCheckAchievements(
+      user.id,
+      'volunteer',
+      { totalClaimed: 1, points: 15 } // +15 points for claiming a task
+    );
+    
     if (!issue) return NextResponse.json({ message: 'Issue not found' }, { status: 404 });
 
     if (!['reported', 'in_review'].includes(issue.status)) {
@@ -82,6 +91,7 @@ export async function POST(
     const { _id, ...rest } = updated!;
 
     // 🔔 Send notifications
+    await notifyIssueClaimed(id, issue.title, user.name);
     await notifyVolunteerTaskClaimed(user.id, id, issue.title, issue.reporter?.name || 'Anonymous');
     await notifyAdminIssueClaimed(id, issue.title, user.name);
 

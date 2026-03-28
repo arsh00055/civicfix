@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
+import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
+import { notifyReporterNewComment } from '@/lib/helpers/notification.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -95,7 +97,6 @@ export async function POST(
 
     const { db } = await connectToDatabase();
 
-    // Check if issue exists
     const issue = await db.collection('issues').findOne({ _id: oid });
     if (!issue) {
       return NextResponse.json({ message: 'Issue not found' }, { status: 404 });
@@ -104,7 +105,6 @@ export async function POST(
     const now = new Date().toISOString();
     const commentId = generateCommentId();
 
-    // Get user's avatar if available
     let avatar: string | undefined;
     try {
       const userObjectId = toObjectId(user.id);
@@ -131,8 +131,7 @@ export async function POST(
       updatedAt: now,
     };
 
-    // Push the new comment to the issue's comments array - CORRECT SYNTAX
-    const result = await db.collection('issues').updateOne(
+    await db.collection('issues').updateOne(
       { _id: oid },
       {
         $push: { comments: newComment } as any,
@@ -141,12 +140,16 @@ export async function POST(
       }
     );
 
-    if (result.modifiedCount === 0) {
-      return NextResponse.json(
-        { message: 'Failed to add comment' },
-        { status: 500 }
-      );
+    if (issue.reporterId !== user.id) {
+      await notifyReporterNewComment(issue.reporterId, id, issue.title, user.name, text);
     }
+
+    // Update user stats for commenting
+    await updateUserStatsAndCheckAchievements(
+      user.id,
+      user.role as 'citizen' | 'volunteer',
+      { totalComments: 1, points: 3 } // +3 points for commenting
+    );
 
     return NextResponse.json(newComment, { status: 201 });
   } catch (error: any) {

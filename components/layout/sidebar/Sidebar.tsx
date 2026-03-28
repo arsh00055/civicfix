@@ -37,14 +37,13 @@ const Sidebar: React.FC = () => {
   const commonMenuItems = [
     { icon: HomeIcon, label: 'Dashboard', href: '/' },
     { icon: MapIcon, label: 'Community Map', href: '/map' },
-    { icon: ClipboardDocumentListIcon, label: 'View Issues', href: '/issues'},
     { icon: BellIcon, label: 'Notifications', href: '/notifications' },
   ];
 
   const roleSpecificItems = {
     citizen: [
       { icon: PlusCircleIcon, label: 'Report Issue', href: '/issues/new' },
-      { icon: ClipboardDocumentListIcon, label: 'My Reports', href: '/issues' },
+      { icon: ClipboardDocumentListIcon, label: 'View Issues', href: '/issues' }, // ✅ Changed from 'My Reports'
       { icon: TrophyIcon, label: 'Achievements', href: '/profile/achievements' },
     ],
     volunteer: [
@@ -63,8 +62,15 @@ const Sidebar: React.FC = () => {
     { icon: QuestionMarkCircleIcon, label: 'Help & Support', href: '/help' },
   ];
 
+  // Remove duplicate common menu items that might appear in role-specific
+  const commonMenuItemsFiltered = commonMenuItems.filter(
+    commonItem => !roleSpecificItems[userRole as keyof typeof roleSpecificItems]?.some(
+      roleItem => roleItem.href === commonItem.href
+    )
+  );
+
   const menuItems = [
-    ...commonMenuItems,
+    ...commonMenuItemsFiltered,
     ...(roleSpecificItems[userRole as keyof typeof roleSpecificItems] || []),
   ];
 

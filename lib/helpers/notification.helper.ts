@@ -1,6 +1,6 @@
-// lib/services/notificationService.ts
-import { connectToDatabase } from '@/lib/db';
-import { ObjectId } from 'mongodb';
+// lib/helpers/notification.helper.ts
+import { connectToDatabase } from "@/lib/db";
+import { ObjectId } from "mongodb";
 
 export type NotificationType = 
   // Issue related
@@ -11,14 +11,18 @@ export type NotificationType =
   | 'issue_closed'
   | 'issue_voted'
   | 'issue_commented'
+  | 'issue_status_changed'
   // Volunteer related
   | 'task_claimed'
   | 'task_started'
   | 'task_completed'
+  | 'new_task_available'
   // Admin related
   | 'new_issue_alert'
   | 'urgent_issue_alert'
-  | 'issue_escalated';
+  | 'issue_escalated'
+  // Achievement related
+  | 'achievement_unlocked';
 
 export interface Notification {
   _id?: ObjectId;
@@ -69,6 +73,8 @@ export async function createNotification(params: CreateNotificationParams) {
   }
 }
 
+// ==================== ISSUE NOTIFICATIONS ====================
+
 export async function notifyAdminsNewIssue(
   issueId: string,
   issueTitle: string,
@@ -110,6 +116,144 @@ export async function notifyAdminsUrgentIssue(
       location,
       urgent: true 
     }
+  });
+}
+
+// Notify all citizens that a new issue has been reported
+export async function notifyAllCitizensNewIssue(
+  issueId: string,
+  issueTitle: string,
+  location: string,
+  category: string
+) {
+  return createNotification({
+    type: 'issue_reported',
+    title: '📋 New Issue in Your Community',
+    message: `A new issue "${issueTitle}" has been reported in ${location} (Category: ${category}). Check it out and support your community!`,
+    targetRole: 'citizen',
+    targetType: 'broadcast',
+    actionUrl: `/issues/${issueId}`,
+    actionText: 'View Issue',
+    metadata: { issueId, issueTitle, location, category }
+  });
+}
+
+// Notify all volunteers that a new task is available
+export async function notifyAllVolunteersNewTask(
+  issueId: string,
+  issueTitle: string,
+  location: string,
+  priority: string
+) {
+  return createNotification({
+    type: 'new_task_available',
+    title: '🆕 New Task Available!',
+    message: `A new ${priority.toUpperCase()} priority task "${issueTitle}" is available at ${location}. Claim it now to help your community!`,
+    targetRole: 'volunteer',
+    targetType: 'broadcast',
+    actionUrl: `/tasks/available`,
+    actionText: 'View Available Tasks',
+    metadata: { issueId, issueTitle, location, priority }
+  });
+}
+
+// Notify everyone about claimed issue
+export async function notifyIssueClaimed(
+  issueId: string,
+  issueTitle: string,
+  volunteerName: string
+) {
+  // Notify citizens
+  await createNotification({
+    type: 'task_claimed',
+    title: '👥 Issue Claimed by Volunteer',
+    message: `${volunteerName} has claimed the issue "${issueTitle}" and will start working on it soon.`,
+    targetRole: 'citizen',
+    targetType: 'broadcast',
+    actionUrl: `/issues/${issueId}`,
+    actionText: 'Track Progress',
+    metadata: { issueId, issueTitle, volunteerName }
+  });
+
+  // Notify volunteers
+  await createNotification({
+    type: 'task_claimed',
+    title: '📋 Task Claimed',
+    message: `${volunteerName} has claimed the task "${issueTitle}".`,
+    targetRole: 'volunteer',
+    targetType: 'broadcast',
+    actionUrl: `/issues/${issueId}`,
+    actionText: 'View Task',
+    metadata: { issueId, issueTitle, volunteerName }
+  });
+
+  // Notify admins
+  await createNotification({
+    type: 'task_claimed',
+    title: '👥 Issue Claimed by Volunteer',
+    message: `${volunteerName} has claimed the issue "${issueTitle}".`,
+    targetRole: 'admin',
+    targetType: 'broadcast',
+    actionUrl: `/admin/issues/${issueId}`,
+    actionText: 'Monitor Progress',
+    metadata: { issueId, issueTitle, volunteerName }
+  });
+}
+
+// Notify everyone about status change
+export async function notifyIssueStatusChanged(
+  issueId: string,
+  issueTitle: string,
+  oldStatus: string,
+  newStatus: string,
+  updatedBy: string,
+  updatedByRole: string
+) {
+  const statusMessages: Record<string, string> = {
+    in_progress: 'has started working on',
+    resolved: 'has resolved',
+    assigned: 'has been assigned to',
+    closed: 'has closed',
+  };
+
+  const message = updatedByRole === 'volunteer' 
+    ? `Volunteer ${updatedBy} ${statusMessages[newStatus] || 'updated'} the issue "${issueTitle}" to ${newStatus.replace('_', ' ')}.`
+    : `The issue "${issueTitle}" status has been updated from ${oldStatus.replace('_', ' ')} to ${newStatus.replace('_', ' ')}.`;
+
+  // Notify citizens
+  await createNotification({
+    type: 'issue_status_changed',
+    title: '🔄 Issue Status Updated',
+    message: message,
+    targetRole: 'citizen',
+    targetType: 'broadcast',
+    actionUrl: `/issues/${issueId}`,
+    actionText: 'View Update',
+    metadata: { issueId, issueTitle, oldStatus, newStatus, updatedBy, updatedByRole }
+  });
+
+  // Notify volunteers
+  await createNotification({
+    type: 'issue_status_changed',
+    title: '🔄 Task Status Updated',
+    message: message,
+    targetRole: 'volunteer',
+    targetType: 'broadcast',
+    actionUrl: `/issues/${issueId}`,
+    actionText: 'View Update',
+    metadata: { issueId, issueTitle, oldStatus, newStatus, updatedBy, updatedByRole }
+  });
+
+  // Notify admins
+  await createNotification({
+    type: 'issue_status_changed',
+    title: '🔄 Issue Status Updated',
+    message: message,
+    targetRole: 'admin',
+    targetType: 'broadcast',
+    actionUrl: `/admin/issues/${issueId}`,
+    actionText: 'View Update',
+    metadata: { issueId, issueTitle, oldStatus, newStatus, updatedBy, updatedByRole }
   });
 }
 
@@ -216,6 +360,8 @@ export async function notifyReporterNewComment(
   });
 }
 
+// ==================== VOLUNTEER NOTIFICATIONS ====================
+
 export async function notifyVolunteerTaskClaimed(
   volunteerId: string,
   issueId: string,
@@ -274,6 +420,8 @@ export async function notifyVolunteerTaskCompleted(
   });
 }
 
+// ==================== ADMIN NOTIFICATIONS ====================
+
 export async function notifyAdminIssueClaimed(
   issueId: string,
   issueTitle: string,
@@ -324,4 +472,79 @@ export async function notifyAdminIssueEscalated(
     actionText: 'Review Escalated Issue',
     metadata: { issueId, issueTitle, reason, previousStatus, urgent: true }
   });
+}
+
+// ==================== ACHIEVEMENT NOTIFICATIONS ====================
+
+export async function notifyAchievementUnlocked(
+  userId: string,
+  achievementName: string,
+  achievementTier: string,
+  points: number,
+  achievementId: string,
+  userRole?: 'citizen' | 'volunteer' | 'admin'
+) {
+  const tierEmojis: Record<string, string> = {
+    bronze: '🥉',
+    silver: '🥈',
+    gold: '🥇',
+    platinum: '💎',
+  };
+  const emoji = tierEmojis[achievementTier] || '🏆';
+
+  let targetRole: 'citizen' | 'volunteer' | 'admin' = 'citizen';
+  
+  if (userRole) {
+    targetRole = userRole;
+  } else {
+    const volunteerKeywords = ['volunteer', 'task', 'claim', 'responder', 'rating', 'streak'];
+    const isVolunteerAchievement = volunteerKeywords.some(keyword => 
+      achievementName.toLowerCase().includes(keyword)
+    );
+    targetRole = isVolunteerAchievement ? 'volunteer' : 'citizen';
+  }
+
+  return createNotification({
+    type: 'achievement_unlocked',
+    title: `${emoji} Achievement Unlocked: ${achievementName}!`,
+    message: `You've earned the "${achievementName}" achievement! +${points} points awarded. Keep up the great work!`,
+    targetRole,
+    targetType: 'specific',
+    targetUserId: userId,
+    actionUrl: `/profile/achievements`,
+    actionText: 'View Achievements',
+    metadata: {
+      achievementId,
+      achievementName,
+      achievementTier,
+      pointsAwarded: points,
+    }
+  });
+}
+
+// Helper function to get user role
+export async function getUserRole(userId: string): Promise<'citizen' | 'volunteer' | 'admin' | null> {
+  try {
+    const { db } = await connectToDatabase();
+    const user = await db.collection('users').findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { role: 1 } }
+    );
+    return user?.role as 'citizen' | 'volunteer' | 'admin' || null;
+  } catch (error) {
+    console.error('Error fetching user role:', error);
+    return null;
+  }
+}
+
+// Achievement notification with automatic role detection
+export async function notifyAchievementUnlockedWithRole(
+  userId: string,
+  achievementName: string,
+  achievementTier: string,
+  points: number,
+  achievementId: string
+) {
+  const userRole = await getUserRole(userId);
+  return notifyAchievementUnlocked(userId, achievementName, achievementTier, points, achievementId, userRole || undefined);
 }

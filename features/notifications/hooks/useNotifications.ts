@@ -1,4 +1,3 @@
-// hooks/useNotifications.ts or wherever you're placing this
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -31,7 +30,7 @@ export const useNotifications = (): UseNotificationsReturn => {
       setError(null);
       
       // Use the notification service directly
-      const notificationsData = await notificationService.getNotifications();
+      const notificationsData = await notificationService.fetchNotifications();
       
       console.log('Fetched notifications:', notificationsData);
       
@@ -42,7 +41,7 @@ export const useNotifications = (): UseNotificationsReturn => {
         title: item.title,
         message: item.message,
         timestamp: item.timestamp || item.createdAt || new Date().toISOString(),
-        read: item.read || false,
+        read: item.isRead || false,
         metadata: item.metadata || {},
         seen: item.seen || false,
         priority: item.priority || 'low',

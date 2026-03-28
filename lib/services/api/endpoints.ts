@@ -87,15 +87,15 @@ export const authApi = {
 };
 
 export const notificationsAPI = {
-  getNotifications:  () => apiClient.get('/notifications'),
-  getUnreadCount:    () => apiClient.get('/notifications/unread/count'),
-  markAsRead:        (id: string) => apiClient.patch(`/notifications/${id}/read`),
-  markAllAsRead:     () => apiClient.patch('/notifications/read-all'),
-  deleteNotification:(id: string) => apiClient.delete(`/notifications/${id}`),
+  getNotifications:  () => apiClient.get('/api/notifications'),
+  getUnreadCount:    () => apiClient.get('/api/notifications/unread/count'),
+  markAsRead:        (id: string) => apiClient.patch(`/api/notifications/${id}/read`),
+  markAllAsRead:     () => apiClient.patch('/api/notifications/read-all'),
+  deleteNotification:(id: string) => apiClient.delete(`/api/notifications/${id}`),
 };
 
 export const achievementsAPI = {
-  getAchievements:     () => apiClient.get('/achievements'),
+  getAchievements:     () => apiClient.get('/api/achievements'),
   getUserAchievements: (userId: string) => apiClient.get(`/users/${userId}/achievements`),
   unlockAchievement:   (achievementId: string) => apiClient.post(`/achievements/${achievementId}/unlock`),
 };

@@ -11,6 +11,7 @@ interface UserMenuProps {
 
 const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -33,6 +34,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   useEffect(() => {
     setBackground(getBackground());
   }, [getBackground]);
+
+  // Mark component as mounted to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -61,6 +67,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  // Get the user email to display
+  const userEmail = currentUser?.email || user?.email;
+
   return (
     <div className="relative" ref={menuRef}>
       
@@ -87,10 +96,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
       >
         <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-gray-200 overflow-hidden">
           
-          {/* User Info */}
+          {/* User Info - Fix hydration mismatch */}
           <div className="px-4 py-3 border-b text-sm">
             <div className="font-semibold text-gray-800 truncate">
-              {currentUser?.email || user?.email}
+              {mounted ? userEmail : ''}
             </div>
             <div className="text-xs text-gray-500 mt-1">
               Signed in as <span className="capitalize">{role || 'user'}</span>

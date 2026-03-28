@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
-import { notifyAdminsNewIssue, notifyAdminsUrgentIssue } from '@/lib/helpers/notification.helper';
+import { notifyAdminsNewIssue, notifyAdminsUrgentIssue, notifyAllCitizensNewIssue, notifyAllVolunteersNewTask } from '@/lib/helpers/notification.helper';
+import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -194,6 +195,14 @@ export async function POST(req: NextRequest) {
     const result = await db.collection('issues').insertOne(newIssue);
     const issueId = result.insertedId.toString();
     const issuePriority = priority || 'medium';
+    await notifyAllCitizensNewIssue(issueId, title, location, category);
+    await notifyAllVolunteersNewTask(issueId, title, location, issuePriority);
+
+    await updateUserStatsAndCheckAchievements(
+      user.id,
+      user.role as 'citizen' | 'volunteer',
+      { totalReports: 1, points: 10 } // +10 points for reporting
+    );
 
     // 🔔 Send notifications based on priority
     if (issuePriority === 'critical' || issuePriority === 'high') {

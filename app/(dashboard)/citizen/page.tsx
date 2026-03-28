@@ -189,6 +189,7 @@ export default function CitizenDashboard() {
                       views: report.views ?? 0,
                       commentsCount: report.commentsCount ?? (report.comments ? report.comments.length : 0),
                       reportedAt: report.reportedAt ?? report.createdAt,
+                      voters: report.voters,
                       priority: report.priority,
                       category: report.category || 'general',
                       location: report.location || '',

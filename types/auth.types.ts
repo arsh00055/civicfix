@@ -29,7 +29,7 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: 'citizen' | 'volunteer' | 'admin' | null;
+  role: string | null;
   phone?: string;
   agreeToTerms: boolean;
   profilePic?: string;

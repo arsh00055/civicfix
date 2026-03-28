@@ -1,13 +1,40 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, JSX } from 'react';
 import { useRouter } from 'next/navigation';
-import Achievement3D from '@/components/three/Achievement3D';
+import { TrophyIcon, FireIcon, StarIcon, SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import type { Achievement } from '@/types';
 import { achievementsAPI } from '@/lib/services/api/endpoints';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import Loading from '@/app/loading';
-import Error from '@/app/error'
+import Error from '@/app/error';
+
+const TIER_STYLES: Record<string, { bg: string; text: string; border: string; icon: JSX.Element }> = {
+  bronze: { 
+    bg: "bg-orange-100", 
+    text: "text-orange-800", 
+    border: "border-orange-200",
+    icon: <FireIcon className="w-4 h-4" />
+  },
+  silver: { 
+    bg: "bg-gray-100", 
+    text: "text-gray-700", 
+    border: "border-gray-200",
+    icon: <StarIcon className="w-4 h-4" />
+  },
+  gold: { 
+    bg: "bg-yellow-100", 
+    text: "text-yellow-800", 
+    border: "border-yellow-200",
+    icon: <TrophyIcon className="w-4 h-4" />
+  },
+  platinum: { 
+    bg: "bg-purple-100", 
+    text: "text-purple-800", 
+    border: "border-purple-200",
+    icon: <SparklesIcon className="w-4 h-4" />
+  },
+};
 
 const AchievementsSection: React.FC = () => {
   const router = useRouter();
@@ -42,7 +69,7 @@ const AchievementsSection: React.FC = () => {
 
   const getAchievementColor = (type: string) => {
     switch (type) {
-      case 'bronze': return 'bg-amber-100 border-amber-200';
+      case 'bronze': return 'bg-orange-100 border-orange-200';
       case 'silver': return 'bg-gray-100 border-gray-200';
       case 'gold': return 'bg-yellow-100 border-yellow-200';
       case 'platinum': return 'bg-purple-100 border-purple-200';
@@ -96,69 +123,88 @@ const AchievementsSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {displayAchievements.map(achievement => {
           const hasProgress = achievement.progress && typeof achievement.progress === 'object';
           const current = hasProgress ? achievement.progress!.current : 0;
           const target = hasProgress ? achievement.progress!.target : 0;
           const isUnlocked = !!achievement.unlockedAt;
+          const progressPercent = target > 0 ? Math.round((current / target) * 100) : 0;
+          const tierStyle = TIER_STYLES[achievement.type] || TIER_STYLES.bronze;
           
           return (
             <div
               key={achievement.id}
               onClick={() => handleAchievementClick(achievement)}
-              className={`border-2 rounded-xl p-4 text-center transition-transform hover:scale-105 cursor-pointer ${
+              className={`border-2 rounded-xl p-4 text-center transition-all hover:scale-105 cursor-pointer ${
                 isUnlocked 
-                  ? getAchievementColor(achievement.type) 
-                  : 'bg-gray-50 border-gray-200 opacity-60'
+                  ? `${getAchievementColor(achievement.type)} shadow-sm` 
+                  : 'bg-gray-50 border-gray-200 opacity-75 hover:opacity-100'
               }`}
             >
-              {/* 3D Achievement Display */}
-              <div className="flex justify-center mb-3">
+              {/* Icon */}
+              <div className="text-4xl mb-3">
                 {isUnlocked ? (
-                  <Achievement3D 
-                    type={achievement.type as any} 
-                    className="h-16 w-16"
-                  />
+                  achievement.icon || (
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${tierStyle.bg}`}>
+                      {tierStyle.icon}
+                    </div>
+                  )
                 ) : (
-                  <div className="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center text-gray-400">
-                    <span className="text-2xl">🔒</span>
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto">
+                    <span className="text-2xl text-gray-400">🔒</span>
                   </div>
                 )}
               </div>
 
-              <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{achievement.name}</h3>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{achievement.description}</p>
+              {/* Title */}
+              <h3 className={`font-semibold mb-1 line-clamp-1 ${isUnlocked ? 'text-gray-900' : 'text-gray-600'}`}>
+                {achievement.name}
+              </h3>
               
-              <div className="flex items-center justify-between text-xs">
-                <span className={`px-2 py-1 rounded-full ${
-                  isUnlocked 
-                    ? 'bg-gray-800 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}>
+              {/* Description */}
+              <p className="text-xs text-gray-500 mb-3 line-clamp-2">
+                {achievement.description}
+              </p>
+              
+              {/* Type Badge */}
+              <div className="flex items-center justify-between text-xs mb-2">
+                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${tierStyle.bg} ${tierStyle.text} border ${tierStyle.border}`}>
+                  {tierStyle.icon}
                   {getTypeDisplay(achievement.type)}
                 </span>
 
                 {isUnlocked ? (
-                  <span className="text-green-600 font-medium">Unlocked</span>
-                ) : hasProgress ? (
-                  <span className="text-blue-600">
-                    {current}/{target}
+                  <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                    <CheckCircleIcon className="w-3 h-3" />
+                    Unlocked
                   </span>
                 ) : (
-                  <span className="text-gray-500">Locked</span>
+                  <span className="text-xs text-gray-500">
+                    {progressPercent}% done
+                  </span>
                 )}
               </div>
 
               {/* Progress Bar */}
               {hasProgress && !isUnlocked && target > 0 && (
-                <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all"
-                    style={{ 
-                      width: `${(current / target) * 100}%` 
-                    }}
-                  />
+                <div className="mt-2 w-full">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>{current}/{target}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div 
+                      className="bg-blue-600 rounded-full h-1.5 transition-all"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Points */}
+              {achievement.points > 0 && (
+                <div className="mt-2 text-xs text-gray-400">
+                  +{achievement.points} pts
                 </div>
               )}
             </div>
@@ -168,6 +214,7 @@ const AchievementsSection: React.FC = () => {
 
       {achievements.length === 0 && (
         <div className="text-center py-8 text-gray-500">
+          <TrophyIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p>No achievements yet. Start contributing to earn achievements!</p>
           <button
             onClick={() => router.push('/issues/new')}

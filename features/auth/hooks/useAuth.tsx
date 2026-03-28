@@ -11,7 +11,7 @@ import { User } from '@/types/auth.types';
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  userRole: 'citizen' | 'volunteer' | 'admin' | null;
+  userRole: string | null;
   isLoading: boolean;
   login: (email: string, password: string, role: string, additionalData?: any) => Promise<any>;
   register: (data: any, role: string) => Promise<void>;

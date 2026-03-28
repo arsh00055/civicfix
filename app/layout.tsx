@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import StoreProvider from './StoreProvider';
 import { AuthProvider } from "../features/auth/hooks/useAuth";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,6 +22,12 @@ export default function RootLayout({children,}: {children: React.ReactNode}) {
         <StoreProvider>
           <AuthProvider>
             {children}
+            <Toaster 
+              position="top-right"
+              richColors
+              closeButton
+              expand
+            />
           </AuthProvider>
         </StoreProvider>
       </body>
