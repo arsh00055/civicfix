@@ -24,6 +24,7 @@ const AdminLogin = dynamic(() => import('@/features/auth/components/AdminLogin')
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<'citizen' | 'volunteer' | 'admin' | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  // const [showPassword, setShowPassword ] = useState(false)
   const { isLoading } = useAuth()
 
   const handleRoleSelect = (role: 'citizen' | 'volunteer' | 'admin') => {

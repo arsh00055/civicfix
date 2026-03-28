@@ -6,9 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import RHFInputField from '@/components/ui/forms/RHFInputField'
-import PrimaryButton from '@/components/ui/buttons/PrimaryButton'
 import apiClient from '@/lib/services/api/client'
+import RHFInputField from '@/components/UI/forms/RHFInputField'
+import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
+import RegistrationSuccess from './RegistrationSuccess'
+import VolunteerSuccess from './VolunteerSuccess'
 
 const volunteerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -51,6 +53,10 @@ export default function VolunteerRegistration({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const [showSuccess, setShowSuccess] = useState(false)
+const [registeredEmail, setRegisteredEmail] = useState('')
+
+
 
   const { 
     register, 
@@ -74,16 +80,18 @@ export default function VolunteerRegistration({
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     setError('')
-
+  
     try {
       const { confirmPassword, agreeToTerms, ...registrationData } = data
       
-      await apiClient.post('/auth/register/volunteer', {
+      await apiClient.post('/api/auth/register', {
         ...registrationData,
         role: 'volunteer'
       })
       
-      onSuccess()
+      setRegisteredEmail(data.email)
+setShowSuccess(true)        // 👈 ADD THIS
+      
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
@@ -110,6 +118,16 @@ export default function VolunteerRegistration({
   const handleSwitchToLogin = (e: React.MouseEvent) => {
     e.preventDefault()
     onSwitchToLogin()
+  }
+
+  // 👈 ADD THIS BEFORE RETURN
+  if (showSuccess) {
+    return (
+      <VolunteerSuccess
+        email={registeredEmail}
+        onContinue={onSuccess}
+      />
+    )
   }
 
   return (
@@ -183,7 +201,6 @@ export default function VolunteerRegistration({
                   id={`skill-${skill}`}
                   type="checkbox"
                   checked={selectedSkills.includes(skill)}
-                  className="text-black"
                   onChange={() => toggleSkill(skill)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   aria-checked={selectedSkills.includes(skill)}
@@ -213,7 +230,6 @@ export default function VolunteerRegistration({
                   id={`availability-${availability}`}
                   type="checkbox"
                   checked={selectedAvailability.includes(availability)}
-                  className="text-black"
                   onChange={() => toggleAvailability(availability)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   aria-checked={selectedAvailability.includes(availability)}

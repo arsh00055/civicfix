@@ -11,6 +11,7 @@ const AdminLogin: React.FC = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [adminKey, setAdminKey] = useState('');
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
@@ -50,16 +51,20 @@ const AdminLogin: React.FC = () => {
           className="text-black text-1xl"
           placeholder="Enter your admin email"
           required
+          showPasswordToggle={false}
         />
         <InputField
           label="Password"
-          type="password"
+          type={showPassword ? "text" : "password"} 
           value={password}
-          onChange={setPassword}
+          onChange={(value: string) => setPassword(value)}
           autoComplete="current-password"
           className="text-black"
           placeholder="Enter your password"
           required
+          showPasswordToggle={true}
+          onTogglePassword={() => setShowPassword(!showPassword)}
+          isPasswordVisible={showPassword}
         />
         <InputField
           label="Admin Security Key"
@@ -68,8 +73,7 @@ const AdminLogin: React.FC = () => {
           onChange={(value: string) => setAdminKey(value)}
           className="text-black"
           placeholder="Enter admin security key"
-          required
-        />
+          required showPasswordToggle={false}        />
         
         {error && (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => {}} />)}
 

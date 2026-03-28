@@ -32,7 +32,7 @@ const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
   leftIcon,
   rightIcon,
 }, ref) => {
-  const { name, onChange, onBlur } = registration;
+  const { name, onChange, onBlur, ref: registrationRef } = registration;
 
   return (
     <div className={wrapperClassName}>
@@ -51,7 +51,7 @@ const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
           </div>
         )}
         <input
-          ref={ref}
+          ref={registrationRef}
           id={id || name}
           type={type}
           placeholder={placeholder}
