@@ -20,6 +20,7 @@ import {
   BellIcon,
   QuestionMarkCircleIcon,
   XMarkIcon,
+  FlagIcon,
 } from '@heroicons/react/24/outline';
 
 const Sidebar: React.FC = () => {
@@ -30,7 +31,6 @@ const Sidebar: React.FC = () => {
   const handleClose = () => dispatch(toggleSidebar());
 
   const handleLinkClick = () => {
-    // Close sidebar on any link click (both mobile and desktop)
     dispatch(toggleSidebar());
   };
 
@@ -43,7 +43,7 @@ const Sidebar: React.FC = () => {
   const roleSpecificItems = {
     citizen: [
       { icon: PlusCircleIcon, label: 'Report Issue', href: '/issues/new' },
-      { icon: ClipboardDocumentListIcon, label: 'View Issues', href: '/issues' }, // ✅ Changed from 'My Reports'
+      { icon: ClipboardDocumentListIcon, label: 'View Issues', href: '/issues' },
       { icon: TrophyIcon, label: 'Achievements', href: '/profile/achievements' },
     ],
     volunteer: [
@@ -52,6 +52,7 @@ const Sidebar: React.FC = () => {
       { icon: ChartBarIcon, label: 'My Assignments', href: '/tasks/assignments' },
     ],
     admin: [
+      { icon: FlagIcon, label: 'Manage Issues', href: '/issues/admin' }, // ✅ Added this
       { icon: UsersIcon, label: 'User Management', href: '/admin/user-management' },
       { icon: ChartBarIcon, label: 'Analytics', href: '/admin/analytics' },
       { icon: Cog6ToothIcon, label: 'System Settings', href: '/admin/settings' },
@@ -62,7 +63,6 @@ const Sidebar: React.FC = () => {
     { icon: QuestionMarkCircleIcon, label: 'Help & Support', href: '/help' },
   ];
 
-  // Remove duplicate common menu items that might appear in role-specific
   const commonMenuItemsFiltered = commonMenuItems.filter(
     commonItem => !roleSpecificItems[userRole as keyof typeof roleSpecificItems]?.some(
       roleItem => roleItem.href === commonItem.href
@@ -76,7 +76,6 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Overlay for both mobile and desktop when sidebar is open */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40"
@@ -84,7 +83,6 @@ const Sidebar: React.FC = () => {
         />
       )}
 
-      {/* Sidebar - Only show when sidebarOpen is true */}
       {sidebarOpen && (
         <aside 
           className="
@@ -93,7 +91,6 @@ const Sidebar: React.FC = () => {
             animate-slideIn
           "
         >
-          {/* Close Button for both mobile and desktop */}
           <div className="lg:hidden flex justify-end p-4 border-b border-gray-200">
             <button 
               onClick={handleClose}

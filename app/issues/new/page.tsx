@@ -151,6 +151,7 @@ const NewIssuePage: React.FC = () => {
               onUpdate={updateFormData}
               onNext={() => setCurrentStep(2)}
               userRole={currentRole as 'citizen' | 'volunteer' | 'admin'}
+              userId={user?.id}
             />
           )}
           {currentStep === 2 && (

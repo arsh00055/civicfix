@@ -94,64 +94,36 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const oldStatus = existing.status;
-    const newStatus = body.status;
 
     const allowed = [
       'title', 'description', 'category', 'priority', 'status',
       'location', 'latitude', 'longitude', 'images',
       'resolutionNotes', 'estimatedResolutionTime', 'tags',
+      'resolutionProof', // Add this to allowed fields
     ];
     const updates: Record<string, any> = { updatedAt: new Date().toISOString() };
+    
     for (const key of allowed) {
       if (key in body) updates[key] = body[key];
     }
 
-    if (body.status === 'resolved' && !existing.resolvedAt) {
+    // Handle resolution proof submission
+    if (body.status === 'pending_review' && body.resolutionNotes && body.resolutionProof) {
+      updates.resolutionNotes = body.resolutionNotes;
+      updates.resolutionProof = body.resolutionProof;
+      updates.submittedForReviewAt = new Date().toISOString();
+    }
+
+    // Handle admin resolution
+    if (body.status === 'resolved' && !existing.resolvedAt && user.role === 'admin') {
       updates.resolvedAt = new Date().toISOString();
+      updates.resolvedBy = user.id;
+      updates.resolvedByName = user.name;
+      updates.reviewedAt = new Date().toISOString();
     }
 
     await db.collection('issues').updateOne({ _id: oid }, { $set: updates });
     const updated = await db.collection('issues').findOne({ _id: oid });
-
-    // 🔔 Send notifications based on status change
-    if (newStatus && newStatus !== oldStatus) {
-      // Notify everyone about status change
-      await notifyIssueStatusChanged(id, existing.title, oldStatus, newStatus, user.name, user.role);
-      // Notify volunteer about status update
-      if (user.role === 'volunteer') {
-        await notifyVolunteerStatusUpdate(user.id, id, existing.title, newStatus);
-      }
-
-      // When status changes to 'in_progress'
-      if (newStatus === 'in_progress' && oldStatus !== 'in_progress') {
-        await notifyVolunteerTaskStarted(user.id, id, existing.title);
-      }
-
-      // When status changes to 'resolved'
-      if (newStatus === 'resolved' && oldStatus !== 'resolved') {
-        // Notify the citizen who reported the issue
-        if (existing.reporterId) {
-          await updateUserStatsAndCheckAchievements(
-            existing.reporterId,
-            'citizen',
-            { resolvedReports: 1, points: 20 } // +20 points for having issue resolved
-          );
-          await notifyCitizenIssueResolved(existing.reporterId, id, existing.title, user.name);
-        }
-        // Notify volunteer who completed the task
-        if (user.role === 'volunteer') {
-          await updateUserStatsAndCheckAchievements(
-            user.id,
-            'volunteer',
-            { tasksCompleted: 1, points: 50 } // +50 points for completing task
-          );
-          await notifyVolunteerTaskCompleted(user.id, id, existing.title);
-        }
-        // Notify admins
-        await notifyAdminIssueResolved(id, existing.title, user.name);
-      }
-    }
 
     return NextResponse.json(normaliseIssue(updated!));
   } catch (error: any) {

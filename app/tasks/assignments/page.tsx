@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/MainLayout';
 import Loading from '@/app/loading';
 import Error from '@/app/error';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { volunteersAPI } from '@/lib/services/api/endpoints';
+import { volunteersAPI, issuesAPI } from '@/lib/services/api/endpoints';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { XMarkIcon, PhotoIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { SubmitProofModal } from './components/SubmitModal';
 
 interface Assignment {
   id: string;
@@ -17,7 +19,7 @@ interface Assignment {
   description: string;
   category: string;
   priority: string;
-  status: 'assigned' | 'in_progress' | 'resolved' | 'closed';
+  status: 'assigned' | 'in_progress' | 'pending_review' | 'resolved' | 'closed';
   location: string;
   latitude: number;
   longitude: number;
@@ -32,6 +34,8 @@ interface Assignment {
   tags: string[];
   estimatedResolutionTime?: string;
   resolutionNotes?: string;
+  resolutionProof?: string[];
+  submittedForReview?: boolean;
 }
 
 const AssignmentsPage: React.FC = () => {
@@ -42,6 +46,9 @@ const AssignmentsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [showResolved, setShowResolved] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [isSubmittingProof, setIsSubmittingProof] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -71,35 +78,68 @@ const AssignmentsPage: React.FC = () => {
     }
   };
 
-  const handleUpdateStatus = async (assignmentId: string, taskId: string, newStatus: string) => {
+  const handleStartWork = async (assignmentId: string, taskId: string) => {
     try {
       setUpdatingStatus(assignmentId);
       
-      await volunteersAPI.updateTaskStatus(taskId, newStatus);
+      await volunteersAPI.updateTaskStatus(taskId, 'in_progress');
       
-      // Update local state
       setAssignments(prev => prev.map(assignment => 
         assignment.id === assignmentId 
           ? { 
               ...assignment, 
-              status: newStatus as Assignment['status'],
-              progress: newStatus === 'in_progress' ? 50 : newStatus === 'resolved' ? 100 : 25,
+              status: 'in_progress',
+              progress: 50,
               updatedAt: new Date().toISOString()
             }
           : assignment
       ));
       
-      toast.success(`Status updated to ${newStatus.replace('_', ' ')}`);
-      
-      if (newStatus === 'resolved') {
-        toast.success('Assignment completed! Great work! 🎉');
-      }
+      toast.success('Work started! Good luck! 🚀');
       
     } catch (err: any) {
-      console.error('Failed to update status:', err);
-      toast.error(err?.message || 'Failed to update task status. Please try again.');
+      console.error('Failed to start work:', err);
+      toast.error(err?.message || 'Failed to update status. Please try again.');
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handleSubmitProof = async (proofData: { notes: string; images: string[] }) => {
+    if (!selectedAssignment) return;
+
+    try {
+      setIsSubmittingProof(true);
+      
+      // Update the issue with resolution proof and set status to pending_review
+      await issuesAPI.updateIssue(selectedAssignment.taskId, {
+        status: 'pending_review',
+        resolutionNotes: proofData.notes,
+        resolutionProof: proofData.images,
+      });
+      
+      // Update local state
+      setAssignments(prev => prev.map(assignment => 
+        assignment.id === selectedAssignment.id 
+          ? { 
+              ...assignment, 
+              status: 'pending_review',
+              resolutionNotes: proofData.notes,
+              resolutionProof: proofData.images,
+              progress: 75,
+              updatedAt: new Date().toISOString()
+            }
+          : assignment
+      ));
+      
+      toast.success('Proof submitted for admin review! 📸');
+      setShowProofModal(false);
+      
+    } catch (err: any) {
+      console.error('Failed to submit proof:', err);
+      toast.error(err?.message || 'Failed to submit proof. Please try again.');
+    } finally {
+      setIsSubmittingProof(false);
     }
   };
 
@@ -122,6 +162,13 @@ const AssignmentsPage: React.FC = () => {
         label: 'In Progress',
         bgColor: 'bg-blue-100',
         dotColor: 'bg-blue-500'
+      },
+      pending_review: {
+        color: 'bg-purple-50 text-purple-800 border-purple-200',
+        icon: '⏰',
+        label: 'Pending Review',
+        bgColor: 'bg-purple-100',
+        dotColor: 'bg-purple-500'
       },
       resolved: {
         color: 'bg-green-50 text-green-800 border-green-200',
@@ -171,13 +218,13 @@ const AssignmentsPage: React.FC = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  // Filter assignments based on showResolved toggle
   const filteredAssignments = assignments.filter(assignment => 
     showResolved ? true : assignment.status !== 'resolved'
   );
 
-  const activeCount = assignments.filter(a => a.status !== 'resolved').length;
+  const activeCount = assignments.filter(a => a.status !== 'resolved' && a.status !== 'closed').length;
   const resolvedCount = assignments.filter(a => a.status === 'resolved').length;
+  const pendingCount = assignments.filter(a => a.status === 'pending_review').length;
 
   if (!user || (user.role !== 'volunteer' && user.role !== 'admin')) {
     return (
@@ -218,7 +265,7 @@ const AssignmentsPage: React.FC = () => {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">My Assignments</h1>
                   <p className="text-gray-600 mt-1">
-                    {activeCount} active · {resolvedCount} resolved
+                    {activeCount} active · {pendingCount} pending review · {resolvedCount} resolved
                   </p>
                 </div>
               </div>
@@ -299,6 +346,7 @@ const AssignmentsPage: React.FC = () => {
                 const priorityConfig = getPriorityConfig(assignment.priority);
                 const isUpdating = updatingStatus === assignment.id;
                 const isResolved = assignment.status === 'resolved';
+                const isPendingReview = assignment.status === 'pending_review';
                 
                 return (
                   <motion.div
@@ -338,8 +386,8 @@ const AssignmentsPage: React.FC = () => {
                           {assignment.description}
                         </p>
                         
-                        {/* Progress Bar - Only show for active assignments */}
-                        {!isResolved && (
+                        {/* Progress Bar */}
+                        {!isResolved && !isPendingReview && (
                           <div className="mb-4">
                             <div className="flex justify-between text-xs text-gray-500 mb-1">
                               <span>Progress</span>
@@ -354,11 +402,22 @@ const AssignmentsPage: React.FC = () => {
                           </div>
                         )}
                         
+                        {/* Pending Review Badge */}
+                        {isPendingReview && (
+                          <div className="mb-4 flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                              <ClockIcon className="w-3 h-3" />
+                              Awaiting Admin Review
+                            </span>
+                          </div>
+                        )}
+                        
                         {/* Completion Badge for Resolved */}
                         {isResolved && (
                           <div className="mb-4 flex items-center gap-2">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                              ✅ Completed on {formatDate(assignment.updatedAt)}
+                              <CheckCircleIcon className="w-3 h-3" />
+                              Completed on {formatDate(assignment.updatedAt)}
                             </span>
                           </div>
                         )}
@@ -399,7 +458,7 @@ const AssignmentsPage: React.FC = () => {
                           <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => handleUpdateStatus(assignment.id, assignment.taskId, 'in_progress')}
+                            onClick={() => handleStartWork(assignment.id, assignment.taskId)}
                             disabled={isUpdating}
                             className="px-5 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
                           >
@@ -407,7 +466,7 @@ const AssignmentsPage: React.FC = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {isUpdating ? 'Updating...' : 'Start Work'}
+                            {isUpdating ? 'Starting...' : 'Start Work'}
                           </motion.button>
                         )}
                         
@@ -415,14 +474,17 @@ const AssignmentsPage: React.FC = () => {
                           <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => handleUpdateStatus(assignment.id, assignment.taskId, 'resolved')}
+                            onClick={() => {
+                              setSelectedAssignment(assignment);
+                              setShowProofModal(true);
+                            }}
                             disabled={isUpdating}
-                            className="px-5 py-2 cursor-pointer bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+                            className="px-5 py-2 cursor-pointer bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 shadow-sm flex items-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {isUpdating ? 'Updating...' : 'Mark Resolved'}
+                            Submit for Review
                           </motion.button>
                         )}
                         
@@ -447,6 +509,18 @@ const AssignmentsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Submit Proof Modal */}
+      <SubmitProofModal
+        isOpen={showProofModal}
+        onClose={() => {
+          setShowProofModal(false);
+          setSelectedAssignment(null);
+        }}
+        onSubmit={handleSubmitProof}
+        assignment={selectedAssignment}
+        isSubmitting={isSubmittingProof}
+      />
     </MainLayout>
   );
 };

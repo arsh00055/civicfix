@@ -12,6 +12,9 @@ export interface Issue {
   state?: string;
   zipCode?: string;
   latitude: number;
+  resolutionNotes?: string;
+  resolutionProof?: string[];
+  submittedForReviewAt?: string;
   longitude: number;
   images: string[];
   videos?: string[];
@@ -40,7 +43,6 @@ export interface Issue {
   tags?: string[];
   estimatedResolutionTime?: string;
   actualResolutionTime?: string;
-  resolutionNotes?: string;
   createdAt: string;
   updatedAt: string;
   reportedAt: string;

@@ -5,7 +5,7 @@ if(!process.env.MONGODB_URI){
 }
 
 const uri = process.env.MONGODB_URI;
-const dbName = process.env.DATABASE_NAME || 'civicFix';
+const dbName = process.env.DATABASE_NAME || 'civicfix';
 
 
 let client: MongoClient;

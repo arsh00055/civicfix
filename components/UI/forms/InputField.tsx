@@ -115,7 +115,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
     onClick={onTogglePassword}
     className="
       absolute inset-y-0 right-0 pr-3 flex items-center
-      text-gray-500 hover:text-gray-700 focus:outline-none
+      text-gray-500 cursor-pointer hover:text-gray-700 focus:outline-none
     "
     aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
   >
