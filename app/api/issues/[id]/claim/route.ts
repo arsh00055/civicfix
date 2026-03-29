@@ -1,3 +1,4 @@
+// app/api/issues/[id]/claim/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
@@ -7,7 +8,7 @@ import {
   notifyAdminIssueClaimed, 
   notifyIssueClaimed
 } from '@/lib/helpers/notification.helper';
-import { updateUserStatsAndCheckAchievements } from '@/lib/helpers/userStats.helper';
+import { checkAndAwardAchievements } from '@/lib/services/achievementService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -37,7 +38,7 @@ export async function POST(
     const user = getCurrentUser(req);
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-    if (user.role !== 'volunteer') {
+    if (user.role !== 'volunteer' && user.role !== 'admin') {
       return NextResponse.json(
         { message: 'Only volunteers can claim issues' },
         { status: 403 }
@@ -50,12 +51,6 @@ export async function POST(
 
     const { db } = await connectToDatabase();
     const issue = await db.collection('issues').findOne({ _id: oid });
-
-    await updateUserStatsAndCheckAchievements(
-      user.id,
-      'volunteer',
-      { totalClaimed: 1, points: 15 } // +15 points for claiming a task
-    );
     
     if (!issue) return NextResponse.json({ message: 'Issue not found' }, { status: 404 });
 
@@ -87,6 +82,40 @@ export async function POST(
     };
 
     await db.collection('issues').updateOne({ _id: oid }, { $set: updates });
+    
+    // Update volunteer stats for claiming a task
+    await db.collection('volunteers').updateOne(
+      { _id: new ObjectId(user.id) },
+      { 
+        $inc: { 
+          'volunteerStats.totalClaimed': 1,
+          'volunteerStats.pointsEarned': 15,
+          'stats.points': 15,
+        },
+        $set: { updatedAt: now }
+      }
+    );
+    
+    // Get updated volunteer stats for achievement checking
+    const updatedVolunteer = await db.collection('volunteers').findOne(
+      { _id: new ObjectId(user.id) },
+      { projection: { stats: 1, volunteerStats: 1, role: 1 } }
+    );
+    
+    if (updatedVolunteer) {
+      // Check and award achievements for the volunteer
+      await checkAndAwardAchievements(
+        user.id,
+        'volunteer',
+        {
+          totalClaimed: updatedVolunteer.volunteerStats?.totalClaimed || 0,
+          tasksCompleted: updatedVolunteer.volunteerStats?.tasksCompleted || 0,
+          points: updatedVolunteer.stats?.points || 0,
+          level: updatedVolunteer.stats?.level || 1,
+        }
+      );
+    }
+    
     const updated = await db.collection('issues').findOne({ _id: oid });
     const { _id, ...rest } = updated!;
 
@@ -95,7 +124,12 @@ export async function POST(
     await notifyVolunteerTaskClaimed(user.id, id, issue.title, issue.reporter?.name || 'Anonymous');
     await notifyAdminIssueClaimed(id, issue.title, user.name);
 
-    return NextResponse.json({ ...rest, id: _id.toString() });
+    return NextResponse.json({ 
+      ...rest, 
+      id: _id.toString(),
+      pointsAwarded: 15,
+      message: 'Task claimed successfully! +15 points awarded.'
+    });
   } catch (error: any) {
     console.error('POST /api/issues/[id]/claim error:', error);
     return NextResponse.json(

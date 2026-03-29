@@ -15,26 +15,30 @@ import {
   StarIcon,
 } from '@/components/UI/icons';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import apiClient from '@/lib/services/api/client';
-
-interface VolunteerStats {
-  completedTasks: number;
-  activeTasks: number;
-  responseTime: string;
-  rating: string;
-  communityRank: string;
-}
+import { fetchVolunteerDashboard, refreshVolunteerDashboard } from '@/lib/helpers/volunteerDashboard.helper';
+import { volunteersAPI } from '@/lib/services/api/endpoints';
+import { toast } from 'sonner';
 
 export default function VolunteerDashboard() {
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const [stats, setStats] = useState<VolunteerStats | null>(null);
+  const [stats, setStats] = useState({
+    completedTasks: 0,
+    activeTasks: 0,
+    totalClaimed: 0,
+    responseTime: 'N/A',
+    rating: '0.0',
+    communityRank: 'Volunteer',
+    points: 0,
+    level: 1,
+  });
   const [availableTasks, setAvailableTasks] = useState<any[]>([]);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [myAssignments, setMyAssignments] = useState<any[]>([]);
+  const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Check authentication
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -47,101 +51,113 @@ export default function VolunteerDashboard() {
   }, [user, authLoading, router]);
 
   const loadDashboardData = async () => {
+    if (!user?.id) return;
+    
     try {
       setIsLoading(true);
       setError(null);
 
-      console.log('🔍 Fetching volunteer dashboard data...');
-      const dashboardResponse = await apiClient.get('/dashboard/volunteer');
-      const dashboardData = dashboardResponse.data || dashboardResponse;
-
-      console.log('📊 Raw dashboard response:', dashboardData);
-      console.log('📊 Available tasks count:', dashboardData.availableTasks?.length || 0);
-      
-      // Check if tasks have unique IDs
-      if (dashboardData.availableTasks && dashboardData.availableTasks.length > 0) {
-        console.group('📋 Task ID Analysis:');
-        dashboardData.availableTasks.forEach((task: any, index: number) => {
-          console.log(`Task ${index + 1}:`, {
-            id: task.id,
-            title: task.title,
-            description: task.description?.substring(0, 50) + '...',
-            location: task.location,
-            uniqueCheck: `issue-${index + 6}` // Check against what you're seeing
-          });
-        });
-        console.groupEnd();
-        
-        // Check for duplicate IDs
-        const taskIds = dashboardData.availableTasks.map((t: any) => t.id);
-        const uniqueIds = [...new Set(taskIds)];
-        if (uniqueIds.length !== taskIds.length) {
-          console.warn('⚠️ DUPLICATE IDs FOUND!');
-          console.log('All IDs:', taskIds);
-          console.log('Unique IDs:', uniqueIds);
-        }
-      }
+      const dashboardData = await fetchVolunteerDashboard(user.id);
 
       setStats({
-        completedTasks: dashboardData.stats?.completedTasks || 0,
-        activeTasks: dashboardData.stats?.activeTasks || 0,
-        responseTime: dashboardData.stats?.responseTime || '0h',
-        rating: dashboardData.stats?.rating || '0.0',
-        communityRank: dashboardData.stats?.communityRank || 'Volunteer'
+        completedTasks: dashboardData.stats.completedTasks,
+        activeTasks: dashboardData.stats.activeTasks,
+        totalClaimed: dashboardData.stats.totalClaimed,
+        responseTime: dashboardData.stats.responseTime,
+        rating: dashboardData.stats.rating,
+        communityRank: dashboardData.stats.communityRank,
+        points: dashboardData.stats.points,
+        level: dashboardData.stats.level,
       });
       
-      setAvailableTasks(dashboardData.availableTasks || []);
-      setRecentActivity(dashboardData.recentActivity || []);
+      setAvailableTasks(dashboardData.availableTasks);
+      setMyAssignments(dashboardData.myAssignments);
+      setRecentNotifications(dashboardData.recentNotifications);
 
     } catch (err: any) {
       console.error('Failed to load volunteer dashboard:', err);
       setError(err.message || 'Failed to load dashboard data. Please try again.');
-      
-      // Set fallback data on error
-      setStats({
-        completedTasks: 0,
-        activeTasks: 0,
-        responseTime: '0h',
-        rating: '0.0',
-        communityRank: 'Volunteer'
-      });
-      setAvailableTasks([]);
-      setRecentActivity([]);
+      toast.error('Failed to load dashboard data');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleRefresh = async () => {
+    if (!user?.id || isRefreshing) return;
+    
+    setIsRefreshing(true);
+    try {
+      const dashboardData = await refreshVolunteerDashboard(user.id);
+      
+      setStats({
+        completedTasks: dashboardData.stats.completedTasks,
+        activeTasks: dashboardData.stats.activeTasks,
+        totalClaimed: dashboardData.stats.totalClaimed,
+        responseTime: dashboardData.stats.responseTime,
+        rating: dashboardData.stats.rating,
+        communityRank: dashboardData.stats.communityRank,
+        points: dashboardData.stats.points,
+        level: dashboardData.stats.level,
+      });
+      
+      setAvailableTasks(dashboardData.availableTasks);
+      setMyAssignments(dashboardData.myAssignments);
+      setRecentNotifications(dashboardData.recentNotifications);
+      
+      toast.success('Dashboard refreshed');
+    } catch (err) {
+      console.error('Failed to refresh dashboard:', err);
+      toast.error('Failed to refresh dashboard');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const handleTaskClaim = async (taskId: string) => {
     try {
-      console.log('📋 Claiming task with ID:', taskId);
-      await apiClient.post(`/volunteers/tasks/${taskId}/claim`);
-      
-      // Refresh dashboard data
-      loadDashboardData();
-    } catch (err) {
+      await volunteersAPI.claimTask(taskId);
+      toast.success('Task claimed successfully!');
+      await loadDashboardData();
+    } catch (err: any) {
       console.error('Failed to claim task:', err);
-      setError('Failed to claim task. Please try again.');
+      toast.error(err?.message || 'Failed to claim task. Please try again.');
     }
   };
 
   const handleIssueUpdate = () => {
-    console.log('🔄 Refreshing dashboard data...');
     loadDashboardData();
   };
 
-  const handleViewAvailableTasks = (e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('📋 Navigating to available tasks page');
+  const handleViewAvailableTasks = () => {
     router.push('/tasks/available');
   };
 
-  // Don't show anything during auth check
+  const handleViewAssignments = () => {
+    router.push('/tasks/assignments');
+  };
+
+  const formatRelativeTime = (dateString: string): string => {
+    if (!dateString) return 'Just now';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
   if (authLoading) {
     return null;
   }
 
-  // If not authenticated or wrong role, don't show dashboard
   if (!user || user.role !== 'volunteer') {
     return null;
   }
@@ -154,66 +170,80 @@ export default function VolunteerDashboard() {
     );
   }
 
-  if (error && !stats) {
-    return (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => {}} />);
+  if (error && stats.completedTasks === 0) {
+    return (<Error error={error as unknown as Error & { digest?: string }} reset={loadDashboardData} />);
   }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section - Exactly like Citizen but with green theme */}
+      {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-green-600 to-emerald-700 rounded-2xl p-6 text-white">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-              Welcome back, {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Volunteer'}!
+              Welcome back, {user?.name?.split(' ')[0] || 'Volunteer'}!
             </h1>
             <p className="text-green-100">
-              {stats && stats.completedTasks > 0 
+              {stats.completedTasks > 0 
                 ? `You've completed ${stats.completedTasks} tasks. Thank you for your service!`
                 : 'Thank you for helping make our community better. Your efforts are appreciated!'
               }
             </p>
           </div>
-          {stats && parseFloat(stats.rating) >= 4.5 && (
+          {parseFloat(stats.rating) >= 4.5 && (
             <div className="bg-white/20 rounded-lg px-3 py-2">
               <span className="text-sm font-medium">⭐ {stats.communityRank}</span>
             </div>
           )}
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 text-sm transition-colors disabled:opacity-50"
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
-      {/* Stats Grid - 4 cards like Citizen */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Completed Tasks"
-          value={stats?.completedTasks.toString() || '0'}
+          value={stats.completedTasks.toString()}
           icon={CheckCircleIcon}
-          trend={{ value: 12, isPositive: true }}
+          trend={{ value: stats.completedTasks > 0 ? 12 : 0, isPositive: true }}
         />
         <StatCard
           title="Active Tasks"
-          value={stats?.activeTasks.toString() || '0'}
+          value={stats.activeTasks.toString()}
           icon={ClockIcon}
         />
         <StatCard
-          title="Avg Response Time"
-          value={stats?.responseTime || '0h'}
+          title="Total Claimed"
+          value={stats.totalClaimed.toString()}
           icon={UserGroupIcon}
         />
         <StatCard
           title="Volunteer Rating"
-          value={stats?.rating || '0.0'}
+          value={stats.rating}
           icon={StarIcon}
-          trend={{ value: 0.3, isPositive: true }}
+          description={`Level ${stats.level} · ${stats.points} pts`}
+          trend={{ value: parseFloat(stats.rating) > 4 ? 0.3 : 0, isPositive: true }}
         />
       </div>
 
-      {/* Main Content Grid - Exactly like Citizen */}
+      {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Quick Actions & Recent Activity */}
+        {/* Left Column */}
         <div className="lg:col-span-1 space-y-8">
           <QuickActions userRole="volunteer" />
-          <RecentActivity />
+          <RecentActivity 
+            notifications={recentNotifications}
+            loading={isLoading}
+            error={error}
+            onRefresh={handleRefresh}
+            onViewAll={() => router.push('/notifications')}
+          />
         </div>
 
         {/* Right Column - Available Tasks */}
@@ -222,49 +252,58 @@ export default function VolunteerDashboard() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Available Tasks</h2>
               <button
-                onClick={loadDashboardData}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="text-sm text-green-600 hover:text-green-700 font-medium disabled:opacity-50"
               >
-                Refresh
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
             <div className="space-y-4">
               {availableTasks.length > 0 ? (
-                availableTasks.map(task => {
-                  console.log('🎯 Rendering task:', task.id, task.title);
-                  return (
-                    <IssueCard 
-                      key={task.id} 
-                      issue={{
-                        id: task.id,
-                        title: task.title,
-                        description: task.description || '',
-                        status: task.status || 'reported',
-                        views: task.views ?? 0,
-                        commentsCount: task.commentsCount ?? 0,
-                        reportedAt: task.reportedAt ?? task.createdAt ?? '',
-                        priority: task.priority || 'medium',
-                        category: task.category || 'general',
-                        location: task.location || '',
-                        createdAt: task.createdAt,
-                        reporter: task.reporter || { name: 'Community Member' },
-                        upvotes: task.votes || 0,
-                        latitude: task.latitude ?? 0,
-                        longitude: task.longitude ?? 0,
-                        images: task.images || [],
-                        reporterId: task.reporterId ?? '',
-                        updatedAt: task.updatedAt ?? task.createdAt ?? '',
-                        assignedTo: task.assignedTo ?? null
-                      }}
-                      onUpdate={handleIssueUpdate}
-                      showClaimButton={true}
-                      onClaim={handleTaskClaim}
-                    />
-                  );
-                })
+                availableTasks.map(task => (
+                  <IssueCard 
+                    key={task.id} 
+                    issue={{
+                      id: task.id,
+                      title: task.title,
+                      description: task.description || '',
+                      status: 'reported',
+                      priority: task.priority || 'medium',
+                      category: task.category || 'general',
+                      location: task.location || '',
+                      latitude: task.latitude ?? 0,
+                      longitude: task.longitude ?? 0,
+                      images: task.images || [],
+                      upvotes: task.upvotes || 0,
+                      voters: [],
+                      views: 0,
+                      commentsCount: 0,
+                      comments: [],
+                      reporterId: task.reporterId || '',
+                      reporter: task.reporter ? {
+                        id: task.reporter.id || task.reporterId || '',
+                        name: task.reporter.name || task.reportedBy || 'Community Member',
+                        avatar: task.reporter.avatar,
+                        email: task.reporter.email,
+                        phone: task.reporter.phone,
+                      } : {
+                        id: task.reporterId || '',
+                        name: task.reportedBy || 'Community Member',
+                      },
+                      assignedTo: undefined,
+                      createdAt: task.reportedAt || task.createdAt || new Date().toISOString(),
+                      updatedAt: task.updatedAt || task.createdAt || new Date().toISOString(),
+                      reportedAt: task.reportedAt || task.createdAt || new Date().toISOString(),
+                    }}
+                    onUpdate={handleIssueUpdate}
+                    showClaimButton={true}
+                    onClaim={handleTaskClaim}
+                  />
+                ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <CheckCircleIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
+                  <CheckCircleIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-lg font-medium text-gray-600">No available tasks</p>
                   <p className="text-sm text-gray-500 mb-4">All current tasks have been claimed</p>
                   <button
@@ -277,6 +316,43 @@ export default function VolunteerDashboard() {
               )}
             </div>
           </div>
+
+          {/* My Active Assignments */}
+          {myAssignments.length > 0 && (
+            <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">My Active Assignments</h2>
+                <button
+                  onClick={handleViewAssignments}
+                  className="text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  View All →
+                </button>
+              </div>
+              <div className="space-y-4">
+                {myAssignments.slice(0, 3).map(assignment => (
+                  <div key={assignment.id} className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{assignment.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-1">{assignment.description}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                          <span>Claimed {formatRelativeTime(assignment.claimedAt)}</span>
+                          <span className="capitalize">{assignment.status?.replace('_', ' ') || 'Assigned'}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => router.push(`/issues/${assignment.taskId}?role=volunteer`)}
+                        className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors ml-4"
+                      >
+                        View
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

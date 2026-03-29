@@ -49,7 +49,7 @@ export default function IssueDetailPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get(`/api/issues/${id}`)
+      const response = await apiClient.get(`/issues/${id}`)
       const issueData = response.data?.data ?? response.data
       setIssue(issueData)
     } catch (err: any) {

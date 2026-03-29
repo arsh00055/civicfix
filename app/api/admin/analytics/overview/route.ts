@@ -27,12 +27,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user.role !== 'admin') {
-      return NextResponse.json(
-        { message: 'Only admins can access analytics' },
-        { status: 403 }
-      );
-    }
+    // Allow all authenticated users (citizen, volunteer, admin)
+    // Removed admin-only restriction
 
     const { db } = await connectToDatabase();
     const { searchParams } = new URL(req.url);
@@ -58,12 +54,47 @@ export async function GET(req: NextRequest) {
     
     const startDateISO = startDate.toISOString();
     
-    // Get overview stats
+    // Get user-specific stats
+    let userStats = null;
+    if (user.role === 'citizen') {
+      const citizenData = await db.collection('citizens').findOne(
+        { _id: new ObjectId(user.id) },
+        { projection: { stats: 1, name: 1, email: 1, createdAt: 1 } }
+      );
+      if (citizenData) {
+        userStats = {
+          reportsSubmitted: citizenData.stats?.totalReports || 0,
+          issuesResolved: citizenData.stats?.resolvedReports || 0,
+          totalVotes: citizenData.stats?.totalVotes || 0,
+          totalComments: citizenData.stats?.totalComments || 0,
+          points: citizenData.stats?.points || 0,
+          level: citizenData.stats?.level || 1,
+          memberSince: citizenData.createdAt,
+        };
+      }
+    } else if (user.role === 'volunteer') {
+      const volunteerData = await db.collection('citizens').findOne(
+        { _id: new ObjectId(user.id) },
+        { projection: { stats: 1, volunteerStats: 1, name: 1, email: 1, createdAt: 1 } }
+      );
+      if (volunteerData) {
+        userStats = {
+          tasksClaimed: volunteerData.volunteerStats?.totalClaimed || 0,
+          tasksCompleted: volunteerData.volunteerStats?.tasksCompleted || 0,
+          rating: volunteerData.volunteerStats?.averageRating || 0,
+          points: volunteerData.stats?.points || 0,
+          level: volunteerData.stats?.level || 1,
+          memberSince: volunteerData.createdAt,
+        };
+      }
+    }
+    
+    // Get community stats (accessible to all)
     const [totalUsers, totalIssues, resolvedIssues, activeVolunteers] = await Promise.all([
       db.collection('citizens').countDocuments({ isActive: true }),
       db.collection('issues').countDocuments(),
       db.collection('issues').countDocuments({ status: 'resolved' }),
-      db.collection('citizens').countDocuments({ role: 'volunteer', isActive: true }),
+      db.collection('volunteers').countDocuments({ role: 'volunteer', isActive: true }),
     ]);
     
     // Get new users this week
@@ -124,7 +155,8 @@ export async function GET(req: NextRequest) {
       resolved: values.resolved,
     })).sort((a, b) => a.date.localeCompare(b.date));
     
-    return NextResponse.json({
+    // Return role-specific response
+    const response: any = {
       overview: {
         totalUsers,
         totalIssues,
@@ -137,7 +169,14 @@ export async function GET(req: NextRequest) {
       issuesByCategory: issuesByCategory.map(item => ({ category: item._id, count: item.count })),
       userGrowth: userGrowth.map(item => ({ date: item._id, count: item.count })),
       issueTrends,
-    });
+    };
+    
+    // Add user-specific stats if available
+    if (userStats) {
+      response.userStats = userStats;
+    }
+    
+    return NextResponse.json(response);
     
   } catch (error) {
     console.error('GET /api/analytics/overview error:', error);

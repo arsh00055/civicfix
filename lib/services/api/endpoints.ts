@@ -28,7 +28,7 @@ export const authApi = {
     };
 
     try {
-      const response = await apiClient.post('/api/auth/login/', JSON.stringify(data));
+      const response = await apiClient.post('/auth/login/', JSON.stringify(data));
       const rawText =
         typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
 
@@ -96,14 +96,8 @@ export const notificationsAPI = {
 
 export const achievementsAPI = {
   getAchievements:     () => apiClient.get('/achievements'),
-  getUserAchievements: (userId: string) => apiClient.get(`/users/${userId}/achievements`),
+  getUserAchievements: (userId: string) => apiClient.get(`/achievements`),
   unlockAchievement:   (achievementId: string) => apiClient.post(`/achievements/${achievementId}/unlock`),
-};
-
-export const dashboardAPI = {
-  getCitizenDashboard:  () => apiClient.get('/citizen'),
-  getVolunteerDashboard:() => apiClient.get('/volunteer'),
-  getAdminDashboard:    () => apiClient.get('/admin'),
 };
 
 export const issuesAPI = {
@@ -211,6 +205,6 @@ export const commentsAPI = {
   addComment:    (issueId: string, commentData: any) =>
     apiClient.post(`/issues/${issueId}/comments`, commentData),
   updateComment: (commentId: string, commentData: any) =>
-    apiClient.put(`/comments/${commentId}`, commentData),
-  deleteComment: (commentId: string) => apiClient.delete(`/comments/${commentId}`),
+    apiClient.put(`/issues/comments/${commentId}`, commentData),
+  deleteComment: (commentId: string) => apiClient.delete(`/issues/comments/${commentId}`),
 };
