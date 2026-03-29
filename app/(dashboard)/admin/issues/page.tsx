@@ -185,7 +185,7 @@ const AdminIssuesPage: React.FC = () => {
   const pendingCount = issues.filter(i => i.status === 'pending_review').length;
 
   return (
-    <MainLayout role={user?.role}>
+    <>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -383,7 +383,7 @@ const AdminIssuesPage: React.FC = () => {
         issue={selectedIssue}
         isSubmitting={isSubmitting}
       />
-    </MainLayout>
+    </>
   );
 };
 

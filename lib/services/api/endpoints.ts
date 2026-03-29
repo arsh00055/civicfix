@@ -87,15 +87,15 @@ export const authApi = {
 };
 
 export const notificationsAPI = {
-  getNotifications:  () => apiClient.get('/api/notifications'),
-  getUnreadCount:    () => apiClient.get('/api/notifications/unread/count'),
-  markAsRead:        (id: string) => apiClient.patch(`/api/notifications/${id}/read`),
-  markAllAsRead:     () => apiClient.patch('/api/notifications/read-all'),
-  deleteNotification:(id: string) => apiClient.delete(`/api/notifications/${id}`),
+  getNotifications:  () => apiClient.get('/notifications'),
+  getUnreadCount:    () => apiClient.get('/notifications/unread/count'),
+  markAsRead:        (id: string) => apiClient.patch(`/notifications/${id}/read`),
+  markAllAsRead:     () => apiClient.patch('/notifications/read-all'),
+  deleteNotification:(id: string) => apiClient.delete(`/notifications/${id}`),
 };
 
 export const achievementsAPI = {
-  getAchievements:     () => apiClient.get('/api/achievements'),
+  getAchievements:     () => apiClient.get('/achievements'),
   getUserAchievements: (userId: string) => apiClient.get(`/users/${userId}/achievements`),
   unlockAchievement:   (achievementId: string) => apiClient.post(`/achievements/${achievementId}/unlock`),
 };
@@ -108,37 +108,37 @@ export const dashboardAPI = {
 
 export const issuesAPI = {
   getIssues: (params?: Record<string, any>) =>
-    apiClient.get('/api/issues', { params }),
+    apiClient.get('/issues', { params }),
   getAvailableTasks: (params?: Record<string, any>) =>
-    apiClient.get('/api/issues/available', { params }),
+    apiClient.get('/issues/available', { params }),
   getMyReports: () =>
-    apiClient.get('/api/issues/my-reports'),
+    apiClient.get('/issues/my-reports'),
   getIssue: (id: string) =>
-    apiClient.get(`/api/issues/${id}`),
+    apiClient.get(`/issues/${id}`),
   createIssue: (issueData: any) =>
-    apiClient.post('/api/issues', issueData),
+    apiClient.post('/issues', issueData),
   updateIssue: (id: string, issueData: any) =>
-    apiClient.put(`/api/issues/${id}`, issueData),
+    apiClient.put(`/issues/${id}`, issueData),
   deleteIssue: (id: string) =>
-    apiClient.delete(`/api/issues/${id}`),
+    apiClient.delete(`/issues/${id}`),
   voteIssue: (id: string) =>
-    apiClient.post(`/api/issues/${id}/vote`),
+    apiClient.post(`/issues/${id}/vote`),
   claimIssue: (id: string) =>
-    apiClient.post(`/api/issues/${id}/claim`),
+    apiClient.post(`/issues/${id}/claim`),
   getIssueComments: (issueId: string) =>
-    apiClient.get(`/api/issues/${issueId}/comments`),
+    apiClient.get(`/issues/${issueId}/comments`),
   addComment: (issueId: string, commentData: any) =>
-    apiClient.post(`/api/issues/${issueId}/comments`, commentData),
+    apiClient.post(`/issues/${issueId}/comments`, commentData),
 };
 
 export const volunteersAPI = {
-  getAvailableTasks: () => apiClient.get('/api/issues/available'),
-  getMyAssignments: () => apiClient.get('/api/volunteers/assignments'),
-  claimTask: (taskId: string) => apiClient.post(`/api/issues/${taskId}/claim`),
+  getAvailableTasks: () => apiClient.get('/issues/available'),
+  getMyAssignments: () => apiClient.get('/volunteers/assignments'),
+  claimTask: (taskId: string) => apiClient.post(`/issues/${taskId}/claim`),
   updateTaskStatus: (taskId: string, status: string) =>
-    apiClient.put(`/api/issues/${taskId}`, { status }),
+    apiClient.put(`/issues/${taskId}`, { status }),
   findTasks: (filters?: any) =>
-    apiClient.get('/api/issues', { params: filters }),
+    apiClient.get('/issues', { params: filters }),
 };
 
 
@@ -170,14 +170,32 @@ export const usersAPI = {
 };
 
 export const analyticsAPI = {
-  getOverview:        (params?: any) => apiClient.get('/analytics/overview', { params }),
+  getOverview:        (params?: any) => apiClient.get('/admin/analytics/overview', { params }),
   getUserStats:       () => apiClient.get('/admin/analytics/users'),
   getIssueStats:      () => apiClient.get('/admin/analytics/issues'),
-  getGeographicData:  () => apiClient.get('/analytics/geographic'),
-  getPlatformMetrics: () => apiClient.get('/analytics/platform-metrics'),
-  getTrends:          (period: string) => apiClient.get('/analytics/trends', { params: { period } }),
-  exportAnalytics:    (format: string): Promise<string> =>
-    apiClient.get('/analytics/export', { params: { format } }).then(r => r.data as string),
+  getGeographicData:  () => apiClient.get('/admin/analytics/geographic'),
+  getPlatformMetrics: () => apiClient.get('/admin/analytics/platform-metrics'),
+  getTrends:          (period: string) => apiClient.get('/admin/analytics/trends', { params: { period } }),
+  exportAnalytics: async (format: string): Promise<void> => {
+    const response = await apiClient.get('/admin/analytics/export', {
+      params: { format },
+      responseType: 'blob', // critical for file downloads
+    });
+  
+    const contentDisposition = response.headers['content-disposition'];
+    const filename = contentDisposition
+      ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+      : `analytics-export.${format}`;
+  
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };
 
 export const activityAPI = {
@@ -189,9 +207,9 @@ export const activityAPI = {
 };
 
 export const commentsAPI = {
-  getComments:   (issueId: string) => apiClient.get(`/api/issues/${issueId}/comments`),
+  getComments:   (issueId: string) => apiClient.get(`/issues/${issueId}/comments`),
   addComment:    (issueId: string, commentData: any) =>
-    apiClient.post(`/api/issues/${issueId}/comments`, commentData),
+    apiClient.post(`/issues/${issueId}/comments`, commentData),
   updateComment: (commentId: string, commentData: any) =>
     apiClient.put(`/comments/${commentId}`, commentData),
   deleteComment: (commentId: string) => apiClient.delete(`/comments/${commentId}`),

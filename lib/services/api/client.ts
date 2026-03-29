@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 
 // Make sure this does NOT have a trailing slash and does NOT include /api
 // e.g. "http://localhost:3000" or "https://yourapp.vercel.app"
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
