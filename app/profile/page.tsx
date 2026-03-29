@@ -48,13 +48,13 @@ const ProfilePage: React.FC = () => {
       }
 
       // Fetch user profile
-      const userResponse = await apiClient.get('/users/profile');
+      const userResponse = await apiClient.get('/api/users/profile');
       const userData = userResponse.data || userResponse;
       setUser(userData.user || userData);
 
       // Fetch user by ID for stats
       try {
-        const userDetailResponse = await apiClient.get(`/users/${currentUser.id}`);
+        const userDetailResponse = await apiClient.get(`/api/users/${currentUser.id}`);
         const userDetail = userDetailResponse.data || userDetailResponse;
         if (userDetail.user?.stats) {
           setStats({
@@ -70,7 +70,7 @@ const ProfilePage: React.FC = () => {
 
       // Fetch achievements
       try {
-        const achievementsResponse = await apiClient.get('/achievements/user');
+        const achievementsResponse = await apiClient.get('/api/achievements/user');
         const achievementsData = achievementsResponse.data || achievementsResponse;
         setAchievements(achievementsData.achievements || achievementsData || []);
       } catch (err) {

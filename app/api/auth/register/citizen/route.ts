@@ -90,6 +90,7 @@ export async function POST(data: any) {
       role: 'citizen',
       isActive: true,
       isEmailVerified: false,
+      achievements: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {

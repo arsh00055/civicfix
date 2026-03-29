@@ -108,23 +108,23 @@ export async function POST(request: NextRequest) {
        // ================= VOLUNTEER LOGIN =================
 
 
-       else if ( role == 'volunteer') {
+       else if (role == 'volunteer') {
         const volunteer = await db.collection('volunteers').findOne({ email });
         console.log("Volunteer from DB", volunteer);
-
-        if (!volunteer){
+      
+        if (!volunteer) {
           return NextResponse.json({
             success: false,
             message: "Invalid email or password",
           });
         }
 
-        if (volunteer.approvalStatus == 'pending') {
+        if (volunteer.approvalStatus === 'pending') {
           return NextResponse.json({
             success: false,
             message: "Your account is pending admin approval. You will receive an email once approved.",
             code: "ACCOUNT_PENDING_APPROVAL"
-          }, { status : 403});
+          }, { status: 403 });
         }
 
         if (volunteer.approvalStatus === 'rejected') {
@@ -136,65 +136,65 @@ export async function POST(request: NextRequest) {
             code: "ACCOUNT_REJECTED"
           }, { status: 403 });
         }
-
-        if (volunteer.isActive === false && volunteer.approvalStatus !== 'approved') {
+        if (volunteer.isActive === false) {
           return NextResponse.json({
             success: false,
-            message: "Your account has been deactivated. Please contact administrator.",
+            message: "Your account has been deactivated. Please contact administrator."
           });
         }
 
-        const isPasswordValid = await bcrypt.compare( data.password , volunteer.password);
-        console.log("PasswordValid", isPasswordValid);
+        const isPasswordValid = await bcrypt.compare(data.password, volunteer.password);
+  console.log("PasswordValid", isPasswordValid);
 
-        if (!isPasswordValid){
-          return NextResponse.json({
-            success: false,
-            message: "Invalid email or password",
-          });
-        }
+  if (!isPasswordValid) {
+    return NextResponse.json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
 
-        const token = jwt.sign(
-          {
-            userId: volunteer._id,
-            role: 'volunteer',
-            email: volunteer.email,
-            name: volunteer.name,
-            approvalStatus: volunteer.approvalStatus 
-          },
-          process.env.JWT_SECRET as string,
-          { expiresIn: "7d"}
-        );
+  const token = jwt.sign(
+    {
+      userId: volunteer._id,
+      role: 'volunteer',
+      email: volunteer.email,
+      name: volunteer.name,
+      approvalStatus: volunteer.approvalStatus
+    },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "7d"}
+  );
 
-        await db.collection("volunteers").updateOne(
-          {_id: volunteer._id},
-          {
-            $set: {
-              lastLoginAt: new Date(),
-              updatedAt: new Date()
-            }
-          }
-        );
-
-        return NextResponse.json({
-          success: true,
-          message: "Login successful!",
-          data: {
-            user: {
-              id: volunteer._id,
-              name: volunteer.name,
-              email: volunteer.email,
-              role: 'volunteer',
-              avatar: volunteer.avatar || null,
-              skills: volunteer.skills || [], // 👈 VOLUNTEER SPECIFIC FIELD
-              approvalStatus: volunteer.approvalStatus,
-              isEmailVerified: volunteer.isEmailVerified || false,
-            },
-            token: token
-          }
-        });
-
+  await db.collection("volunteers").updateOne(
+    { _id: volunteer._id },
+    {
+      $set: {
+        lastLoginAt: new Date(),
+        updatedAt: new Date()
       }
+    }
+  );
+
+
+  return NextResponse.json({
+    success: true,
+    message: "Login successful!",
+    data: {
+      user: {
+        id: volunteer._id,
+        name: volunteer.name,
+        email: volunteer.email,
+        role: 'volunteer',
+        avatar: volunteer.avatar || null,
+        skills: volunteer.skills || [],
+        approvalStatus: volunteer.approvalStatus,
+        isEmailVerified: volunteer.isEmailVerified || false,
+      },
+      token: token
+    }
+  });
+}
+
 
       // ================= ADMIN LOGIN =================
 else if (role === 'admin') {
