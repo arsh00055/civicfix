@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // app/api/users/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
@@ -93,6 +94,8 @@ export async function GET(
       { status: 500 }
     );
 =======
+=======
+>>>>>>> Stashed changes
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
@@ -231,6 +234,9 @@ export async function GET(
       { success: false, message: 'Failed to fetch user', error: error.message },
       { status: 500 }
     )
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }
 }

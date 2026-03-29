@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // app/api/users/profile/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
@@ -100,6 +101,8 @@ export async function PUT(req: NextRequest) {
       { status: 500 }
     );
 =======
+=======
+>>>>>>> Stashed changes
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
@@ -326,6 +329,9 @@ export async function PUT(req: NextRequest) {
       { success: false, message: 'Failed to update profile', error: error.message },
       { status: 500 }
     )
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }
 }

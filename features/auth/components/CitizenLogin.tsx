@@ -1,9 +1,12 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import InputField from '../../../components/UI/forms/InputField';
 import PrimaryButton from '../../../components/UI/buttons/PrimaryButton';
 =======
+=======
+>>>>>>> Stashed changes
 'use client'
 
 import React, { useState } from 'react'
@@ -11,6 +14,9 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../hooks/useAuth'
 import InputField from '@/components/UI/forms/InputField'
 import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 const CitizenLogin: React.FC = () => {
