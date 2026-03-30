@@ -1,108 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-// app/api/users/profile/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
-import { ObjectId } from 'mongodb';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-function getCurrentUser(req: NextRequest): { id: string; role: string; name: string } | null {
-  try {
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.cookies.get('auth_token')?.value;
-    if (!token) return null;
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name };
-  } catch {
-    return null;
-  }
-}
-
-// GET /api/users/profile - Get current user's profile
-export async function GET(req: NextRequest) {
-  try {
-    const user = getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { db } = await connectToDatabase();
-    const userData = await db.collection('citizens').findOne(
-      { _id: new ObjectId(user.id) },
-      { 
-        projection: { 
-          password: 0,
-          'metadata.deviceInfo': 0,
-        } 
-      }
-    );
-
-    if (!userData) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
-
-    const { _id, ...rest } = userData;
-    return NextResponse.json({ id: _id.toString(), ...rest });
-  } catch (error) {
-    console.error('GET /api/users/profile error:', error);
-    return NextResponse.json(
-      { message: 'Failed to fetch profile' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT /api/users/profile - Update current user's profile
-export async function PUT(req: NextRequest) {
-  try {
-    const user = getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const { name, phone, avatar, profile, preferences } = body;
-
-    const { db } = await connectToDatabase();
-    const updateData: any = {
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (name) updateData.name = name;
-    if (phone) updateData.phone = phone;
-    if (avatar) updateData.avatar = avatar;
-    if (profile) updateData.profile = { ...profile };
-    if (preferences) updateData.preferences = { ...preferences };
-
-    const result = await db.collection('citizens').updateOne(
-      { _id: new ObjectId(user.id) },
-      { $set: updateData }
-    );
-
-    if (result.matchedCount === 0) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
-
-    const updatedUser = await db.collection('citizens').findOne(
-      { _id: new ObjectId(user.id) },
-      { projection: { password: 0 } }
-    );
-
-    const { _id, ...rest } = updatedUser!;
-    return NextResponse.json({ id: _id.toString(), ...rest });
-  } catch (error) {
-    console.error('PUT /api/users/profile error:', error);
-    return NextResponse.json(
-      { message: 'Failed to update profile' },
-      { status: 500 }
-    );
-=======
-=======
->>>>>>> Stashed changes
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
@@ -124,15 +19,14 @@ function getCurrentUser(req: NextRequest): { id: string; role: string; name: str
   }
 }
 
-// Role ke hisaab se collection
-function getCollection(role: string) {
+function getCollection(role: string): string | null {
   if (role === 'citizen') return 'citizens'
   if (role === 'volunteer') return 'volunteers'
   if (role === 'admin') return 'admins'
   return null
 }
 
-// ============ GET /api/users/profile ============
+// GET /api/users/profile
 export async function GET(req: NextRequest) {
   try {
     const currentUser = getCurrentUser(req)
@@ -156,7 +50,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     }
 
-    // Stats fetch karo — issues collection toh
     let stats = {
       issuesReported: 0,
       issuesResolved: 0,
@@ -168,7 +61,7 @@ export async function GET(req: NextRequest) {
         db.collection('issues').countDocuments({ reporterId: currentUser.id }),
         db.collection('issues').countDocuments({
           reporterId: currentUser.id,
-          status: { $in: ['resolved', 'closed'] }
+          status: { $in: ['resolved', 'closed'] },
         }),
       ])
       stats.issuesReported = reported
@@ -181,7 +74,7 @@ export async function GET(req: NextRequest) {
         db.collection('issues').countDocuments({ reporterId: currentUser.id }),
         db.collection('issues').countDocuments({
           assignedToId: currentUser.id,
-          status: { $in: ['resolved', 'closed'] }
+          status: { $in: ['resolved', 'closed'] },
         }),
       ])
       stats.issuesReported = reported
@@ -189,7 +82,6 @@ export async function GET(req: NextRequest) {
       stats.communityScore = user.rating ? Math.round(user.rating * 20) : 0
     }
 
-    // Common fields
     const formattedUser: any = {
       id: user._id.toString(),
       name: user.name || '',
@@ -208,7 +100,6 @@ export async function GET(req: NextRequest) {
       stats,
     }
 
-    // Citizen specific
     if (currentUser.role === 'citizen') {
       formattedUser.address = {
         street: user.address || '',
@@ -219,7 +110,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Volunteer specific
     if (currentUser.role === 'volunteer') {
       formattedUser.skills = user.skills || []
       formattedUser.availability = user.availability || []
@@ -237,7 +127,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Admin specific
     if (currentUser.role === 'admin') {
       formattedUser.department = user.department || 'Administration'
       formattedUser.permissions = user.permissions || ['all']
@@ -247,10 +136,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user: formattedUser,
-      // Backward compatibility
       ...formattedUser,
     })
-
   } catch (error: any) {
     console.error('GET /api/users/profile error:', error)
     return NextResponse.json(
@@ -260,7 +147,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ============ PUT /api/users/profile ============
+// PUT /api/users/profile
 export async function PUT(req: NextRequest) {
   try {
     const currentUser = getCurrentUser(req)
@@ -276,7 +163,6 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Invalid role' }, { status: 400 })
     }
 
-    // Common fields jo update ho sakte ne
     const updateData: any = {
       updatedAt: new Date(),
     }
@@ -285,8 +171,17 @@ export async function PUT(req: NextRequest) {
     if (body.phone !== undefined) updateData.phone = body.phone
     if (body.bio !== undefined) updateData.bio = body.bio
     if (body.avatar !== undefined) updateData.avatar = body.avatar
+    if (body.email !== undefined) {
+      const existing = await db.collection(collection).findOne({ 
+        email: body.email.trim(), 
+        _id: { $ne: new ObjectId(currentUser.id) } 
+      })
+      if (existing) {
+        return NextResponse.json({ success: false, message: 'Email already in use' }, { status: 409 })
+      }
+      updateData.email = body.email.trim()
+    }
 
-    // Citizen specific updates
     if (currentUser.role === 'citizen') {
       if (body.address?.street !== undefined) updateData.address = body.address.street
       if (body.address?.city !== undefined) updateData.city = body.address.city
@@ -295,7 +190,6 @@ export async function PUT(req: NextRequest) {
       if (body.address?.country !== undefined) updateData.country = body.address.country
     }
 
-    // Volunteer specific updates
     if (currentUser.role === 'volunteer') {
       if (body.skills !== undefined) updateData.skills = body.skills
       if (body.availability !== undefined) updateData.availability = body.availability
@@ -311,7 +205,6 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     }
 
-    // Updated user fetch karo
     const updatedUser = await db.collection(collection).findOne(
       { _id: new ObjectId(currentUser.id) },
       { projection: { password: 0 } }
@@ -322,16 +215,11 @@ export async function PUT(req: NextRequest) {
       message: 'Profile updated successfully!',
       user: { ...updatedUser, id: updatedUser?._id.toString() },
     })
-
   } catch (error: any) {
     console.error('PUT /api/users/profile error:', error)
     return NextResponse.json(
       { success: false, message: 'Failed to update profile', error: error.message },
       { status: 500 }
     )
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
   }
 }

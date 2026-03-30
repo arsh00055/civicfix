@@ -157,8 +157,8 @@ export const usersAPI = {
   updateProfile:  (profileData: any) => apiClient.put('/users/profile', profileData),
   getUsers:       (params?: any) => apiClient.get('/users', { params }),
   getUser:        (id: string) => apiClient.get(`/users/${id}`),
-  updateUserRole: (userId: string, role: string) =>
-    apiClient.patch(`/admin/users/${userId}/role`, { role }),
+  updateUserRole: (id: string, role: string) =>
+    apiClient.patch(`/admin/users/${id}/role`, { role }),
   searchUsers:    (query: string) => apiClient.get('/users/search', { params: { query } }),
   getUserActivity:(userId: string) => apiClient.get(`/users/${userId}/activity`),
 };

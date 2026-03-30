@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
       }
 
       try {
-        const response = await apiClient.get(`/api/auth/validate-reset-token?token=${token}`);
+        const response = await apiClient.get(`/auth/validate-reset-token?token=${token}`);
         if (!response.data.valid) {
           setTokenValid(false);
           toast.error('Invalid or expired reset link');
@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
     setError('');
 
     try {
-      const response = await apiClient.post('/api/auth/reset-password', { token, password });
+      const response = await apiClient.post('/auth/reset-password', { token, password });
 
       if (response.data.success) {
         setIsSubmitted(true);

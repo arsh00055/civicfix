@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
     setError('')
 
     try {
-      const response = await apiClient.post('/api/auth/forgot-password', { email })
+      const response = await apiClient.post('/auth/forgot-password', { email })
 
       if (response.data.success) {
         setIsSubmitted(true)
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full px-4 py-3 cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

@@ -374,7 +374,7 @@ export default function CitizenDashboard() {
             </div>
             <div className="space-y-8 flex flex-col">
               {myReports.length > 0 ? (
-                myReports.map(report => (
+                myReports.slice(0, 3).map(report => (
                   <IssueCard 
                     key={report.id} 
                     issue={report}

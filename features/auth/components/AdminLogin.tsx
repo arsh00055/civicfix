@@ -73,7 +73,7 @@ const AdminLogin: React.FC = () => {
             <button
               type="button"
               onClick={() => router.push('/forgot-password')}
-              className="text-xs text-purple-600 hover:text-purple-500 transition-colors"
+              className="text-xs cursor-pointer text-purple-600 hover:text-purple-500 transition-colors"
             >
               Forgot Password?
             </button>

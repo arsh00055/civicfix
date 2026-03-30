@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import { Notification } from '@/types/notification.types';
@@ -8,10 +8,22 @@ import { Notification } from '@/types/notification.types';
 const NotificationBell: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, refetch } = useNotifications();
+  const ref = useRef<HTMLDivElement>(null); // add ref
 
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  // close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read) {
@@ -20,7 +32,7 @@ const NotificationBell: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 text-gray-600 cursor-pointer hover:text-gray-900 hover:bg-gray-100 rounded-full relative transition-colors"

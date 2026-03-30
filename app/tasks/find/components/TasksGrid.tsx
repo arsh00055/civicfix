@@ -43,8 +43,8 @@ const TasksGrid: React.FC<TasksGridProps> = ({
             </button>
           )}
           <button
-            onClick={() => router.push('/dashboard')}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            onClick={() => router.push('/')}
+            className="border cursor-pointer border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Back to Dashboard
           </button>

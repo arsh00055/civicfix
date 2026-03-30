@@ -92,7 +92,7 @@ const VolunteerLogin: React.FC = () => {
             <button
               type="button"
               onClick={() => router.push('/forgot-password')}
-              className="text-xs text-green-600 hover:text-green-500 transition-colors"
+              className="text-xs cursor-pointer text-green-600 hover:text-green-500 transition-colors"
             >
               Forgot Password?
             </button>

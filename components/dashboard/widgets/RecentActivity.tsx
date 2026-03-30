@@ -189,7 +189,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
 
       <div className="space-y-4">
         {notifications.length > 0 ? (
-          notifications.map((notification) => (
+          notifications.slice(0, 3).map((notification) => (
             <button
               key={notification.id}
               onClick={() => handleNotificationClick(notification)}

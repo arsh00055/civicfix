@@ -1,0 +1,119 @@
+'use client'
+
+import { useState } from 'react'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import LoginHeader from './components/LoginHeader'
+import LoginRoleSelector from './components/LoginRoleSelector'
+import LoginFormContainer from './components/LoginFormContainer'
+import Loading from '@/app/loading'
+import dynamic from 'next/dynamic'
+
+const CitizenLogin = dynamic(() => import('@/features/auth/components/CitizenLogin'), {
+  ssr: false,
+  loading: () => <div className="flex justify-center py-8"><Loading /></div>
+})
+const VolunteerLogin = dynamic(() => import('@/features/auth/components/VolunteerLogin'), {
+  ssr: false,
+  loading: () => <div className="flex justify-center py-8"><Loading /></div>
+})
+const AdminLogin = dynamic(() => import('@/features/auth/components/AdminLogin'), {
+  ssr: false,
+  loading: () => <div className="flex justify-center py-8"><Loading /></div>
+})
+
+export default function LoginPage() {
+  const [selectedRole, setSelectedRole] = useState<'citizen' | 'volunteer' | 'admin' | null>(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  // const [showPassword, setShowPassword ] = useState(false)
+  const { isLoading } = useAuth()
+
+  const handleRoleSelect = (role: 'citizen' | 'volunteer' | 'admin') => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setSelectedRole(role)
+      setIsTransitioning(false)
+    }, 300)
+  }
+
+  const handleBack = () => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setSelectedRole(null)
+      setIsTransitioning(false)
+    }, 300)
+  }
+
+  const renderLoginForm = () => {
+    if (!selectedRole) return null
+
+    return (
+      <div className={`transform transition-all duration-500 ${isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+        {selectedRole === 'citizen' && <CitizenLogin />}
+        {selectedRole === 'volunteer' && <VolunteerLogin />}
+        {selectedRole === 'admin' && <AdminLogin />}
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (<Loading />)
+  }
+
+  return (
+    <div className="h-screen bg-white flex relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50/60 via-white to-purple-50/60"></div>
+      
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -left-20 top-1/4 w-80 h-80 bg-blue-200/40 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute -left-32 bottom-1/4 w-64 h-64 bg-cyan-200/30 rounded-full blur-3xl animate-pulse-slower"></div>
+        
+        <div className="absolute -right-20 top-1/3 w-80 h-80 bg-purple-200/40 rounded-full blur-3xl animate-pulse-slow delay-1000"></div>
+        <div className="absolute -right-32 bottom-1/3 w-64 h-64 bg-pink-200/30 rounded-full blur-3xl animate-pulse-slower delay-1500"></div>
+      
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gray-100/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <style jsx>{`
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.6; }
+        }
+        @keyframes pulse-slower {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
+        }
+        .animate-pulse-slower {
+          animation: pulse-slower 6s ease-in-out infinite;
+        }
+      `}</style>
+
+      <div className="flex-1 flex flex-col relative z-10">
+        {!selectedRole && (
+          <div className="pt-8 px-6">
+            <LoginHeader />
+          </div>
+        )}
+
+        <div className="flex-1 flex items-center justify-center px-6 pb-8">
+          <div className="w-full max-w-4xl mx-auto">
+            <div className={`transform transition-all duration-500 ease-out ${
+              isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+            }`}>
+              {!selectedRole ? (
+                <LoginRoleSelector onRoleSelect={handleRoleSelect} />
+              ) : (
+                <LoginFormContainer 
+                  onBack={handleBack}
+                  form={renderLoginForm()}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

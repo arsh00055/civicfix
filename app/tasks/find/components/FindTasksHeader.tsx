@@ -98,7 +98,7 @@ const FindTasksHeader: React.FC<FindTasksHeaderProps> = ({
           {/* Refresh button */}
           <button
             onClick={onRefresh}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm hover:shadow"
+            className="w-full flex cursor-pointer items-center justify-center space-x-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 transition-colors shadow-sm hover:shadow"
           >
             <RefreshIcon className="h-5 w-5" />
             <span className="font-medium">Refresh Tasks</span>

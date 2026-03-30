@@ -25,6 +25,7 @@ import { formatRelativeTime, formatDate } from '@/lib/utils/helpers/formatters'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { toast } from 'sonner'
 import { XMarkIcon } from '@heroicons/react/24/solid'
+import ResolutionRating from '@/components/issues/ResolutionRating'
 
 export default function IssueDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -171,6 +172,12 @@ export default function IssueDetailPage() {
             </div>
 
             <p className="text-gray-700 text-lg mb-8 leading-relaxed">{issue.description}</p>
+
+            <ResolutionRating
+              issueId={issue.id}
+              issueStatus={issue.status}
+              reporterId={issue.reporterId}
+            />
 
             {/* Metadata grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">

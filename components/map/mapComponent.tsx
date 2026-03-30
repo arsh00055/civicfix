@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from 'react-leaflet';
 import { Issue } from '@/types/issue.types';
+import { useRouter } from 'next/navigation';
 
 // Fix for default markers in react-leaflet
 if (typeof window !== 'undefined') {
@@ -91,6 +92,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }
 }) => {
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
@@ -124,9 +126,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   const handlePopupClick = (issue: MapIssue, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onIssueClick) {
-      onIssueClick(issue);
-    }
+    router.push(`/issues/${issue.id}`);
   };
 
   const getMarkerColor = (issue: MapIssue): string => {
@@ -177,6 +177,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
               icon={createColoredPin(getMarkerColor(issue))}
               eventHandlers={{
                 click: () => handleMarkerClick(issue),
+                mouseover: (e) => e.target.openPopup(),
+                mouseout: (e) => {
+                  const popup = e.target.getPopup();
+                  if (!popup) return;
+                  // small delay — lets mouse reach the popup before closing
+                  setTimeout(() => {
+                    const popupEl = popup.getElement();
+                    if (popupEl && popupEl.matches(':hover')) return; // mouse is on popup, keep open
+                    e.target.closePopup();
+                  }, 100);
+                },
               }}
             >
               <Popup>
@@ -241,7 +252,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
                   {onIssueClick && (
                     <button
                       onClick={(e) => handlePopupClick(issue, e)}
-                      className="w-full mt-3 px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors font-medium"
+                      className="w-full cursor-pointer mt-3 px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors font-medium"
                     >
                       View Details
                     </button>

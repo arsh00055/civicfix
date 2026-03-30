@@ -1,12 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import InputField from '../../../components/UI/forms/InputField';
-import PrimaryButton from '../../../components/UI/buttons/PrimaryButton';
-=======
-=======
->>>>>>> Stashed changes
 'use client'
 
 import React, { useState } from 'react'
@@ -14,10 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '../hooks/useAuth'
 import InputField from '@/components/UI/forms/InputField'
 import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 const CitizenLogin: React.FC = () => {
   const router = useRouter()
@@ -83,7 +70,7 @@ const CitizenLogin: React.FC = () => {
             <button
               type="button"
               onClick={() => router.push('/forgot-password')}
-              className="text-xs text-blue-600 hover:text-blue-500 transition-colors"
+              className="text-xs text-blue-600 cursor-pointer hover:text-blue-500 transition-colors"
             >
               Forgot Password?
             </button>

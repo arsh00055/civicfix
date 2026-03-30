@@ -76,7 +76,7 @@ const FindTasksPage: React.FC = () => {
       }
 
       // Fetch tasks from the find endpoint
-      const response = await apiClient.get('/volunteers/tasks/find');
+      const response = await apiClient.get('/volunteers/tasks/search');
       const data = response.data || response;
       setTasks(data.tasks || []);
       
@@ -116,7 +116,7 @@ const FindTasksPage: React.FC = () => {
 
       // Note: Your Mockoon endpoint might not support all these filters
       // In a real app, the backend would handle filtering
-      const response = await apiClient.get('/volunteers/tasks/find', { params });
+      const response = await apiClient.get('/volunteers/tasks/search', { params });
       const data = response.data || response;
       setTasks(data.tasks || []);
       

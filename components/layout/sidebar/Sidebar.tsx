@@ -21,7 +21,10 @@ import {
   QuestionMarkCircleIcon,
   XMarkIcon,
   FlagIcon,
+  ChatBubbleLeftRightIcon,
+  MegaphoneIcon,
 } from '@heroicons/react/24/outline';
+import { MedalIcon } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -38,6 +41,9 @@ const Sidebar: React.FC = () => {
     { icon: HomeIcon, label: 'Dashboard', href: '/' },
     { icon: MapIcon, label: 'Community Map', href: '/map' },
     { icon: BellIcon, label: 'Notifications', href: '/notifications' },
+    { icon: ChatBubbleLeftRightIcon, label: 'Community Polls', href: '/polls' },
+    { icon: MegaphoneIcon, label: 'Community Board', href: '/bulletin' },
+    { icon: MedalIcon, label: 'Leaderboard', href: '/leaderboard'},
   ];
 
   const roleSpecificItems = {

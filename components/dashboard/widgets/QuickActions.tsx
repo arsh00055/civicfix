@@ -18,13 +18,14 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
   const citizenActions = [
     { label: 'Report Issue', href: '/issues/new', primary: true },
     { label: 'View Map', href: '/map', primary: false },
-    { label: 'My Reports', href: '/issues', primary: false },
+    { label: 'My Reports', href: '/issues/my-reports', primary: false },
   ];
 
   const volunteerActions = [
     { label: 'Find Tasks', href: '/tasks/find', primary: true },
     { label: 'My Assignments', href: '/tasks/assignments', primary: false },
     { label: 'Update Skills', href: '/profile/edit', primary: false },
+    { label: 'Leaderboard', href: '/leaderboard' },
   ];
 
   const adminActions = [
@@ -61,7 +62,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
             <PrimaryButton
             key={index}
             onClick={() => handleActionClick(action.href)}
-            className="w-full justify-center"
+            className="w-full cursor-pointer justify-center"
             role={actualUserRole as 'citizen' | 'volunteer' | 'admin'}
           >
             {action.label}
@@ -70,7 +71,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
             <SecondaryButton
               key={index}
               onClick={() => handleActionClick(action.href)}
-              className="w-full justify-center"
+              className="w-full cursor-pointer justify-center"
             >
               {action.label}
             </SecondaryButton>
