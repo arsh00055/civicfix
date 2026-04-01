@@ -294,9 +294,9 @@ export async function POST(request: NextRequest) {
     const fullName = `${data.firstName} ${data.lastName}`;
     
     const volunteerData = {
-      name: fullName,
       firstName: data.firstName,
-      lastName: data.lastName,
+  lastName: data.lastName,
+  name: `${data.firstName} ${data.lastName}`,
       email: email,
       password: hashedPassword,
       phone: data.phone || null,

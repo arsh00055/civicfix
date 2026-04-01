@@ -18,7 +18,8 @@ interface UserStats {
 }
 
 const ProfilePage: React.FC = () => {
-  const { user: currentUser } = useAuth();
+
+  const { user: currentUser, refreshUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState<UserStats>({
     communityScore: 0,
@@ -47,12 +48,10 @@ const ProfilePage: React.FC = () => {
         return;
       }
 
-      // Fetch user profile
       const userResponse = await apiClient.get('/users/profile');
       const userData = userResponse.data || userResponse;
       setUser(userData.user || userData);
 
-      // Fetch user by ID for stats
       try {
         const userDetailResponse = await apiClient.get(`/users/${currentUser.id}`);
         const userDetail = userDetailResponse.data || userDetailResponse;
@@ -68,7 +67,6 @@ const ProfilePage: React.FC = () => {
         console.warn('Could not fetch user details, using default stats');
       }
 
-      // Fetch achievements
       try {
         const achievementsResponse = await apiClient.get('/achievements');
         const achievementsData = achievementsResponse.data || achievementsResponse;
@@ -85,10 +83,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleRetry = () => {
-    fetchUserData();
-  };
-
   if (loading) {
     return (<Loading />);
   }
@@ -101,7 +95,6 @@ const ProfilePage: React.FC = () => {
     <MainLayout role={user?.role}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Profile Header */}
           <ProfileHeader user={user} stats={{ 
             issuesReported: stats.issuesReported, 
             issuesResolved: stats.issuesResolved, 
@@ -109,14 +102,11 @@ const ProfilePage: React.FC = () => {
           }} />
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <ProfileSidebar user={user} />
             </div>
             
-            {/* Main Content */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Achievements Section */}
               <AchievementsSection />
             </div>
           </div>

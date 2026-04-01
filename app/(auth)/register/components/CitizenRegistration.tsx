@@ -21,6 +21,7 @@ const citizenSchema = z.object({
   address: z.string().min(5, 'Address is required'),
   city: z.string().min(2, 'City is required'),
   zipCode: z.string().min(3, 'ZIP code is required'),
+  avatar: z.string().optional(), 
   agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -57,7 +58,7 @@ const [registeredEmail, setRegisteredEmail] = useState('')
     try {
       const { confirmPassword, agreeToTerms, ...registrationData } = data
       
-      await apiClient.post('/api/auth/register', {
+      await apiClient.post('/auth/register', {
         ...registrationData,
         role: 'citizen'
       })

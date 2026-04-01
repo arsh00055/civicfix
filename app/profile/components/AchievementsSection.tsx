@@ -51,21 +51,22 @@ const AchievementsSection: React.FC = () => {
 
   const fetchAchievements = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
       
-      if (!user) return;
-
-      const response = await achievementsAPI.getUserAchievements(user.id);
-      setAchievements(response.data || []);
+      if (!user) return
+  
+      const response = await achievementsAPI.getUserAchievements(user.id)
+      const data = response.data
+      setAchievements(Array.isArray(data) ? data : data?.achievements || [])
       
     } catch (err) {
-      console.error('Failed to fetch achievements:', err);
-      setError('Failed to load achievements');
+      console.warn('Achievements not available yet')
+      setAchievements([]) // ← crash nahi karega
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getAchievementColor = (type: string) => {
     switch (type) {
@@ -99,9 +100,9 @@ const AchievementsSection: React.FC = () => {
     return <Loading />;
   }
 
-  if (error) {
-    return <Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => fetchAchievements()} />;
-  }
+  // if (error) {
+  //   return <Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => fetchAchievements()} />;
+  // }
 
   const unlockedCount = achievements.filter(a => a.unlockedAt).length;
   const displayAchievements = achievements.slice(0, 4);

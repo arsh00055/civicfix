@@ -6,6 +6,7 @@ export interface UserProfile extends BaseUser {
   userId: string; // Duplicate of id but kept for backward compatibility
   coverImage?: string;
   bio?: string;
+  avatar?: string | null; 
 
   achievements?: Achievement[]; 
   address?: {

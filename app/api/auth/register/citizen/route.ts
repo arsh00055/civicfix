@@ -78,9 +78,9 @@ export async function POST(data: any) {
     const fullName = `${data.firstName} ${data.lastName}`;
     
     const citizenData = {
-      name: fullName,
       firstName: data.firstName,
-      lastName: data.lastName,
+  lastName: data.lastName,
+  name: `${data.firstName} ${data.lastName}`,
       email: email,
       password: hashedPassword,
       phone: data.phone || null,
@@ -91,6 +91,7 @@ export async function POST(data: any) {
       isActive: true,
       isEmailVerified: false,
       achievements: [],
+      avatar: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {

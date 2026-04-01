@@ -2,6 +2,8 @@ export interface BaseUser {
     id: string;
     email: string;
     name: string;
+    firstName?: string;
+    lastName?: string;
     role: 'citizen' | 'volunteer' | 'admin';
     avatar?: string | null;
     phone?: string;

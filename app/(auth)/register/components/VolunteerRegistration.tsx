@@ -84,7 +84,7 @@ const [registeredEmail, setRegisteredEmail] = useState('')
     try {
       const { confirmPassword, agreeToTerms, ...registrationData } = data
       
-      await apiClient.post('/api/auth/register', {
+      await apiClient.post('/auth/register', {
         ...registrationData,
         role: 'volunteer'
       })

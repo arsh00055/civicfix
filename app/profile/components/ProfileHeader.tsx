@@ -18,12 +18,37 @@ interface ProfileHeaderProps {
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
   const router = useRouter();
 
-  const getRoleBadgeColor = (role: string) => {
+  // 👇 ROLE-BASED COLORS
+  const getRoleColors = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800 border border-purple-200';
-      case 'volunteer': return 'bg-green-100 text-green-800 border border-green-200';
-      case 'citizen': return 'bg-blue-100 text-blue-800 border border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border border-gray-200';
+      case 'admin':
+        return {
+          badge: 'bg-purple-100 text-purple-800 border-purple-200',
+          cover: 'from-purple-600 to-indigo-700',
+          avatarBg: 'from-purple-500 to-indigo-600',
+          button: 'bg-purple-600 hover:bg-purple-700'
+        };
+      case 'volunteer':
+        return {
+          badge: 'bg-green-100 text-green-800 border-green-200',
+          cover: 'from-green-600 to-emerald-700',
+          avatarBg: 'from-green-500 to-emerald-600',
+          button: 'bg-green-600 hover:bg-green-700'
+        };
+      case 'citizen':
+        return {
+          badge: 'bg-blue-100 text-blue-800 border-blue-200',
+          cover: 'from-blue-600 to-indigo-700',
+          avatarBg: 'from-blue-500 to-indigo-600',
+          button: 'bg-blue-600 hover:bg-blue-700'
+        };
+      default:
+        return {
+          badge: 'bg-gray-100 text-gray-800 border-gray-200',
+          cover: 'from-gray-600 to-gray-700',
+          avatarBg: 'from-gray-500 to-gray-600',
+          button: 'bg-gray-600 hover:bg-gray-700'
+        };
     }
   };
 
@@ -36,19 +61,44 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
     }
   };
 
+  const getFullName = () => {
+    if (user.firstName || user.lastName) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    }
+    return user.name || 'User';
+  };
+
+  const getInitials = () => {
+    const fullName = getFullName();
+    return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const roleColors = getRoleColors(user.role);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+      {/* 👇 ROLE-BASED COVER IMAGE */}
+      <div className={`h-32 bg-gradient-to-r ${roleColors.cover}`}></div>
 
       <div className="px-6 pb-6">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-16">
           <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-6">
             <div className="relative">
-              <img
-                src={user.avatar || '/images/avatar-placeholder.png'}
-                alt={user.name}
-                className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
-              />
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={getFullName()}
+                  className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/avatar-placeholder.png';
+                  }}
+                />
+              ) : (
+                // 👇 ROLE-BASED AVATAR BACKGROUND
+                <div className={`w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-br ${roleColors.avatarBg} flex items-center justify-center`}>
+                  <span className="text-white text-3xl font-bold">{getInitials()}</span>
+                </div>
+              )}
               {user.verification?.identity && (
                 <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
                   <span className="text-white text-xs">✓</span>
@@ -57,9 +107,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRoleBadgeColor(user.role)}`}>
+              <div className="flex items-center space-x-3 flex-wrap gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">{getFullName()}</h1>
+                {/* 👇 ROLE-BASED BADGE */}
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${roleColors.badge}`}>
                   {getRoleDisplayName(user.role)}
                 </span>
               </div>
@@ -70,10 +121,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
                 <p className="text-gray-700 max-w-2xl">{user.bio}</p>
               )}
               
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                 <span>Joined {formatDate(user.joinDate)}</span>
-                {user.phone && <span>• {user.phone}</span>}
-                {user.address && <span>• {user.address.street}, {user.address.state}, {user.address.city}, {user.address.country}, {user.address.zipCode}</span>}
+                {user.phone && <span>• 📞 {user.phone}</span>}
+                {user.address && <span>• 📍 {user.address.street}, {user.address.city}</span>}
               </div>
             </div>
           </div>
@@ -82,6 +133,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
           <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
             <PrimaryButton
               onClick={() => router.push('/profile/edit')}
+              className={`${roleColors.button} text-white`}
             >
               Edit Profile
             </PrimaryButton>

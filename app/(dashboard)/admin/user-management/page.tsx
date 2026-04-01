@@ -197,7 +197,7 @@ export default function UserManagementPage() {
       setLoading(true)
       setError(null)
       
-      const response = await apiClient.get('/api/admin/users')
+      const response = await apiClient.get('/admin/users')
       setUsers(response.data)
     } catch (err: any) {
       console.error('Failed to fetch users:', err)
@@ -211,7 +211,7 @@ export default function UserManagementPage() {
   const fetchPendingVolunteers = async () => {
     try {
       setLoadingPending(true)
-      const response = await apiClient.get('/api/admin/volunteers/pending')
+      const response = await apiClient.get('/admin/volunteers/pending')
       setPendingVolunteers(response.data.data || [])
     } catch (err: any) {
       console.error('Failed to fetch pending volunteers:', err)
@@ -225,7 +225,7 @@ export default function UserManagementPage() {
     try {
       setUpdatingUser(userId)
       
-      await apiClient.patch(`/api/admin/users/${userId}/role`, { role: newRole })
+      await apiClient.patch(`/admin/users/${userId}/role`, { role: newRole })
       
       setUsers(prev => prev.map(user => 
         user.id === userId ? { ...user, role: newRole } : user
@@ -244,7 +244,7 @@ export default function UserManagementPage() {
     }
 
     try {
-      await apiClient.delete(`/api/admin/users/${userId}`)
+      await apiClient.delete(`/admin/users/${userId}`)
       setUsers(prev => prev.filter(user => user.id !== userId))
     } catch (err: any) {
       console.error('Failed to delete user:', err)
@@ -255,7 +255,7 @@ export default function UserManagementPage() {
   // 👇 NEW: Handle approve volunteer
   const handleApproveVolunteer = async (volunteerId: string) => {
     try {
-      await apiClient.post(`/api/admin/volunteers/${volunteerId}/approve`)
+      await apiClient.post(`/admin/volunteers/${volunteerId}/approve`)
       // Remove from pending list
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
       // Refresh users list to include new approved volunteer
@@ -272,7 +272,7 @@ export default function UserManagementPage() {
     const reason = prompt('Please enter reason for rejection (optional):')
     
     try {
-      await apiClient.post(`/api/admin/volunteers/${volunteerId}/reject`, { reason: reason || 'No reason provided' })
+      await apiClient.post(`/admin/volunteers/${volunteerId}/reject`, { reason: reason || 'No reason provided' })
       // Remove from pending list
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
       alert('❌ Volunteer rejected successfully!')

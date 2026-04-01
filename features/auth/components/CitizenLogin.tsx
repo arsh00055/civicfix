@@ -32,7 +32,7 @@ const CitizenLogin: React.FC = () => {
     } catch (err: any) {
       setError(err?.message || 'Login failed. Please try again.')
     } finally {
-      setLocalLoading(false) // ← STOP
+      setLocalLoading(false)
     }
   }
 
@@ -77,7 +77,6 @@ const CitizenLogin: React.FC = () => {
           </div>
         </div>
 
-        {/* Inline Error Message */}
         {error && (
           <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-lg px-4 py-3" role="alert">
             <span className="text-red-500 mt-0.5 flex-shrink-0">

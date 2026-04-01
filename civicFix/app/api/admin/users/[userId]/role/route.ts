@@ -1,4 +1,3 @@
-// app/api/admin/users/[userId]/role/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
@@ -68,7 +67,6 @@ export async function PATCH(
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Create activity record for role change
     await db.collection('activities').insertOne({
       userId: user.id,
       userName: user.name,
