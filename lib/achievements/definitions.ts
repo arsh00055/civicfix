@@ -304,3 +304,143 @@ export interface AchievementDefinition {
       requirement: { type: "points", target: 1000 } 
     },
   ];
+
+export const ADMIN_ACHIEVEMENTS: AchievementDefinition[] = [
+  // Review milestones
+  { 
+    id: "first_review", 
+    name: "First Review", 
+    description: "Review your first issue resolution", 
+    icon: "📋", 
+    category: "administration", 
+    tier: "bronze", 
+    points: 50, 
+    rarity: "common",
+    requirement: { type: "issuesReviewed", target: 1 } 
+  },
+  { 
+    id: "reviewer_10", 
+    name: "Diligent Admin", 
+    description: "Review 10 issue resolutions", 
+    icon: "✅", 
+    category: "administration", 
+    tier: "silver", 
+    points: 200, 
+    rarity: "uncommon",
+    requirement: { type: "issuesReviewed", target: 10 } 
+  },
+  { 
+    id: "reviewer_50", 
+    name: "Review Master", 
+    description: "Review 50 issue resolutions", 
+    icon: "🏆", 
+    category: "administration", 
+    tier: "gold", 
+    points: 800, 
+    rarity: "rare",
+    requirement: { type: "issuesReviewed", target: 50 } 
+  },
+  { 
+    id: "reviewer_200", 
+    name: "Legendary Admin", 
+    description: "Review 200 issue resolutions", 
+    icon: "👑", 
+    category: "administration", 
+    tier: "platinum", 
+    points: 3000, 
+    rarity: "epic",
+    requirement: { type: "issuesReviewed", target: 200 } 
+  },
+  // Report generation
+  { 
+    id: "first_report", 
+    name: "Data Enthusiast", 
+    description: "Generate your first analytics report", 
+    icon: "📊", 
+    category: "analytics", 
+    tier: "bronze", 
+    points: 30, 
+    rarity: "common",
+    requirement: { type: "reportsGenerated", target: 1 } 
+  },
+  { 
+    id: "reporter_20", 
+    name: "Insight Provider", 
+    description: "Generate 20 analytics reports", 
+    icon: "📈", 
+    category: "analytics", 
+    tier: "silver", 
+    points: 150, 
+    rarity: "uncommon",
+    requirement: { type: "reportsGenerated", target: 20 } 
+  },
+  // User management
+  { 
+    id: "user_manager", 
+    name: "People Manager", 
+    description: "Manage 50 different users", 
+    icon: "👥", 
+    category: "management", 
+    tier: "silver", 
+    points: 250, 
+    rarity: "uncommon",
+    requirement: { type: "usersManaged", target: 50 } 
+  },
+  { 
+    id: "user_master", 
+    name: "Community Leader", 
+    description: "Manage 200 different users", 
+    icon: "🌟", 
+    category: "management", 
+    tier: "gold", 
+    points: 1000, 
+    rarity: "rare",
+    requirement: { type: "usersManaged", target: 200 } 
+  },
+  // System uptime
+  { 
+    id: "uptime_99", 
+    name: "Reliable", 
+    description: "Maintain 99% system uptime for a month", 
+    icon: "🔒", 
+    category: "system", 
+    tier: "silver", 
+    points: 500, 
+    rarity: "uncommon",
+    requirement: { type: "systemUptime", target: 99 } 
+  },
+  { 
+    id: "uptime_999", 
+    name: "Five Nines", 
+    description: "Maintain 99.99% system uptime for a quarter", 
+    icon: "⚡", 
+    category: "system", 
+    tier: "platinum", 
+    points: 5000, 
+    rarity: "epic",
+    requirement: { type: "systemUptime", target: 99.99 } 
+  },
+  // Level milestones
+  { 
+    id: "admin_level_5", 
+    name: "Rising Admin", 
+    description: "Reach level 5 as an admin", 
+    icon: "📈", 
+    category: "milestone", 
+    tier: "bronze", 
+    points: 100, 
+    rarity: "common",
+    requirement: { type: "level", target: 5 } 
+  },
+  { 
+    id: "admin_level_10", 
+    name: "Elite Admin", 
+    description: "Reach level 10 as an admin", 
+    icon: "🏅", 
+    category: "milestone", 
+    tier: "gold", 
+    points: 1000, 
+    rarity: "rare",
+    requirement: { type: "level", target: 10 } 
+  },
+];
