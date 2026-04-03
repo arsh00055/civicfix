@@ -353,7 +353,7 @@ export const ADMIN_ACHIEVEMENTS: AchievementDefinition[] = [
   },
   // Report generation
   { 
-    id: "first_report", 
+    id: "admin_first_report", 
     name: "Data Enthusiast", 
     description: "Generate your first analytics report", 
     icon: "📊", 

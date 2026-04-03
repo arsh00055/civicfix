@@ -74,12 +74,31 @@ export async function POST(
           { 
             $inc: { 
               'volunteerStats.tasksCompleted': 1,
-              'volunteerStats.pointsEarned': 50, // Add points for completing a task
+              'volunteerStats.pointsEarned': 50,
               'stats.points': 50,
             },
             $set: { updatedAt: now }
           }
         );
+
+        await db.collection('admins').updateOne(
+          { _id: new ObjectId(user.id) },
+          {
+            $inc: { 'stats.issuesReviewed': 1, 'stats.points': 10 },
+            $set: { updatedAt: now }
+          }
+        );        
+
+        const updatedAdmin = await db.collection('admins').findOne(
+          { _id: new ObjectId(user.id) },
+          { projection: { stats: 1 } }
+        );
+
+        await checkAndAwardAchievements(user.id, 'admin', {
+          issuesReviewed: updatedAdmin?.stats?.issuesReviewed ?? 0,
+          level:          updatedAdmin?.stats?.level ?? 1,
+          points:         updatedAdmin?.stats?.points ?? 0,
+        });
         
         // Get updated volunteer stats for achievement checking
         const updatedVolunteer = await db.collection('volunteers').findOne(

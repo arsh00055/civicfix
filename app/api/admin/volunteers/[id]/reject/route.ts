@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
-
 import { getCurrentUser } from '@/lib/auth/getCurrentUser'
+import { checkAndAwardAchievements } from '@/lib/services/achievementService'
 import { sendEmail } from '@/lib/email'
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -54,6 +54,22 @@ await sendEmail({
     </div>
   `
 })
+
+    await db.collection('admins').updateOne(
+      { _id: new ObjectId(user.id) },
+      { $inc: { 'stats.usersManaged': 1 } }
+    );
+    
+    const updatedAdmin = await db.collection('admins').findOne(
+      { _id: new ObjectId(user.id) },
+      { projection: { stats: 1 } }
+    );
+    
+    await checkAndAwardAchievements(user.id, 'admin', {
+      usersManaged: updatedAdmin?.stats?.usersManaged ?? 0,
+      level:        updatedAdmin?.stats?.level ?? 1,
+      points:       updatedAdmin?.stats?.points ?? 0,
+    });
 
     return NextResponse.json({ success: true, message: `${volunteer.name} di application reject kar diti gayi.` })
   } catch (error: any) {

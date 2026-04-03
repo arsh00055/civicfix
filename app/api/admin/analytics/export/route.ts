@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { ObjectId } from 'mongodb';
+import { checkAndAwardAchievements } from '@/lib/services/achievementService';
 
 export async function GET(req: NextRequest) {
     try {
@@ -133,6 +135,22 @@ export async function GET(req: NextRequest) {
           },
         });
       }
+
+      await db.collection('admins').updateOne(
+        { _id: new ObjectId(currentUser.id) },
+        { $inc: { 'stats.reportsGenerated': 1, 'stats.points': 5 } }
+      );
+      
+      const updatedAdmin = await db.collection('admins').findOne(
+        { _id: new ObjectId(currentUser.id) },
+        { projection: { stats: 1 } }
+      );
+      
+      await checkAndAwardAchievements(currentUser.id, 'admin', {
+        reportsGenerated: updatedAdmin?.stats?.reportsGenerated ?? 0,
+        level:            updatedAdmin?.stats?.level ?? 1,
+        points:           updatedAdmin?.stats?.points ?? 0,
+      });
   
       // Default to JSON
       const jsonString = JSON.stringify(exportData, null, 2);

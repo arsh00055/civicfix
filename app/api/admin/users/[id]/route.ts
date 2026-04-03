@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
 import { getCurrentUser } from '@/lib/auth/getCurrentUser'
+import { checkAndAwardAchievements } from '@/lib/services/achievementService'
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -34,6 +35,22 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       if (result.matchedCount > 0) { found = true; break }
     }
 
+    await db.collection('admins').updateOne(
+      { _id: new ObjectId(adminUser.id) },
+      { $inc: { 'stats.usersManaged': 1 } }
+    );
+    
+    const updatedAdmin = await db.collection('admins').findOne(
+      { _id: new ObjectId(adminUser.id) },
+      { projection: { stats: 1 } }
+    );
+    
+    await checkAndAwardAchievements(adminUser.id, 'admin', {
+      usersManaged: updatedAdmin?.stats?.usersManaged ?? 0,
+      level:        updatedAdmin?.stats?.level ?? 1,
+      points:       updatedAdmin?.stats?.points ?? 0,
+    });
+
     if (!found) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     return NextResponse.json({ success: true, message: 'Role updated' })
   } catch (error: any) {
@@ -49,7 +66,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params;
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, message: 'Invalid user ID' }, { status: 400 })
     }

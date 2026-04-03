@@ -12,7 +12,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
-import { HomeIcon } from 'lucide-react';
+import { HomeIcon, UsersIcon } from 'lucide-react';
 import apiClient from '@/lib/services/api/client';
 import { usersAPI } from '@/lib/services/api/endpoints';
 
@@ -27,13 +27,19 @@ interface UserStats {
   totalReports?: number;
   resolvedReports?: number;
   totalVotes?: number;
+  totalComments?: number;
+  reputation?: number;
   unlockedAchievements?: number;
   // volunteer
   tasksCompleted?: number;
+  totalClaimed?: number;
+  pointsEarned?: number;
   rating?: number;
-  // admin
+  totalRatings?: number;
+  // admin (platform-wide aggregates)
   totalIssues?: number;
   resolvedIssues?: number;
+  totalUsers?: number;
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
@@ -72,16 +78,25 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
         const res = await usersAPI.getUserStats();
         const data = res.data;
         setUserStats({
-          points:              data.points              ?? 0,
-          level:               data.level               ?? 1,
-          totalReports:        data.totalReports,
-          resolvedReports:     data.resolvedReports,
-          totalVotes:          data.totalVotes,
+          points:               data.points               ?? 0,
+          level:                data.level                ?? 1,
+          // citizen fields
+          totalReports:         data.totalReports,
+          resolvedReports:      data.resolvedReports,
+          totalVotes:           data.totalVotes,
+          totalComments:        data.totalComments,
+          reputation:           data.reputation,
           unlockedAchievements: data.unlockedAchievements,
-          tasksCompleted:      data.tasksCompleted,
-          rating:              data.rating,
-          totalIssues:         data.totalIssues,
-          resolvedIssues:      data.resolvedIssues,
+          // volunteer fields
+          tasksCompleted:       data.tasksCompleted,
+          totalClaimed:         data.totalClaimed,
+          pointsEarned:         data.pointsEarned,
+          rating:               data.rating,
+          totalRatings:         data.totalRatings,
+          // admin fields
+          totalIssues:          data.totalIssues,
+          resolvedIssues:       data.resolvedIssues,
+          totalUsers:           data.totalUsers,
         });
       } catch (err) {
         console.error('Failed to fetch user stats:', err);
@@ -158,13 +173,18 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
       return (
         <>
           <div className="flex items-center gap-1">
-            <SparklesIcon className="w-4 h-4 text-yellow-300" />
-            <span className="text-sm font-medium">{userStats.totalIssues ?? 0} issues</span>
+            <UsersIcon className="w-4 h-4 text-yellow-300" />
+            <span className="text-sm font-medium">{userStats.totalUsers ?? 0} users</span>
           </div>
           <div className="w-px h-4 bg-white/20" />
           <div className="flex items-center gap-1">
             <TrophyIcon className="w-4 h-4 text-yellow-300" />
             <span className="text-sm font-medium">{userStats.resolvedIssues ?? 0} resolved</span>
+          </div>
+          <div className="w-px h-4 bg-white/20" />
+          <div className="flex items-center gap-1">
+            <SparklesIcon className="w-4 h-4 text-yellow-300" />
+            <span className="text-sm font-medium">{userStats.totalIssues ?? 0} issues</span>
           </div>
         </>
       );
@@ -193,12 +213,16 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
 
   const AvatarDisplay = ({ size }: { size: 'sm' | 'lg' }) => {
     const cls = size === 'sm' ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-lg';
+    // Always render initials on the server (mounted=false) so SSR and the
+    // initial client paint agree. Once mounted=true we switch to the avatar
+    // image if one is available. This eliminates the hydration mismatch.
+    const showImage = mounted && !!userAvatar && !imageError;
     return (
       <div className={`${cls} rounded-full bg-white/20 flex items-center justify-center text-white font-semibold backdrop-blur overflow-hidden`}>
-        {userAvatar && !imageError ? (
-          <img src={userAvatar} alt={userName || 'User'} className="w-full h-full object-cover" onError={() => setImageError(true)} />
+        {showImage ? (
+          <img src={userAvatar!} alt={userName || 'User'} className="w-full h-full object-cover" onError={() => setImageError(true)} />
         ) : (
-          <span>{getInitials(userName)}</span>
+          <span>{getInitials(mounted ? userName : undefined)}</span>
         )}
       </div>
     );
@@ -215,7 +239,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
       >
         <div className="relative">
           <AvatarDisplay size="sm" />
-          {userStats.points > 0 && (
+          {mounted && userStats.points > 0 && (
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
           )}
         </div>
