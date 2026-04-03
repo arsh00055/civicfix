@@ -29,10 +29,6 @@ export default function UsersTable({
     }
   }
 
-  const handleUpdateRole = (userId: string, newRole: UserRole) => {
-    onUpdateRole(userId, newRole)
-  }
-
   const handleDeleteUser = (userId: string) => {
     onDeleteUser(userId)
   }
@@ -79,7 +75,7 @@ export default function UsersTable({
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
                       {user.avatar ? (
-                        <Image
+                        <img
                           src={user.avatar}
                           alt={user.name}
                           width={40}
@@ -107,22 +103,9 @@ export default function UsersTable({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleUpdateRole(user.id, e.target.value as UserRole)}
-                      disabled={updatingUser === user.id}
-                      className={`text-xs font-medium px-2 py-1 rounded-full border ${getRoleColor(user.role)} focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 bg-transparent`}
-                      aria-label={`Change role for ${user.name}`}
-                    >
-                      <option value="citizen">Citizen</option>
-                      <option value="volunteer">Volunteer</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                    {updatingUser === user.id && (
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 ml-2" aria-hidden="true"></div>
-                    )}
-                  </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full border ${getRoleColor(user.role as UserRole)}`}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString()}

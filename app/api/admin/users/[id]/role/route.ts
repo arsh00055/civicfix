@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
+import { sendEmail } from '@/lib/email'; // 👈 ADD THIS
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -19,12 +20,11 @@ function getCurrentUser(req: NextRequest): { id: string; role: string; name: str
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: userId } = await params; // 👈 FIX: rename to userId
     const user = getCurrentUser(req);
+    
     if (!user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -36,7 +36,6 @@ export async function PATCH(
       );
     }
 
-    const { userId } = await params;
     const body = await req.json();
     const { role } = body;
 
@@ -53,34 +52,80 @@ export async function PATCH(
       return NextResponse.json({ message: 'Invalid user ID' }, { status: 400 });
     }
 
-    const result = await db.collection('citizens').updateOne(
+    // 👇 STEP 1: Find user in which collection
+    let userData = await db.collection('citizens').findOne({ _id: new ObjectId(userId) });
+    let currentCollection = 'citizens';
+    let oldRole = 'citizen';
+
+    if (!userData) {
+      userData = await db.collection('volunteers').findOne({ _id: new ObjectId(userId) });
+      currentCollection = 'volunteers';
+      oldRole = 'volunteer';
+    }
+
+    if (!userData) {
+      userData = await db.collection('admins').findOne({ _id: new ObjectId(userId) });
+      currentCollection = 'admins';
+      oldRole = 'admin';
+    }
+
+    if (!userData) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    // 👇 STEP 2: If role is same, return
+    if (oldRole === role) {
+      return NextResponse.json({ 
+        success: true, 
+        message: `User is already a ${role}` 
+      });
+    }
+
+    // 👇 STEP 3: Update in current collection
+    const updateResult = await db.collection(currentCollection).updateOne(
       { _id: new ObjectId(userId) },
       { 
         $set: { 
-          role,
+          role: role,
           updatedAt: new Date().toISOString(),
         } 
       }
     );
 
-    if (result.matchedCount === 0) {
+    if (updateResult.matchedCount === 0) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Create activity record for role change
+    // 👇 STEP 4: Send email to user about role change
+    const roleDisplayNames = {
+      citizen: 'Citizen',
+      volunteer: 'Volunteer',
+      admin: 'Administrator'
+    };
+
+
+    // 👇 STEP 5: Create activity record
     await db.collection('activities').insertOne({
       userId: user.id,
       userName: user.name,
       type: 'role_updated',
-      message: `${user.name} changed user role to ${role}`,
+      message: `${user.name} changed ${userData.name}'s role from ${oldRole} to ${role}`,
       metadata: {
         targetUserId: userId,
+        targetUserName: userData.name,
+        oldRole: oldRole,
         newRole: role,
       },
       createdAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ success: true, message: 'User role updated' });
+    console.log(`✅ Role updated: ${userData.name} from ${oldRole} to ${role}`);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: `User role updated from ${oldRole} to ${role}` 
+    });
+    
   } catch (error) {
     console.error('PATCH /api/admin/users/[userId]/role error:', error);
     return NextResponse.json(

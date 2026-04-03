@@ -3,6 +3,7 @@ import type { BaseUser } from './base.types';
 import type { NotificationPreferences } from './notification.types';
 
 export interface UserProfile extends BaseUser {
+  isEmailVerified: any;
   userId: string; // Duplicate of id but kept for backward compatibility
   coverImage?: string;
   bio?: string;

@@ -110,9 +110,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
               <div className="flex items-center space-x-3 flex-wrap gap-2">
                 <h1 className="text-2xl font-bold text-gray-900">{getFullName()}</h1>
                 {/* 👇 ROLE-BASED BADGE */}
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${roleColors.badge}`}>
-                  {getRoleDisplayName(user.role)}
-                </span>
+                {user.isEmailVerified ? (
+  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+    ✓ Verified
+  </span>
+) : (
+  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+    ⚠ Unverified
+  </span>
+)}
               </div>
               
               <p className="text-gray-600">{user.email}</p>

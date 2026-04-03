@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     // Mark email as verified
     await db.collection(collection).updateOne(
       { _id: new ObjectId(currentUser.id) },
-      { $set: { 'verification.email': true, updatedAt: new Date() } }
+      { $set: { 'isEmailVerified': true, updatedAt: new Date() } }
     )
 
     // Mark OTP as used

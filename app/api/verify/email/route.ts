@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     const user = await db.collection(collection).findOne({ _id: new ObjectId(currentUser.id) })
     if (!user) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
 
-    if (user.verification?.email) {
+    if (user.isEmailVerified) {
       return NextResponse.json({ success: false, message: 'Email is already verified' }, { status: 400 })
     }
 
