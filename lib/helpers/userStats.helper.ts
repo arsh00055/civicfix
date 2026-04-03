@@ -8,19 +8,17 @@ export async function updateUserStatsAndCheckAchievements(
   updates: Record<string, number>
 ) {
   const { db } = await connectToDatabase();
-  const citizens = db.collection("citizens");
+  const col = db.collection(role === 'volunteer' ? 'volunteers' : 'citizens');
 
-  const updateObj: Record<string, any> = {};
-  for (const [key, value] of Object.entries(updates)) {
-    updateObj[`stats.${key}`] = value;
-  }
+  const inc: Record<string, any> = {};
+  for (const [k, v] of Object.entries(updates)) inc[`stats.${k}`] = v;
 
-  await citizens.updateOne(
+  await col.updateOne(
     { _id: new ObjectId(userId) },
-    { $inc: updateObj, $set: { updatedAt: new Date().toISOString() } }
+    { $inc: inc, $set: { updatedAt: new Date().toISOString() } }
   );
 
-  const updatedUser = await citizens.findOne(
+  const updatedUser = await col.findOne(
     { _id: new ObjectId(userId) },
     { projection: { stats: 1 } }
   );

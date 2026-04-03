@@ -1,32 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
 import { ObjectId } from 'mongodb'
-import jwt from 'jsonwebtoken'
+
+import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 import { sendEmail } from '@/lib/email'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-// ✅ SAHI - localStorage token bhi check karo
-function getCurrentUser(req: NextRequest): { id: string; role: string; name: string } | null {
-    try {
-      const authHeader = req.headers.get('authorization')
-      const token = authHeader?.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : req.cookies.get('auth_token')?.value
-      
-      console.log('🔍 Token received:', token ? token.substring(0, 20) + '...' : 'NULL')
-      console.log('🔍 JWT_SECRET:', process.env.JWT_SECRET ? process.env.JWT_SECRET.substring(0, 5) + '...' : 'NOT SET')
-      
-      if (!token) return null
-      const decoded = jwt.verify(token, JWT_SECRET) as any
-      console.log('✅ Decoded role:', decoded.role)
-      return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name }
-    } catch (err) {
-      console.log('❌ JWT verify failed:', err)
-      return null
-    }
-  }
-  export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = await params
     const user = getCurrentUser(req)

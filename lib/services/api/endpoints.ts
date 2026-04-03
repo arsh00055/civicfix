@@ -161,6 +161,7 @@ export const usersAPI = {
     apiClient.patch(`/admin/users/${id}/role`, { role }),
   searchUsers:    (query: string) => apiClient.get('/users/search', { params: { query } }),
   getUserActivity:(userId: string) => apiClient.get(`/users/${userId}/activity`),
+  getUserStats:     () => apiClient.get(`/users/stats`),
 };
 
 export const analyticsAPI = {

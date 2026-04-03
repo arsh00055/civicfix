@@ -1,21 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
-import { ObjectId } from 'mongodb'
-import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-function getCurrentUser(req: NextRequest) {
-  try {
-    const authHeader = req.headers.get('authorization')
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.cookies.get('auth_token')?.value
-    if (!token) return null
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name }
-  } catch { return null }
-}
+import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 
 // GET /api/polls — list active polls
 export async function GET(req: NextRequest) {

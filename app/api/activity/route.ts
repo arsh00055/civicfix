@@ -1,29 +1,12 @@
 // app/api/activity/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { ObjectId } from 'mongodb';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-function getCurrentUser(req: NextRequest): { id: string; role: string; name: string } | null {
-  try {
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.cookies.get('auth_token')?.value;
-    if (!token) return null;
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name };
-  } catch {
-    return null;
-  }
-}
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 
 export async function POST(req: NextRequest) {
   try {
-    const user = getCurrentUser(req);
-    if (!user) {
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -40,9 +23,9 @@ export async function POST(req: NextRequest) {
     const { db } = await connectToDatabase();
 
     const activity = {
-      userId: user.id,
-      userName: user.name,
-      userRole: user.role,
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userRole: currentUser.role,
       type,
       message,
       metadata: metadata || {},

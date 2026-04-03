@@ -3,43 +3,28 @@ import { connectToDatabase } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { checkAndAwardAchievements } from "@/lib/services/achievementService";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-// JWT verification helper
-function verifyToken(token: string): { id: string; role: string } | null {
-  try {
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return { id: decoded.id || decoded.userId, role: decoded.role };
-  } catch {
-    return null;
-  }
-}
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-    const decoded = verifyToken(authHeader.split(" ")[1]);
-    if (!decoded?.id) {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { db } = await connectToDatabase();
-    const citizens = db.collection("citizens");
+    const col = db.collection(currentUser.role === 'volunteer' ? 'volunteers' : 'citizens');
 
     // Get the user profile first
-    const user = await citizens.findOne(
-      { _id: new ObjectId(decoded.id) },
+    const user = await col.findOne(
+      { _id: new ObjectId(currentUser.id) },
       { projection: { stats: 1, volunteerStats: 1, role: 1, achievements: 1 } }
     );
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    const isVolunteer = user.role === "volunteer";
+    const isVolunteer = user.role === 'volunteer';
     
     // Build stats object
     const stats: Record<string, number> = isVolunteer
@@ -64,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     // Check and award achievements
     const { newlyUnlocked, pointsAwarded } = await checkAndAwardAchievements(
-      decoded.id,
+      currentUser.id,
       user.role as 'citizen' | 'volunteer',
       stats
     );
@@ -74,11 +59,11 @@ export async function POST(req: NextRequest) {
       pointsAwarded,
       message: newlyUnlocked.length > 0
         ? `🎉 ${newlyUnlocked.length} new achievement(s) unlocked! +${pointsAwarded} points!`
-        : "No new achievements",
+        : 'No new achievements',
     });
 
   } catch (err) {
-    console.error("POST /api/achievements/check error:", err);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error('POST /api/achievements/check error:', err);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

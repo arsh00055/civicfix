@@ -2,28 +2,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { ObjectId } from 'mongodb';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-function getCurrentUser(req: NextRequest): { id: string; role: string } | null {
-  try {
-    const authHeader = req.headers.get('authorization');
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : req.cookies.get('auth_token')?.value;
-    if (!token) return null;
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-    return { id: decoded.id || decoded.userId, role: decoded.role };
-  } catch {
-    return null;
-  }
-}
+import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getCurrentUser(req);
-    if (!user) {
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -56,9 +40,9 @@ export async function GET(req: NextRequest) {
     
     // Get user-specific stats
     let userStats = null;
-    if (user.role === 'citizen') {
+    if (currentUser.role === 'citizen') {
       const citizenData = await db.collection('citizens').findOne(
-        { _id: new ObjectId(user.id) },
+        { _id: new ObjectId(currentUser.id) },
         { projection: { stats: 1, name: 1, email: 1, createdAt: 1 } }
       );
       if (citizenData) {
@@ -72,9 +56,9 @@ export async function GET(req: NextRequest) {
           memberSince: citizenData.createdAt,
         };
       }
-    } else if (user.role === 'volunteer') {
+    } else if (currentUser.role === 'volunteer') {
       const volunteerData = await db.collection('citizens').findOne(
-        { _id: new ObjectId(user.id) },
+        { _id: new ObjectId(currentUser.id) },
         { projection: { stats: 1, volunteerStats: 1, name: 1, email: 1, createdAt: 1 } }
       );
       if (volunteerData) {
