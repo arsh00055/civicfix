@@ -8,12 +8,6 @@ export async function POST(request: NextRequest) {
     const { db } = await connectToDatabase();
     const data = await request.json();
 
-    console.log('🔍 Citizen login request received:', {
-      email: data.email,
-      role: data.role,
-      hasPassword: !!data.password
-    });
-
     // Required fields check
     const requiredFields = ['email', 'password'];
     const missingFields = requiredFields.filter(field => !data[field]);
@@ -40,7 +34,6 @@ export async function POST(request: NextRequest) {
        // ================= CITIZEN LOGIN =================
        if (role === 'citizen') {
         const citizen = await db.collection('citizens').findOne({ email });
-        console.log('Citizen from DB:', citizen); 
   
         if (!citizen) {
           return NextResponse.json({
@@ -57,7 +50,6 @@ export async function POST(request: NextRequest) {
         }
   
         const isPasswordValid = await bcrypt.compare(data.password, citizen.password);
-        console.log('Password valid:', isPasswordValid); 
   
         if (!isPasswordValid) {
           return NextResponse.json({
@@ -110,7 +102,6 @@ export async function POST(request: NextRequest) {
 
        else if (role == 'volunteer') {
         const volunteer = await db.collection('volunteers').findOne({ email });
-        console.log("Volunteer from DB", volunteer);
       
         if (!volunteer) {
           return NextResponse.json({
@@ -144,7 +135,6 @@ export async function POST(request: NextRequest) {
         }
 
         const isPasswordValid = await bcrypt.compare(data.password, volunteer.password);
-  console.log("PasswordValid", isPasswordValid);
 
   if (!isPasswordValid) {
     return NextResponse.json({
@@ -208,7 +198,6 @@ else if (role === 'admin') {
   }
   
   const admin = await db.collection('admins').findOne({ email });
-  console.log('Admin from DB:', admin); 
 
   if (!admin) {
     return NextResponse.json({
@@ -225,7 +214,6 @@ else if (role === 'admin') {
   }
 
   const isPasswordValid = await bcrypt.compare(data.password, admin.password);
-  console.log('Password valid:', isPasswordValid); 
 
   if (!isPasswordValid) {
     return NextResponse.json({

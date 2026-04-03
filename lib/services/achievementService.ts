@@ -26,9 +26,10 @@ export async function checkAndAwardAchievements(
 ): Promise<{ newlyUnlocked: string[]; pointsAwarded: number }> {
   try {
     const { db } = await connectToDatabase();
-    const citizens = db.collection("citizens");
-
-    const user = await citizens.findOne(
+    const col = db.collection(
+      role === 'volunteer' ? 'volunteers' : 'citizens'
+    );
+    const user = await col.findOne(
       { _id: new ObjectId(userId) },
       { projection: { achievements: 1, stats: 1 } }
     );
@@ -113,13 +114,13 @@ export async function checkAndAwardAchievements(
         
         if (existingAchievement) {
           // Update existing achievement
-          await citizens.updateOne(
+          await col.updateOne(
             { _id: new ObjectId(userId), "achievements.id": update.id },
             { $set: { "achievements.$.unlockedAt": update.unlockedAt } } as any
           );
         } else {
           // Add new achievement
-          await citizens.updateOne(
+          await col.updateOne(
             { _id: new ObjectId(userId) },
             { $push: { achievements: update } } as any
           );
@@ -127,7 +128,7 @@ export async function checkAndAwardAchievements(
       }
 
       // Update points in stats
-      await citizens.updateOne(
+      await col.updateOne(
         { _id: new ObjectId(userId) },
         { 
           $inc: { "stats.points": pointsToAdd },

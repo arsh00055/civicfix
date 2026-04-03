@@ -1,29 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectToDatabase } from '@/lib/db'
-import jwt from 'jsonwebtoken'
+import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-// ✅ SAHI - localStorage token bhi check karo
-function getCurrentUser(req: NextRequest): { id: string; role: string; name: string } | null {
-    try {
-      const authHeader = req.headers.get('authorization')
-      const token = authHeader?.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : req.cookies.get('auth_token')?.value
-      
-      console.log('🔍 Token received:', token ? token.substring(0, 20) + '...' : 'NULL')
-      console.log('🔍 JWT_SECRET:', process.env.JWT_SECRET ? process.env.JWT_SECRET.substring(0, 5) + '...' : 'NOT SET')
-      
-      if (!token) return null
-      const decoded = jwt.verify(token, JWT_SECRET) as any
-      console.log('✅ Decoded role:', decoded.role)
-      return { id: decoded.id || decoded.userId, role: decoded.role, name: decoded.name }
-    } catch (err) {
-      console.log('❌ JWT verify failed:', err)
-      return null
-    }
-  }
 export async function GET(req: NextRequest) {
   try {
     const user = getCurrentUser(req)

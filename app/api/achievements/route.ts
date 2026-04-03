@@ -2,49 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { CITIZEN_ACHIEVEMENTS, VOLUNTEER_ACHIEVEMENTS, ADMIN_ACHIEVEMENTS } from "@/lib/achievements/definitions";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
-function verifyToken(token: string): { id: string; role: string } | null {
-  try {
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return { id: decoded.id || decoded.userId, role: decoded.role };
-  } catch {
-    return null;
-  }
-}
+
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-    const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
-    if (!decoded?.id) {
-      return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     const { db } = await connectToDatabase();
-    const citizens = db.collection("citizens");
+    const col = db.collection(currentUser.role === 'volunteer' ? 'volunteers' : 'citizens');
 
     // Get the user profile first
-    const user = await citizens.findOne(
-      { _id: new ObjectId(decoded.id) },
+      const user = await col.findOne(
+      { _id: new ObjectId(currentUser.id) },
       { projection: { stats: 1, volunteerStats: 1, adminStats: 1, role: 1, achievements: 1 } }
     );
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
     // Select achievements based on role
     let definitions;
     let statsMap: Record<string, number> = {};
 
-    if (user.role === "volunteer") {
+    if (user.role === 'volunteer') {
       definitions = VOLUNTEER_ACHIEVEMENTS;
       statsMap = {
         totalClaimed:        user.volunteerStats?.totalClaimed ?? 0,
@@ -56,7 +44,7 @@ export async function GET(req: NextRequest) {
         level:               user.stats?.level ?? 1,
         points:              user.stats?.points ?? 0,
       };
-    } else if (user.role === "admin") {
+    } else if (user.role === 'admin') {
       definitions = ADMIN_ACHIEVEMENTS;
       statsMap = {
         issuesReviewed:      user.adminStats?.issuesReviewed ?? 0,
@@ -69,7 +57,6 @@ export async function GET(req: NextRequest) {
         points:              user.stats?.points ?? 0,
       };
     } else {
-      // Citizen
       definitions = CITIZEN_ACHIEVEMENTS;
       statsMap = {
         totalReports:    user.stats?.totalReports ?? 0,
@@ -145,7 +132,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (err) {
-    console.error("GET /api/achievements error:", err);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error('GET /api/achievements error:', err);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

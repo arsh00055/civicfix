@@ -1,13 +1,12 @@
 import { connectToDatabase } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // 👇 Data receive karega (body only)
-export async function POST(data: any) {
+export async function POST(req: NextRequest) {
   try {
     const { db } = await connectToDatabase();
-    
-    console.log('🔵 STEP 2: Received data:', data);
+    const data = await req.json();
     
     // ================= VALIDATION =================
     
@@ -79,8 +78,8 @@ export async function POST(data: any) {
     
     const citizenData = {
       firstName: data.firstName,
-  lastName: data.lastName,
-  name: `${data.firstName} ${data.lastName}`,
+      lastName: data.lastName,
+      name: `${data.firstName} ${data.lastName}`,
       email: email,
       password: hashedPassword,
       phone: data.phone || null,
@@ -107,8 +106,6 @@ export async function POST(data: any) {
     if (!result.acknowledged) {
       throw new Error('Failed to insert citizen data');
     }
-
-    console.log('✅ Citizen registered successfully:', { email, id: result.insertedId });
 
     return NextResponse.json({
       success: true,
