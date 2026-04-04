@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { UserProfile } from '@/types';
 import PrimaryButton from '@/components/UI/buttons/PrimaryButton';
@@ -17,6 +17,7 @@ interface ProfileHeaderProps {
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
   const router = useRouter();
+  const [avatarError, setAvatarError] = useState(false);
 
   // 👇 ROLE-BASED COLORS
   const getRoleColors = (role: string) => {
@@ -84,17 +85,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-16">
           <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-6">
             <div className="relative">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={getFullName()}
-                  className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/avatar-placeholder.png';
-                  }}
-                />
-              ) : (
-                // 👇 ROLE-BASED AVATAR BACKGROUND
+                {user.avatar && !avatarError ? (
+                  <img
+                    src={user.avatar}
+                    alt={getFullName()}
+                    className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
                 <div className={`w-32 h-32 rounded-full border-4 border-white shadow-lg bg-gradient-to-br ${roleColors.avatarBg} flex items-center justify-center`}>
                   <span className="text-white text-3xl font-bold">{getInitials()}</span>
                 </div>
