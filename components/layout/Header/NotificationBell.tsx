@@ -47,7 +47,7 @@ const NotificationBell: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed sm:absolute right-1 sm:right-0 mt-2 w-[calc(100vw-1rem)] sm:w-80 bg-white rounded-lg shadow-xl z-50" style={{top: 'auto'}}>
+        <div className="fixed sm:absolute right-1 sm:right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-xl z-50">
           <div className="p-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
           </div>
@@ -65,8 +65,8 @@ const NotificationBell: React.FC = () => {
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <p className="text-sm text-gray-800">{notification.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-800 line-clamp-2">{notification.message}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
                     {new Date(notification.timestamp).toLocaleTimeString([], { 
                       hour: '2-digit', 
                       minute: '2-digit' 
