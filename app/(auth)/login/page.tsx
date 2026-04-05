@@ -60,7 +60,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="h-screen bg-white flex relative overflow-hidden">
+    <div className="min-h-screen bg-white flex relative overflow-x-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/60 via-white to-purple-50/60"></div>
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,7 +97,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <div className="flex-1 flex items-center justify-center px-6 pb-8">
+<div className="flex-1 flex items-center justify-center px-4 py-8">
           <div className="w-full max-w-4xl mx-auto">
             <div className={`transform transition-all duration-500 ease-out ${
               isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'

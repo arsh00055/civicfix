@@ -41,13 +41,7 @@ const PERIOD_LABELS: Record<Period, string> = {
 
 function Avatar({ name, avatar, size = 10 }: { name: string; avatar: string | null; size?: number }) {
   if (avatar) {
-    return (
-      <img
-        src={avatar}
-        alt={name}
-        className={`w-${size} h-${size} rounded-full object-cover`}
-      />
-    )
+    return <img src={avatar} alt={name} className={`w-${size} h-${size} rounded-full object-cover`} />
   }
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500']
@@ -70,16 +64,12 @@ export default function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true); setError(null)
       const res = await apiClient.get('/leaderboard', { params: { period } })
       setLeaderboard(res.data.leaderboard || [])
       setCurrentUserRank(res.data.currentUserRank || null)
-    } catch (err: any) {
-      setError('Failed to load leaderboard.')
-    } finally {
-      setLoading(false)
-    }
+    } catch { setError('Failed to load leaderboard.') }
+    finally { setLoading(false) }
   }
 
   useEffect(() => { fetchLeaderboard() }, [period])
@@ -90,7 +80,7 @@ export default function LeaderboardPage() {
   return (
     <MainLayout role={user?.role ?? null}>
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-50">
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6">
 
           {/* Header */}
           <div className="text-center">
@@ -99,7 +89,8 @@ export default function LeaderboardPage() {
                 <TrophySolid className="h-8 w-8 text-yellow-500" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Leaderboard</h1>
+            {/* FIX: text-2xl on mobile, text-3xl on sm+ */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Leaderboard</h1>
             <p className="text-gray-500 mt-1 text-sm">Top volunteers making a difference</p>
           </div>
 
@@ -109,18 +100,13 @@ export default function LeaderboardPage() {
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-                  period === p
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${period === p ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {PERIOD_LABELS[p]}
               </button>
             ))}
           </div>
 
-          {/* Error */}
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
               {error}
@@ -128,7 +114,6 @@ export default function LeaderboardPage() {
             </div>
           )}
 
-          {/* Loading */}
           {loading ? (
             <div className="space-y-3">
               {[1,2,3,4,5].map(i => (
@@ -153,8 +138,7 @@ export default function LeaderboardPage() {
             <>
               {/* Top 3 podium */}
               {top3.length > 0 && (
-                <div className="grid grid-cols-3 gap-3">
-                  {/* Reorder: 2nd, 1st, 3rd */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {[top3[1], top3[0], top3[2]].map((entry, i) => {
                     if (!entry) return <div key={i} />
                     const actualRank = entry.rank
@@ -163,18 +147,12 @@ export default function LeaderboardPage() {
                     return (
                       <div
                         key={entry.volunteerId}
-                        className={`flex flex-col items-center p-4 rounded-xl border-2 ${medal.bg} ${
-                          isFirst ? 'scale-105 shadow-md' : ''
-                        } ${entry.isCurrentUser ? 'ring-2 ring-blue-400' : ''}`}
+                        className={`flex flex-col items-center p-2 sm:p-4 rounded-xl border-2 ${medal.bg} ${isFirst ? 'scale-105 shadow-md' : ''} ${entry.isCurrentUser ? 'ring-2 ring-blue-400' : ''}`}
                       >
-                        <span className="text-2xl mb-2">{medal.icon}</span>
-                        <Avatar name={entry.name} avatar={entry.avatar} size={12} />
-                        <p className="text-xs font-bold text-gray-900 mt-2 text-center line-clamp-1">
-                          {entry.name}
-                        </p>
-                        <p className={`text-lg font-bold mt-1 ${medal.color}`}>
-                          {entry.tasksCompleted}
-                        </p>
+                        <span className="text-xl sm:text-2xl mb-1 sm:mb-2">{medal.icon}</span>
+                        <Avatar name={entry.name} avatar={entry.avatar} size={10} />
+                        <p className="text-xs font-bold text-gray-900 mt-1 sm:mt-2 text-center line-clamp-1">{entry.name}</p>
+                        <p className={`text-base sm:text-lg font-bold mt-1 ${medal.color}`}>{entry.tasksCompleted}</p>
                         <p className="text-xs text-gray-400">tasks</p>
                       </div>
                     )
@@ -188,24 +166,16 @@ export default function LeaderboardPage() {
                   {rest.map(entry => (
                     <div
                       key={entry.volunteerId}
-                      className={`flex items-center gap-4 bg-white rounded-xl border p-4 transition-all ${
-                        entry.isCurrentUser
-                          ? 'border-blue-300 ring-1 ring-blue-300 bg-blue-50'
-                          : 'border-gray-100 hover:border-gray-200 hover:shadow-sm'
-                      }`}
+                      className={`flex items-center gap-3 sm:gap-4 bg-white rounded-xl border p-3 sm:p-4 transition-all ${entry.isCurrentUser ? 'border-blue-300 ring-1 ring-blue-300 bg-blue-50' : 'border-gray-100 hover:border-gray-200 hover:shadow-sm'}`}
                     >
-                      <span className="w-8 text-center text-sm font-bold text-gray-400">
-                        #{entry.rank}
-                      </span>
+                      <span className="w-7 sm:w-8 text-center text-sm font-bold text-gray-400">#{entry.rank}</span>
                       <Avatar name={entry.name} avatar={entry.avatar} size={10} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">
                           {entry.name}
-                          {entry.isCurrentUser && (
-                            <span className="ml-2 text-xs text-blue-600 font-normal">(you)</span>
-                          )}
+                          {entry.isCurrentUser && <span className="ml-2 text-xs text-blue-600 font-normal">(you)</span>}
                         </p>
-                        <div className="flex items-center gap-3 mt-0.5">
+                        <div className="flex items-center gap-2 sm:gap-3 mt-0.5">
                           {entry.rating > 0 && (
                             <span className="flex items-center gap-0.5 text-xs text-yellow-500">
                               <StarIcon className="h-3 w-3 fill-yellow-400 stroke-yellow-400" />
@@ -220,7 +190,7 @@ export default function LeaderboardPage() {
                           )}
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <p className="text-base font-bold text-gray-900">{entry.tasksCompleted}</p>
                         <p className="text-xs text-gray-400">tasks</p>
                       </div>
@@ -229,18 +199,15 @@ export default function LeaderboardPage() {
                 </div>
               )}
 
-              {/* Current user's rank if outside top 20 */}
               {currentUserRank && !leaderboard.find(e => e.isCurrentUser) && (
-                <div className="flex items-center gap-4 bg-blue-50 border-2 border-blue-300 rounded-xl p-4">
-                  <span className="w-8 text-center text-sm font-bold text-blue-600">
-                    #{currentUserRank.rank}
-                  </span>
+                <div className="flex items-center gap-3 sm:gap-4 bg-blue-50 border-2 border-blue-300 rounded-xl p-3 sm:p-4">
+                  <span className="w-7 sm:w-8 text-center text-sm font-bold text-blue-600">#{currentUserRank.rank}</span>
                   <Avatar name={user?.name || 'You'} avatar={user?.avatar ?? null} size={10} />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-blue-900">{user?.name || 'You'}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-blue-900 truncate">{user?.name || 'You'}</p>
                     <p className="text-xs text-blue-600">Your current rank</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0">
                     <p className="text-base font-bold text-blue-900">{currentUserRank.tasksCompleted}</p>
                     <p className="text-xs text-blue-600">tasks</p>
                   </div>
@@ -249,15 +216,10 @@ export default function LeaderboardPage() {
             </>
           )}
 
-          {/* Refresh */}
-          <button
-            onClick={fetchLeaderboard}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={fetchLeaderboard} className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors">
             <ArrowPathIcon className="h-4 w-4" />
             Refresh
           </button>
-
         </div>
       </div>
     </MainLayout>

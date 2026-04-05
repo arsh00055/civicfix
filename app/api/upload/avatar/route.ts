@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const objectId = new ObjectId(currentUser.id)
     
     // Avatar URL
-    const avatarUrl = `/api/upload/avatar?userId=${currentUser.id}&t=${Date.now()}`
+  const avatarUrl = `/api/upload/avatar?userId=${currentUser.id}&t=${Date.now()}`
 
     // ============ STEP 1: Update or Insert in uploads collection ============
     const existing = await db.collection('uploads').findOne({

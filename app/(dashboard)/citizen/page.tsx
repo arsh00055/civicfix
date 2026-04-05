@@ -1,4 +1,3 @@
-// app/(dashboard)/citizen/page.tsx
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
@@ -9,10 +8,10 @@ import QuickActions from '@/components/dashboard/widgets/QuickActions'
 import Loading from '@/app/loading'
 import Error from '@/app/error'
 import RecentActivity from '@/components/dashboard/widgets/RecentActivity'
-import { 
-  HomeIcon, 
-  MapIcon, 
-  PlusIcon, 
+import {
+  HomeIcon,
+  MapIcon,
+  PlusIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from '@/components/UI/icons'
@@ -70,7 +69,6 @@ export default function CitizenDashboard() {
       router.push('/login');
       return;
     }
-    
     if (user && user.role === 'citizen') {
       loadDashboardData();
     }
@@ -78,13 +76,10 @@ export default function CitizenDashboard() {
 
   const loadDashboardData = async () => {
     if (!user?.id) return;
-    
     try {
       setIsLoading(true);
       setError(null);
-
       const dashboardData = await fetchCitizenDashboard(user.id);
-
       setStats({
         reportsSubmitted: dashboardData.stats.reportsSubmitted ?? 0,
         issuesResolved: dashboardData.stats.issuesResolved ?? 0,
@@ -101,41 +96,20 @@ export default function CitizenDashboard() {
         thisWeekReports: dashboardData.stats.thisWeekReports ?? 0,
         thisWeekResolved: dashboardData.stats.thisWeekResolved ?? 0,
       });
-      
       setMyReports(dashboardData.myReports ?? []);
       setRecentNotifications(dashboardData.recentNotifications ?? []);
-      
-      // Build vote status map
       if (user) {
         const newVoteMap = new Map<string, boolean>();
         dashboardData.myReports?.forEach((report: any) => {
-          const hasVoted = report.voters?.includes(user.id) || false;
-          newVoteMap.set(report.id, hasVoted);
+          newVoteMap.set(report.id, report.voters?.includes(user.id) || false);
         });
         setVoteStatusMap(newVoteMap);
       }
-
     } catch (err: any) {
       console.error('Failed to load citizen dashboard:', err);
       setError(err.message || 'Failed to load dashboard data. Please try again.');
       toast.error('Failed to load dashboard data');
-      
-      setStats({
-        reportsSubmitted: 0,
-        issuesResolved: 0,
-        achievementsEarned: 0,
-        communityRank: 'Citizen',
-        communityImpact: '0%',
-        totalVotes: 0,
-        totalComments: 0,
-        activeVolunteers: 0,
-        resolutionRate: 0,
-        averageResolutionTime: 'N/A',
-        pendingIssues: 0,
-        totalCommunityIssues: 0,
-        thisWeekReports: 0,
-        thisWeekResolved: 0,
-      });
+      setStats({ reportsSubmitted: 0, issuesResolved: 0, achievementsEarned: 0, communityRank: 'Citizen', communityImpact: '0%', totalVotes: 0, totalComments: 0, activeVolunteers: 0, resolutionRate: 0, averageResolutionTime: 'N/A', pendingIssues: 0, totalCommunityIssues: 0, thisWeekReports: 0, thisWeekResolved: 0 });
       setMyReports([]);
       setRecentNotifications([]);
     } finally {
@@ -145,11 +119,9 @@ export default function CitizenDashboard() {
 
   const handleRefresh = async () => {
     if (!user?.id || isRefreshing) return;
-    
     setIsRefreshing(true);
     try {
       const dashboardData = await refreshCitizenDashboard(user.id);
-      
       setStats({
         reportsSubmitted: dashboardData.stats.reportsSubmitted ?? 0,
         issuesResolved: dashboardData.stats.issuesResolved ?? 0,
@@ -166,23 +138,17 @@ export default function CitizenDashboard() {
         thisWeekReports: dashboardData.stats.thisWeekReports ?? 0,
         thisWeekResolved: dashboardData.stats.thisWeekResolved ?? 0,
       });
-      
       setMyReports(dashboardData.myReports ?? []);
       setRecentNotifications(dashboardData.recentNotifications ?? []);
-      
-      // Update vote status map
       if (user) {
         const newVoteMap = new Map<string, boolean>();
         dashboardData.myReports?.forEach((report: any) => {
-          const hasVoted = report.voters?.includes(user.id) || false;
-          newVoteMap.set(report.id, hasVoted);
+          newVoteMap.set(report.id, report.voters?.includes(user.id) || false);
         });
         setVoteStatusMap(newVoteMap);
       }
-      
       toast.success('Dashboard refreshed');
     } catch (err) {
-      console.error('Failed to refresh dashboard:', err);
       toast.error('Failed to refresh dashboard');
     } finally {
       setIsRefreshing(false);
@@ -190,197 +156,110 @@ export default function CitizenDashboard() {
   };
 
   const handleVote = async (issueId: string) => {
-    if (!user?.id) {
-      toast.warning('Please login to vote');
-      router.push('/login');
-      return;
-    }
-
+    if (!user?.id) { toast.warning('Please login to vote'); router.push('/login'); return; }
     try {
       const response = await issuesAPI.voteIssue(issueId);
       const result = response.data;
-      
-      // Update local reports state
       setMyReports(prev => prev.map(report => {
         if (report.id === issueId) {
-          return {
-            ...report,
-            upvotes: result.upvotes,
-            voters: result.voted 
-              ? [...(report.voters || []), user.id]
-              : (report.voters || []).filter((voterId: string) => voterId !== user.id),
-          };
+          return { ...report, upvotes: result.upvotes, voters: result.voted ? [...(report.voters || []), user.id] : (report.voters || []).filter((v: string) => v !== user.id) };
         }
         return report;
       }));
-      
-      // Update vote status map
-      setVoteStatusMap(prev => {
-        const newMap = new Map(prev);
-        newMap.set(issueId, result.voted);
-        return newMap;
-      });
-      
+      setVoteStatusMap(prev => { const m = new Map(prev); m.set(issueId, result.voted); return m; });
       toast.success(result.voted ? 'Vote added!' : 'Vote removed');
-    } catch (error) {
-      console.error('Failed to vote:', error);
+    } catch {
       toast.error('Failed to vote. Please try again.');
     }
   };
 
-  const handleIssueUpdate = () => {
-    loadDashboardData();
-  };
+  const handleIssueUpdate = () => loadDashboardData();
 
   const handleReportIssue = (e: React.MouseEvent) => {
     e.preventDefault();
     router.push('/issues/new?role=' + (user?.role || ''));
   };
 
-  const hasUserVoted = useCallback((issueId: string): boolean => {
-    return voteStatusMap.get(issueId) || false;
-  }, [voteStatusMap]);
+  const hasUserVoted = useCallback((issueId: string): boolean => voteStatusMap.get(issueId) || false, [voteStatusMap]);
 
-  if (authLoading) {
-    return null;
-  }
-
-  if (!user || user.role !== 'citizen') {
-    return null;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Loading />
-      </div>
-    );
-  }
-
-  if (error && stats.reportsSubmitted === 0) {
-    return (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={loadDashboardData} />);
-  }
+  if (authLoading) return null;
+  if (!user || user.role !== 'citizen') return null;
+  if (isLoading) return <div className="space-y-6"><Loading /></div>;
+  if (error && stats.reportsSubmitted === 0) return <Error error={error as unknown as Error & { digest?: string | undefined }} reset={loadDashboardData} />;
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">
+      {/* FIX: Welcome banner — flex-col on mobile, row on sm+ */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+          <div className="flex-1 min-w-0">
+            {/* FIX: text-xl on mobile, text-2xl on sm+ */}
+            <h1 className="text-xl sm:text-2xl font-bold mb-2">
               Welcome back, {user?.name?.split(' ')[0] || 'Citizen'}!
             </h1>
-            <p className="text-blue-100">
-              {stats.reportsSubmitted > 0 
+            <p className="text-blue-100 text-sm sm:text-base">
+              {stats.reportsSubmitted > 0
                 ? `You've contributed ${stats.reportsSubmitted} issues to our community. Thank you!`
-                : 'Glad to see you again! Together we can make our community better.'
-              }
+                : 'Glad to see you again! Together we can make our community better.'}
             </p>
           </div>
-          {stats.communityRank === 'Top Contributor' && (
-            <div className="bg-white/20 rounded-lg px-3 py-2">
-              <span className="text-sm font-medium">🌟 {stats.communityRank}</span>
-            </div>
-          )}
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 text-sm transition-colors disabled:opacity-50"
-          >
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {stats.communityRank === 'Top Contributor' && (
+              <div className="bg-white/20 rounded-lg px-3 py-2">
+                <span className="text-sm font-medium">🌟 {stats.communityRank}</span>
+              </div>
+            )}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 text-sm transition-colors disabled:opacity-50"
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Personal Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Reports Submitted"
-          value={stats.reportsSubmitted.toString()}
-          icon={PlusIcon}
-          trend={{ value: stats.reportsSubmitted > 0 ? 15 : 0, isPositive: true }}
-        />
-        <StatCard
-          title="Issues Resolved"
-          value={stats.issuesResolved.toString()}
-          icon={CheckCircleIcon}
-          trend={{ value: stats.issuesResolved > 0 ? 10 : 0, isPositive: true }}
-        />
-        <StatCard
-          title="Achievements"
-          value={stats.achievementsEarned.toString()}
-          icon={HomeIcon}
-        />
-        <StatCard
-          title="Community Impact"
-          value={stats.communityImpact}
-          icon={MapIcon}
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <StatCard title="Reports Submitted" value={stats.reportsSubmitted.toString()} icon={PlusIcon} trend={{ value: stats.reportsSubmitted > 0 ? 15 : 0, isPositive: true }} />
+        <StatCard title="Issues Resolved" value={stats.issuesResolved.toString()} icon={CheckCircleIcon} trend={{ value: stats.issuesResolved > 0 ? 10 : 0, isPositive: true }} />
+        <StatCard title="Achievements" value={stats.achievementsEarned.toString()} icon={HomeIcon} />
+        <StatCard title="Community Impact" value={stats.communityImpact} icon={MapIcon} />
       </div>
 
       {/* Community Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Active Volunteers"
-          value={stats.activeVolunteers.toString()}
-          icon={UserIcon}
-          description="Helping our community"
-        />
-        <StatCard
-          title="Resolution Rate"
-          value={`${stats.resolutionRate}%`}
-          icon={CheckCircleIcon}
-          description={`${stats.thisWeekResolved} resolved this week`}
-          trend={{ value: stats.resolutionRate, isPositive: stats.resolutionRate > 50 }}
-        />
-        <StatCard
-          title="Avg Resolution Time"
-          value={stats.averageResolutionTime}
-          icon={ClockIcon}
-          description="From report to resolution"
-        />
-        <StatCard
-          title="Community Issues"
-          value={stats.totalCommunityIssues.toString()}
-          icon={ExclamationTriangleIcon}
-          description={`${stats.pendingIssues} pending · ${stats.thisWeekReports} new this week`}
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <StatCard title="Active Volunteers" value={stats.activeVolunteers.toString()} icon={UserIcon} description="Helping our community" />
+        <StatCard title="Resolution Rate" value={`${stats.resolutionRate}%`} icon={CheckCircleIcon} description={`${stats.thisWeekResolved} resolved this week`} trend={{ value: stats.resolutionRate, isPositive: stats.resolutionRate > 50 }} />
+        <StatCard title="Avg Resolution Time" value={stats.averageResolutionTime} icon={ClockIcon} description="From report to resolution" />
+        <StatCard title="Community Issues" value={stats.totalCommunityIssues.toString()} icon={ExclamationTriangleIcon} description={`${stats.pendingIssues} pending · ${stats.thisWeekReports} new this week`} />
       </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-8">
           <QuickActions userRole="citizen" />
-          <RecentActivity 
-            notifications={recentNotifications}
-            loading={isLoading}
-            error={error}
-            onRefresh={handleRefresh}
-            onViewAll={() => router.push('/notifications')}
-          />
+          <RecentActivity notifications={recentNotifications} loading={isLoading} error={error} onRefresh={handleRefresh} onViewAll={() => router.push('/notifications')} />
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Your Recent Reports</h2>
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium disabled:opacity-50"
-              >
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900">Your Recent Reports</h2>
+              <button onClick={handleRefresh} disabled={isRefreshing} className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium disabled:opacity-50">
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
             </div>
             <div className="space-y-8 flex flex-col">
               {myReports.length > 0 ? (
                 myReports.slice(0, 3).map(report => (
-                  <IssueCard 
-                    key={report.id} 
+                  <IssueCard
+                    key={report.id}
                     issue={report}
                     isVoted={hasUserVoted(report.id)}
                     onVote={() => handleVote(report.id)}
-                    onClick={() => {router.push(`/issues/${report.id}?role=${user?.role || ''}`);}}
+                    onClick={() => router.push(`/issues/${report.id}?role=${user?.role || ''}`)}
                     onUpdate={handleIssueUpdate}
                     showActions={false}
                     showVoting={true}
@@ -389,12 +268,9 @@ export default function CitizenDashboard() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <PlusIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
-                  <p className="text-lg font-medium text-gray-600">No issues reported yet</p>
+                  <p className="text-base sm:text-lg font-medium text-gray-600">No issues reported yet</p>
                   <p className="text-sm text-gray-500 mb-4">Start contributing to your community</p>
-                  <button
-                    onClick={handleReportIssue}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
+                  <button onClick={handleReportIssue} className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     <PlusIcon className="w-4 h-4 mr-2" aria-hidden="true" />
                     Report Your First Issue
                   </button>

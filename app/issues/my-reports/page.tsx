@@ -157,7 +157,7 @@ export default function MyReportsPage() {
           </div>
 
           {/* ── Stats ── */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard value={total}      label="Total"       color="text-gray-800" />
             <StatCard value={pending}    label="Pending"     color="text-yellow-600" />
             <StatCard value={inProgress} label="In Progress" color="text-blue-600" />

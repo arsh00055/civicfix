@@ -250,7 +250,7 @@ function CreatePollModal({ onClose, onCreated }: { onClose: () => void; onCreate
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Category</label>
               <select
@@ -348,7 +348,7 @@ export default function PollsPage() {
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
 
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-purple-100 rounded-xl">
                 <ChatBubbleLeftRightIcon className="h-6 w-6 text-purple-600" />
@@ -358,7 +358,7 @@ export default function PollsPage() {
                 <p className="text-sm text-gray-500">Vote on what matters to your community</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button onClick={fetchPolls} className="flex items-center gap-1.5 px-4 cursor-pointer py-2 text-green-500 hover:text-green-800 hover:bg-white rounded-lg border border-gray-200 transition-colors">
                 <ArrowPathIcon className="h-4 w-4" />
                 Refresh

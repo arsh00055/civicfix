@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { EnvelopeIcon, UserCircleIcon, UsersIcon } from '@/components/UI/icons'
 import type { User } from '@/types'
 
@@ -28,6 +29,10 @@ export default function UsersTable({
     }
   }
 
+  const handleDeleteUser = (userId: string) => {
+    onDeleteUser(userId)
+  }
+
   if (users.length === 0) {
     return (
       <div className="text-center py-12">
@@ -41,7 +46,7 @@ export default function UsersTable({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden overflow-x-auto">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -73,10 +78,9 @@ export default function UsersTable({
                         <img
                           src={user.avatar}
                           alt={user.name}
+                          width={40}
+                          height={40}
                           className="h-10 w-10 rounded-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
                         />
                       ) : (
                         <UserCircleIcon className="h-10 w-10 text-gray-400" aria-hidden="true" />
@@ -99,14 +103,17 @@ export default function UsersTable({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
+                <span className={`text-xs font-medium px-2 py-1 rounded-full border ${getRoleColor(user.role as UserRole)}`}>
+                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
-                    onClick={() => onDeleteUser(user.id)}
-                    className="text-red-600 hover:text-red-900 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded px-2 py-1 cursor-pointer"
+                    onClick={() => handleDeleteUser(user.id)}
+                    className="text-red-600 hover:text-red-900 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded px-2 py-1"
                     aria-label={`Delete user ${user.name}`}
                   >
                     Delete

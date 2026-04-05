@@ -291,7 +291,7 @@ export default function BulletinPage() {
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
 
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-orange-100 rounded-xl">
                 <MegaphoneIcon className="h-6 w-6 text-orange-600" />
@@ -301,7 +301,7 @@ export default function BulletinPage() {
                 <p className="text-sm text-gray-500">Announcements, help, and community chat</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button onClick={fetchPosts} className="flex cursor-pointer items-center gap-1.5 px-4 py-2 text-green-500 hover:text-green-800 hover:bg-white rounded-lg border border-gray-200 transition-colors">
                 <ArrowPathIcon className="h-4 w-4" />
                 Refresh

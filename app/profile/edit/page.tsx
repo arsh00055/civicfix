@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import MainLayout from '@/components/layout/MainLayout'
-import PrimaryButton from '@/components/UI/buttons/PrimaryButton'
-import SecondaryButton from '@/components/UI/buttons/SecondaryButton'
-import { useAuth } from '@/features/auth/hooks/useAuth'
-import apiClient from '@/lib/services/api/client'
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import MainLayout from '@/components/layout/MainLayout';
+import PrimaryButton from '@/components/UI/buttons/PrimaryButton';
+import SecondaryButton from '@/components/UI/buttons/SecondaryButton';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import apiClient from '@/lib/services/api/client';
 
 const EditProfilePage: React.FC = () => {
-  const router = useRouter()
-  const { user: currentUser, refreshUser } = useAuth()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const { user: currentUser, refreshUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -27,21 +27,22 @@ const EditProfilePage: React.FC = () => {
     availability: [] as string[],
     experienceLevel: '',
     department: '',
-  })
+  });
 
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  // ✅ Fresh data fetch on every mount
+  // Fetch fresh data on every mount
   useEffect(() => {
-    refreshUser().catch(console.error)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    refreshUser().catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // ✅ Populate form whenever currentUser changes (after refreshUser completes)
+  // Populate form whenever currentUser changes
   useEffect(() => {
     if (currentUser) {
       setFormData({
@@ -58,75 +59,75 @@ const EditProfilePage: React.FC = () => {
         availability: (currentUser as any).availability || [],
         experienceLevel: (currentUser as any).experienceLevel || '',
         department: (currentUser as any).department || '',
-      })
+      });
 
       if (currentUser.avatar) {
         const avatarUrl = currentUser.avatar.includes('?')
           ? `${currentUser.avatar}&t=${Date.now()}`
-          : `${currentUser.avatar}?t=${Date.now()}`
-        setAvatarPreview(avatarUrl)
+          : `${currentUser.avatar}?t=${Date.now()}`;
+        setAvatarPreview(avatarUrl);
       }
     }
-  }, [currentUser])
+  }, [currentUser]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!validTypes.includes(file.type)) {
-      setError('Only JPEG, PNG, WebP, GIF images allowed.')
-      return
+      setError('Only JPEG, PNG, WebP, GIF images allowed.');
+      return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB.')
-      return
+      setError('Image must be less than 5MB.');
+      return;
     }
 
-    setAvatarFile(file)
-    setAvatarPreview(URL.createObjectURL(file))
-    setError(null)
-  }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+    setError(null);
+  };
 
   const uploadAvatar = async (): Promise<string | null> => {
-    if (!avatarFile || !currentUser) return null
+    if (!avatarFile || !currentUser) return null;
 
-    setUploadingAvatar(true)
+    setUploadingAvatar(true);
     try {
-      const formDataUpload = new FormData()
-      formDataUpload.append('file', avatarFile)
-      formDataUpload.append('userId', currentUser.id)
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', avatarFile);
+      formDataUpload.append('userId', currentUser.id);
 
-      const response = await apiClient.post('/api/upload/avatar', formDataUpload, {
+      const response = await apiClient.post('/upload/avatar', formDataUpload, {
         headers: { 'Content-Type': 'multipart/form-data' },
-      })
+      });
 
-      if (response.data.success) return response.data.data.avatar
-      return null
+      if (response.data.success) return response.data.data.avatar;
+      return null;
     } catch (err) {
-      console.error('Avatar upload error:', err)
-      setError('Failed to upload profile picture')
-      return null
+      console.error('Avatar upload error:', err);
+      setError('Failed to upload profile picture');
+      return null;
     } finally {
-      setUploadingAvatar(false)
+      setUploadingAvatar(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!currentUser?.id) {
-      setError('User not authenticated')
-      return
+      setError('User not authenticated');
+      return;
     }
 
-    setSaving(true)
-    setError(null)
-    setSuccess(false)
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      let avatarUrl = null
+      let avatarUrl = null;
       if (avatarFile) {
-        avatarUrl = await uploadAvatar()
+        avatarUrl = await uploadAvatar();
       }
 
       const updateData: any = {
@@ -139,58 +140,55 @@ const EditProfilePage: React.FC = () => {
         city: formData.city,
         state: formData.state,
         zipCode: formData.zipCode,
-      }
+      };
 
-      if (avatarUrl) updateData.avatar = avatarUrl
+      if (avatarUrl) updateData.avatar = avatarUrl;
 
       if (currentUser.role === 'volunteer') {
-        updateData.skills = formData.skills
-        updateData.availability = formData.availability
-        updateData.experienceLevel = formData.experienceLevel
+        updateData.skills = formData.skills;
+        updateData.availability = formData.availability;
+        updateData.experienceLevel = formData.experienceLevel;
       }
 
       if (currentUser.role === 'admin') {
-        updateData.department = formData.department
+        updateData.department = formData.department;
       }
 
-      const response = await apiClient.put('/users/profile', updateData)
+      const response = await apiClient.put('/users/profile', updateData);
 
       if (response.data.success) {
-        console.log('✅ Profile saved, refreshing user...')
-
-        // ✅ Refresh user — updateAuthState inside will update all storage
-        await refreshUser()
-
-        setSuccess(true)
-
-        // ✅ replace so back button nahi aata stale page par
-        setTimeout(() => router.replace('/profile'), 800)
+        console.log('✅ Profile saved, refreshing user...');
+        setSuccess(true);
+        setTimeout(() => router.replace('/profile'), 800);
       } else {
-        setError(response.data.message || 'Failed to update profile')
+        setError(response.data.message || 'Failed to update profile');
       }
     } catch (err: any) {
-      console.error('Profile update error:', err)
-      setError(err?.response?.data?.message || 'An error occurred while updating your profile')
+      console.error('Profile update error:', err);
+      setError(err?.response?.data?.message || 'An error occurred while updating your profile');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   if (!currentUser) {
     return (
       <MainLayout role="citizen">
         <div className="max-w-2xl mx-auto px-4 py-8 text-center">
           <p className="text-gray-600">Please log in to edit your profile.</p>
-          <button onClick={() => router.push('/login')} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg">
+          <button
+            onClick={() => router.push('/login')}
+            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg"
+          >
             Log In
           </button>
         </div>
       </MainLayout>
-    )
+    );
   }
 
-  const isVolunteer = currentUser.role === 'volunteer'
-  const isAdmin = currentUser.role === 'admin'
+  const isVolunteer = currentUser.role === 'volunteer';
+  const isAdmin = currentUser.role === 'admin';
 
   return (
     <MainLayout role={currentUser.role}>
@@ -203,7 +201,9 @@ const EditProfilePage: React.FC = () => {
 
           {success && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <p className="text-green-700 font-medium">Profile updated successfully! Redirecting...</p>
+              <p className="text-green-700 font-medium">
+                Profile updated successfully! Redirecting...
+              </p>
             </div>
           )}
 
@@ -216,12 +216,18 @@ const EditProfilePage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Profile Picture */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Profile Picture
+              </h2>
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-white shadow-md">
                     {avatarPreview ? (
-                      <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
+                      <img
+                        src={avatarPreview}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">
@@ -238,7 +244,9 @@ const EditProfilePage: React.FC = () => {
                 </div>
 
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-sm text-gray-600 mb-3">Upload a profile picture (JPEG, PNG, WebP — max 5MB)</p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Upload a profile picture (JPEG, PNG, WebP — max 5MB)
+                  </p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -258,9 +266,9 @@ const EditProfilePage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setAvatarFile(null)
-                          setAvatarPreview(currentUser.avatar || null)
-                          if (fileInputRef.current) fileInputRef.current.value = ''
+                          setAvatarFile(null);
+                          setAvatarPreview(currentUser.avatar || null);
+                          if (fileInputRef.current) fileInputRef.current.value = '';
                         }}
                         className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200"
                       >
@@ -274,7 +282,9 @@ const EditProfilePage: React.FC = () => {
 
             {/* Personal Information */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Personal Information
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-black mb-1">
@@ -283,7 +293,12 @@ const EditProfilePage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        firstName: e.target.value,
+                      }))
+                    }
                     required
                     disabled={saving}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-black"
@@ -298,7 +313,12 @@ const EditProfilePage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        lastName: e.target.value,
+                      }))
+                    }
                     required
                     disabled={saving}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-black"
@@ -319,11 +339,18 @@ const EditProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1">Phone Number</label>
+                  <label className="block text-sm font-medium text-black mb-1">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                     disabled={saving}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-black"
                     placeholder="+91 98765 43210"
@@ -331,11 +358,18 @@ const EditProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-black mb-1">City</label>
+                  <label className="block text-sm font-medium text-black mb-1">
+                    City
+                  </label>
                   <input
                     type="text"
                     value={formData.city}
-                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        city: e.target.value,
+                      }))
+                    }
                     disabled={saving}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-black"
                     placeholder="Your city"
@@ -344,10 +378,17 @@ const EditProfilePage: React.FC = () => {
               </div>
 
               <div className="mt-6">
-                <label className="block text-sm font-medium text-black mb-1">Bio</label>
+                <label className="block text-sm font-medium text-black mb-1">
+                  Bio
+                </label>
                 <textarea
                   value={formData.bio}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      bio: e.target.value,
+                    }))
+                  }
                   placeholder="Tell us about yourself..."
                   rows={3}
                   disabled={saving}
@@ -359,12 +400,21 @@ const EditProfilePage: React.FC = () => {
             {/* Volunteer Section */}
             {isVolunteer && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Volunteer Details</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Volunteer Details
+                </h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Experience Level
+                  </label>
                   <select
                     value={formData.experienceLevel}
-                    onChange={(e) => setFormData(prev => ({ ...prev, experienceLevel: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        experienceLevel: e.target.value,
+                      }))
+                    }
                     disabled={saving}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
@@ -380,13 +430,22 @@ const EditProfilePage: React.FC = () => {
             {/* Admin Section */}
             {isAdmin && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Admin Details</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Admin Details
+                </h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Department
+                  </label>
                   <input
                     type="text"
                     value={formData.department}
-                    onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        department: e.target.value,
+                      }))
+                    }
                     disabled={saving}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="e.g., Administration, IT, HR"
@@ -397,10 +456,25 @@ const EditProfilePage: React.FC = () => {
 
             {/* Buttons */}
             <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-              <SecondaryButton type="button" onClick={() => router.back()} disabled={saving}>
+              <SecondaryButton
+                type="button"
+                onClick={() => router.back()}
+                disabled={saving}
+              >
                 Cancel
               </SecondaryButton>
-              <PrimaryButton type="submit" disabled={saving || uploadingAvatar} isLoading={saving}>
+              <PrimaryButton
+                type="submit"
+                disabled={saving || uploadingAvatar}
+                isLoading={saving}
+                className={
+                  currentUser.role === 'admin'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : currentUser.role === 'volunteer'
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }
+              >
                 {saving ? 'Saving...' : 'Save Changes'}
               </PrimaryButton>
             </div>
@@ -408,7 +482,7 @@ const EditProfilePage: React.FC = () => {
         </div>
       </div>
     </MainLayout>
-  )
-}
+  );
+};
 
-export default EditProfilePage
+export default EditProfilePage;

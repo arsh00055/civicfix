@@ -50,7 +50,7 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-2xl p-8 pt-4 shadow-xl border border-gray-100">
+  <div className="bg-white rounded-2xl p-8 pt-4 shadow-xl border border-gray-100 overflow-auto max-h-[90vh]">
         <div className="text-center mb-5">
           <h2 className="text-1xl font-bold text-gray-900 mb-1">
             Welcome back

@@ -69,6 +69,7 @@ export async function GET(req: NextRequest) {
     if (!currentUser) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
+    console.log('currentUser', currentUser);
 
     const role = currentUser.role as UserRole;
 

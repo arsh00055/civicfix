@@ -137,8 +137,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   const userEmail  = userData?.email;
   const userName   = userData?.name;
   let userAvatar   = userData?.avatar;
-  if (userAvatar && !userAvatar.startsWith('http') && !userAvatar.startsWith('/')) {
-    userAvatar = `/${userAvatar}`;
+  if (userAvatar?.startsWith('/upload/')) {
+    userAvatar = `/api${userAvatar}`;
   }
 
   const userRole = role || 'user';

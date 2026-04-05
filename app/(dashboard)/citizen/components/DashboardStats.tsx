@@ -25,7 +25,7 @@ export default function DashboardStats({ data, title, description }: DashboardSt
         <StatsVisualization data={data} />
       </div>
       
-      <div className="mt-4 grid grid-cols-2 gap-4 text-center">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
         <div>
           <p className="text-2xl font-bold text-gray-900">{data[0]}</p>
           <p className="text-sm text-gray-600">This Week</p>
