@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import MainLayout from '@/components/layout/MainLayout'
 import { useAuth } from '@/features/auth/hooks/useAuth'
@@ -15,21 +15,12 @@ const PrivacySecurityPage: React.FC = () => {
     showPhone: false,
     showLocation: true,
     showActivity: true,
-    profileVisibility: 'public', // public | community | private
-  })
-
-  const [passwords, setPasswords] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    profileVisibility: 'public',
   })
 
   const [savingPrivacy, setSavingPrivacy] = useState(false)
-  const [savingPassword, setSavingPassword] = useState(false)
   const [privacySuccess, setPrivacySuccess] = useState(false)
-  const [passwordSuccess, setPasswordSuccess] = useState(false)
   const [privacyError, setPrivacyError] = useState<string | null>(null)
-  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   const handlePrivacySubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,31 +35,6 @@ const PrivacySecurityPage: React.FC = () => {
       setPrivacyError(err?.response?.data?.message || 'Failed to save privacy settings.')
     } finally {
       setSavingPrivacy(false)
-    }
-  }
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setPasswordError(null)
-    setPasswordSuccess(false)
-
-    if (!passwords.currentPassword) return setPasswordError('Current password is required.')
-    if (passwords.newPassword.length < 8) return setPasswordError('New password must be at least 8 characters.')
-    if (passwords.newPassword !== passwords.confirmPassword) return setPasswordError('Passwords do not match.')
-
-    setSavingPassword(true)
-    try {
-      await apiClient.put('/users/change-password', {
-        currentPassword: passwords.currentPassword,
-        newPassword: passwords.newPassword,
-      })
-      setPasswordSuccess(true)
-      setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      setTimeout(() => setPasswordSuccess(false), 3000)
-    } catch (err: any) {
-      setPasswordError(err?.response?.data?.message || 'Failed to change password.')
-    } finally {
-      setSavingPassword(false)
     }
   }
 
@@ -97,7 +63,6 @@ const PrivacySecurityPage: React.FC = () => {
             <p className="text-sm text-gray-500 mb-5">Control what others can see on your profile.</p>
 
             <div className="space-y-5">
-              {/* Profile Visibility */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Profile Visibility</label>
                 <div className="flex gap-3">
@@ -159,59 +124,18 @@ const PrivacySecurityPage: React.FC = () => {
           </div>
         </form>
 
-        {/* Change Password */}
-        <form onSubmit={handlePasswordSubmit}>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Change Password</h2>
-            <p className="text-sm text-gray-500 mb-5">Update your password to keep your account secure.</p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                <input
-                  type="password"
-                  value={passwords.currentPassword}
-                  onChange={e => setPasswords(p => ({ ...p, currentPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  placeholder="Enter current password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={passwords.newPassword}
-                  onChange={e => setPasswords(p => ({ ...p, newPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  placeholder="Min 8 characters"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={passwords.confirmPassword}
-                  onChange={e => setPasswords(p => ({ ...p, confirmPassword: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                  placeholder="Repeat new password"
-                />
-              </div>
-            </div>
-
-            {passwordError && <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{passwordError}</div>}
-            {passwordSuccess && <div className="mt-4 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg px-4 py-2">✓ Password changed successfully!</div>}
-
-            <div className="mt-5 flex justify-end">
-              <button
-                type="submit"
-                disabled={savingPassword}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
-              >
-                {savingPassword ? 'Changing...' : 'Change Password'}
-              </button>
-            </div>
-          </div>
-        </form>
+        {/* Change Password — Button only, opens new page */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">Password</h2>
+          <p className="text-sm text-gray-500 mb-5">Update your password to keep your account secure.</p>
+          <button
+            type="button"
+            onClick={() => router.push('/profile/change-password')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+          >
+            Change Password →
+          </button>
+        </div>
 
         {/* Danger Zone */}
         <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
