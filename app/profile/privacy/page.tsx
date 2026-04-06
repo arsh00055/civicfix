@@ -143,9 +143,19 @@ const PrivacySecurityPage: React.FC = () => {
           <p className="text-sm text-gray-500 mb-4">These actions are irreversible. Proceed with caution.</p>
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-                apiClient.delete('/users/account').then(() => router.push('/'))
+                try {
+                  await apiClient.delete('/users/account')
+                  // Clear all auth data
+                  document.cookie.split(';').forEach(c => {
+                    document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/')
+                  })
+                  localStorage.clear()
+                  router.push('/login')
+                } catch (err) {
+                  alert('Failed to delete account. Please try again.')
+                }
               }
             }}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
