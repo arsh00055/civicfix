@@ -86,42 +86,31 @@ export default function UserManagementPage() {
     }
   }
 
-  const deleteUser = async (userId: string) => {  
-    // Use toast for confirmation dialog
-    toast.warning('Delete User?', {
-      description: 'Are you sure you want to permanently delete this user? This action cannot be undone.',
+  const toggleUserActive = async (userId: string, currentStatus: boolean) => {
+    const newStatus = !currentStatus
+    toast.warning(`${newStatus ? 'Activate' : 'Deactivate'} this user?`, {
+      description: `User account will be ${newStatus ? 'activated' : 'deactivated'}.`,
       duration: 5000,
       action: {
-        label: 'Delete',
+        label: newStatus ? 'Activate' : 'Deactivate',
         onClick: async () => {
           try {
-            await apiClient.delete(`/admin/users/${userId}`);
-            setUsers(prev => prev.filter(user => user.id !== userId));
-            toast.success('User deleted successfully', {
-              description: 'The user has been permanently removed from the system.',
-              duration: 3000,
-            });
+            setUpdatingUser(userId)
+            await apiClient.patch(`/admin/users/${userId}`, { isActive: newStatus })
+            setUsers(prev => prev.map(u =>
+              u.id === userId ? { ...u, isActive: newStatus } as any : u
+            ))
+            toast.success(`User ${newStatus ? 'activated' : 'deactivated'} successfully`)
           } catch (err: any) {
-            console.error('Failed to delete user:', err);
-            toast.error('Failed to delete user', {
-              description: err.message || 'Please try again or contact support if the issue persists.',
-              duration: 4000,
-            });
-            setError(err.message || 'Failed to delete user. Please try again.');
+            toast.error('Action failed', { description: err.message || 'Please try again.' })
+          } finally {
+            setUpdatingUser(null)
           }
         },
       },
-      cancel: {
-        label: 'Cancel',
-        onClick: () => {
-          toast.info('Delete cancelled', {
-            description: 'The user was not deleted.',
-            duration: 2000,
-          });
-        },
-      },
-    });
-  };
+      cancel: { label: 'Cancel', onClick: () => {} },
+    })
+  }
 
   // 👇 NEW: Handle approve volunteer
   const handleApproveVolunteer = async (volunteerId: string) => {
@@ -152,6 +141,8 @@ export default function UserManagementPage() {
       alert(err.response?.data?.message || 'Failed to reject volunteer. Please try again.')
     }
   }
+
+  
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)
@@ -246,7 +237,7 @@ export default function UserManagementPage() {
           users={filteredUsers}
           updatingUser={updatingUser}
           onUpdateRole={updateUserRole}
-          onDeleteUser={deleteUser}
+          onToggleActive={toggleUserActive}
         />
       </div>
     </div>

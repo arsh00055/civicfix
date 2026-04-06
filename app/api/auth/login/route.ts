@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
         if (!citizen) {
           return NextResponse.json({
             success: false,
-            message: "Invalid email or password"
+            message: "No account found with this email. Please sign up first.",
+            code: "ACCOUNT_NOT_FOUND"
           });
         }
   
@@ -54,7 +55,8 @@ export async function POST(request: NextRequest) {
         if (!isPasswordValid) {
           return NextResponse.json({
             success: false,
-            message: "Invalid email or password"
+            message: "Incorrect password. Please try again.",
+            code: "INCORRECT_PASSWORD"
           });
         }
   
@@ -106,7 +108,8 @@ export async function POST(request: NextRequest) {
         if (!volunteer) {
           return NextResponse.json({
             success: false,
-            message: "Invalid email or password",
+            message: "No account found with this email. Please apply to become a volunteer first.",
+            code: "ACCOUNT_NOT_FOUND"
           });
         }
 
@@ -136,12 +139,13 @@ export async function POST(request: NextRequest) {
 
         const isPasswordValid = await bcrypt.compare(data.password, volunteer.password);
 
-  if (!isPasswordValid) {
-    return NextResponse.json({
-      success: false,
-      message: "Invalid email or password",
-    });
-  }
+        if (!isPasswordValid) {
+          return NextResponse.json({
+            success: false,
+            message: "Incorrect password. Please try again.",
+            code: "INCORRECT_PASSWORD"
+          });
+        }
 
   const token = jwt.sign(
     {
@@ -198,11 +202,11 @@ else if (role === 'admin') {
   }
   
   const admin = await db.collection('admins').findOne({ email });
-
   if (!admin) {
     return NextResponse.json({
       success: false,
-      message: "Invalid email or password"
+      message: "No admin account found with this email.",
+      code: "ACCOUNT_NOT_FOUND"
     });
   }
 
@@ -218,7 +222,8 @@ else if (role === 'admin') {
   if (!isPasswordValid) {
     return NextResponse.json({
       success: false,
-      message: "Invalid email or password"
+      message: "Incorrect password. Please try again.",
+      code: "INCORRECT_PASSWORD"
     });
   }
 
