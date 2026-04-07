@@ -174,6 +174,14 @@ export default function IssueDetailPage() {
               <div className="flex flex-wrap gap-2">
                 <VoteButton issueId={issue.id} initialVotes={issue.upvotes || 0} />
                 <ClaimButton issueId={issue.id} currentStatus={issue.status} />
+                {user?.id === issue.reporterId && issue.status === 'reported' && (
+                  <button
+                  onClick={() => router.push(`/issues/${issue.id}/edit?role=${userRole}`)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  >
+                    ✏️ Edit
+                    </button>
+                  )}
               </div>
             </div>
 
