@@ -88,7 +88,9 @@ export default function VolunteerDashboard() {
 
   if (authLoading) return null;
   if (!user || user.role !== 'volunteer') return null;
-  if (isLoading) return <div className="space-y-6"><Loading /></div>;
+  if (isLoading){
+    return <Loading isLoading={true} mode="page" message="Loading..." />;
+  }
   if (error && stats.completedTasks === 0) return <Error error={error as unknown as Error & { digest?: string }} reset={loadDashboardData} />;
 
   return (

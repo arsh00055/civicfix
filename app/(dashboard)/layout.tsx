@@ -45,11 +45,7 @@ export default function DashboardLayout({
   }, [isAuthenticated, userRole, isLoading, pathname, router]);
 
   if (isLoading || checkingAuth) {
-    return (
-      <div className="h-screen bg-white flex items-center justify-center">
-        <Loading />
-      </div>
-    );
+    return <Loading isLoading={true} mode="page" message="Checking Authentication..." />;
   }
 
   if (!isAuthenticated) {

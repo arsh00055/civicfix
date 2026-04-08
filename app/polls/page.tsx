@@ -345,7 +345,7 @@ export default function PollsPage() {
   return (
     <MainLayout role={user?.role ?? null}>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-3">

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import StatCard from '@/components/UI/cards/StatCard'
 import IssueCard from '@/components/UI/cards/IssueCard'
 import QuickActions from '@/components/dashboard/widgets/QuickActions'
-import Loading from '@/app/loading'
 import Error from '@/app/error'
 import RecentActivity from '@/components/dashboard/widgets/RecentActivity'
 import {
@@ -20,6 +19,7 @@ import { fetchCitizenDashboard, refreshCitizenDashboard } from '@/lib/helpers/ci
 import { issuesAPI } from '@/lib/services/api/endpoints'
 import { toast } from 'sonner'
 import { ClockIcon, UserIcon } from 'lucide-react'
+import Loading from '@/app/loading'
 
 interface DashboardStats {
   reportsSubmitted: number;
@@ -184,7 +184,9 @@ export default function CitizenDashboard() {
 
   if (authLoading) return null;
   if (!user || user.role !== 'citizen') return null;
-  if (isLoading) return <div className="space-y-6"><Loading /></div>;
+  if (isLoading) {
+    return <Loading isLoading={true} mode="page" message="Loading..." />;
+  }
   if (error && stats.reportsSubmitted === 0) return <Error error={error as unknown as Error & { digest?: string | undefined }} reset={loadDashboardData} />;
 
   return (
@@ -270,7 +272,7 @@ export default function CitizenDashboard() {
                   <PlusIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" aria-hidden="true" />
                   <p className="text-base sm:text-lg font-medium text-gray-600">No issues reported yet</p>
                   <p className="text-sm text-gray-500 mb-4">Start contributing to your community</p>
-                  <button onClick={handleReportIssue} className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  <button onClick={handleReportIssue} className="inline-flex cursor-pointer items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     <PlusIcon className="w-4 h-4 mr-2" aria-hidden="true" />
                     Report Your First Issue
                   </button>
