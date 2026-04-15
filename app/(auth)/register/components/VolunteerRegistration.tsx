@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -46,24 +46,41 @@ interface VolunteerRegistrationProps {
   onSwitchToLogin: () => void
 }
 
-export default function VolunteerRegistration({ 
-  onSuccess, 
-  onSwitchToLogin 
+export default function VolunteerRegistration({
+  onSuccess,
+  onSwitchToLogin
 }: VolunteerRegistrationProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
   const [showSuccess, setShowSuccess] = useState(false)
-const [registeredEmail, setRegisteredEmail] = useState('')
+  const [registeredEmail, setRegisteredEmail] = useState('')
 
+  // ✅ null = loading, true = closed, false = open
+  const [registrationClosed, setRegistrationClosed] = useState<boolean | null>(null)
+  const [supportEmail, setSupportEmail] = useState('support@civicfix.com')
 
+  useEffect(() => {
+    const checkRegistration = async () => {
+      try {
+        const response = await apiClient.get('/admin/settings')
+        const settings = response.data?.data
+        setRegistrationClosed(settings?.allowVolunteerRegistration === false)
+        if (settings?.supportEmail) setSupportEmail(settings.supportEmail)
+      } catch {
+        // Error hove ta form dikhao — safe fallback
+        setRegistrationClosed(false)
+      }
+    }
+    checkRegistration()
+  }, [])
 
-  const { 
-    register, 
-    handleSubmit, 
+  const {
+    register,
+    handleSubmit,
     watch,
     setValue,
-    formState: { errors } 
+    formState: { errors }
   } = useForm({
     resolver: zodResolver(volunteerSchema),
     defaultValues: {
@@ -80,20 +97,20 @@ const [registeredEmail, setRegisteredEmail] = useState('')
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     setError('')
-  
+
     try {
       const { confirmPassword, agreeToTerms, ...registrationData } = data
-      
-      await apiClient.post('/auth/register', {
+
+      await apiClient.post('/auth/register/volunteer', {
         ...registrationData,
-        role: 'volunteer'
       })
-      
+
       setRegisteredEmail(data.email)
-setShowSuccess(true)        // 👈 ADD THIS
-      
+      setShowSuccess(true)
+
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.')
+      const message = err.response?.data?.message || err.message
+      setError(message || 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -101,17 +118,15 @@ setShowSuccess(true)        // 👈 ADD THIS
 
   const toggleSkill = (skill: string) => {
     const newSkills = selectedSkills.includes(skill)
-      ? selectedSkills.filter(s => s !== skill)
+      ? selectedSkills.filter((s: string) => s !== skill)
       : [...selectedSkills, skill]
-    
     setValue('skills', newSkills, { shouldValidate: true })
   }
 
   const toggleAvailability = (availability: string) => {
     const newAvailability = selectedAvailability.includes(availability)
-      ? selectedAvailability.filter(a => a !== availability)
+      ? selectedAvailability.filter((a: string) => a !== availability)
       : [...selectedAvailability, availability]
-    
     setValue('availability', newAvailability, { shouldValidate: true })
   }
 
@@ -120,7 +135,7 @@ setShowSuccess(true)        // 👈 ADD THIS
     onSwitchToLogin()
   }
 
-  // 👈 ADD THIS BEFORE RETURN
+  // ✅ Success screen
   if (showSuccess) {
     return (
       <VolunteerSuccess
@@ -130,6 +145,71 @@ setShowSuccess(true)        // 👈 ADD THIS
     )
   }
 
+  // ✅ Loading
+  if (registrationClosed === null) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600" />
+      </div>
+    )
+  }
+
+  // ✅ Registration Closed screen
+  if (registrationClosed) {
+    return (
+      <div className="py-6 px-2">
+        <button
+          onClick={onSwitchToLogin}
+          className="flex items-center text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Login
+        </button>
+
+        <div className="text-center">
+          <div className="flex items-center justify-center w-20 h-20 bg-orange-50 border-2 border-orange-100 rounded-full mx-auto mb-6">
+            <span className="text-4xl">🔒</span>
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Volunteer Applications are Temporarily Closed
+          </h2>
+
+          <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+            We're not accepting new volunteer applications at the moment.
+            Please try again after some time — we open registrations periodically.
+          </p>
+
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">Need help?</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 inline-block mb-8">
+            <p className="text-xs text-gray-500 mb-1">Contact our support team</p>
+            <a
+              href={`mailto:${supportEmail}`}
+              className="text-green-600 font-semibold text-sm hover:text-green-700 hover:underline transition-colors"
+            >
+              {supportEmail}
+            </a>
+          </div>
+
+          <button
+            onClick={onSwitchToLogin}
+            className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-sm"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ✅ Normal registration form
   return (
     <div>
       <div className="text-center mb-6">
@@ -192,8 +272,8 @@ setShowSuccess(true)        // 👈 ADD THIS
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {SKILLS_OPTIONS.map((skill) => (
-              <label 
-                key={skill} 
+              <label
+                key={skill}
                 className="flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                 htmlFor={`skill-${skill}`}
               >
@@ -221,8 +301,8 @@ setShowSuccess(true)        // 👈 ADD THIS
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {AVAILABILITY_OPTIONS.map((availability) => (
-              <label 
-                key={availability} 
+              <label
+                key={availability}
                 className="flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                 htmlFor={`availability-${availability}`}
               >

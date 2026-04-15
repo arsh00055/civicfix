@@ -2,18 +2,25 @@ import { connectToDatabase } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
-// 👇 Data receive karega (body only)
 export async function POST(req: NextRequest) {
   try {
     const { db } = await connectToDatabase();
     const data = await req.json();
-    
+
+    // ✅ Check if citizen registration is allowed
+    const settings = await db.collection('systemSettings').findOne({ key: 'global' })
+    if (settings?.allowCitizenRegistration === false) {
+      return NextResponse.json({
+        success: false,
+        message: "Citizen registration is currently closed. Please contact support for more information."
+      }, { status: 403 });
+    }
+
     // ================= VALIDATION =================
-    
-    // Required fields check
+
     const requiredFields = ['email', 'password', 'firstName', 'lastName', 'address', 'city', 'zipCode'];
     const missingFields = requiredFields.filter(field => !data[field]);
-    
+
     if (missingFields.length > 0) {
       return NextResponse.json({
         success: false,
@@ -21,7 +28,6 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email)) {
       return NextResponse.json({
@@ -30,7 +36,6 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Password validation
     if (data.password.length < 8) {
       return NextResponse.json({
         success: false,
@@ -38,7 +43,6 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Name validation
     if (data.firstName.length < 2 || data.lastName.length < 2) {
       return NextResponse.json({
         success: false,
@@ -47,10 +51,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ================= CHECK DUPLICATE EMAIL =================
-    
+
     const email = data.email.toLowerCase();
-    
-    // Check in citizens collection
+
     const existingCitizen = await db.collection('citizens').findOne({ email });
     if (existingCitizen) {
       return NextResponse.json({
@@ -58,8 +61,7 @@ export async function POST(req: NextRequest) {
         message: "Email already registered. Please login or use a different email."
       }, { status: 409 });
     }
-    
-    // Check in volunteers collection
+
     const existingVolunteer = await db.collection('volunteers').findOne({ email });
     if (existingVolunteer) {
       return NextResponse.json({
@@ -69,17 +71,17 @@ export async function POST(req: NextRequest) {
     }
 
     // ================= HASH PASSWORD =================
-    
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // ================= CREATE CITIZEN OBJECT =================
-    
+
     const fullName = `${data.firstName} ${data.lastName}`;
-    
+
     const citizenData = {
       firstName: data.firstName,
       lastName: data.lastName,
-      name: `${data.firstName} ${data.lastName}`,
+      name: fullName,
       email: email,
       password: hashedPassword,
       phone: data.phone || null,
@@ -94,13 +96,11 @@ export async function POST(req: NextRequest) {
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {
-        registrationIp: 'unknown',  // 👈 FIXED - no headers
-        userAgent: 'unknown'        // 👈 FIXED - no headers
+        registrationIp: 'unknown',
+        userAgent: 'unknown'
       }
     };
 
-    // ================= INSERT INTO DATABASE =================
-    
     const result = await db.collection('citizens').insertOne(citizenData);
 
     if (!result.acknowledged) {
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Registration successful! Please check your email to verify your account.",
+      message: "Registration successful!",
       data: {
         userId: result.insertedId,
         email: email,
@@ -121,7 +121,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error("❌ Citizen registration error:", error);
-    
     return NextResponse.json({
       success: false,
       message: error instanceof Error ? error.message : "Server error. Please try again later."

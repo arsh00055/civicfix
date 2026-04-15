@@ -14,6 +14,9 @@ const VolunteerLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [errorCode, setErrorCode] = useState<string>('');
   const [localLoading, setLocalLoading] = useState(false);
+  const [registrationsOpen, setRegistrationsOpen] = useState(true)
+const [showMessage, setShowMessage] = useState(false)
+
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,11 +146,28 @@ const VolunteerLogin: React.FC = () => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
         <button
-          onClick={() => router.push('/register/volunteer')}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
-        >
-          Apply to be a Volunteer
-        </button>
+  onClick={() => {
+    if (registrationsOpen) {
+      router.push('/register/volunteer')
+    } else {
+      setShowMessage(true)
+      setTimeout(() => setShowMessage(false), 3000)
+    }
+  }}
+  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+    registrationsOpen 
+      ? 'bg-green-600 text-white hover:bg-green-700' 
+      : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+  }`}
+>
+  {registrationsOpen ? 'Apply to be a Volunteer' : 'Registrations Closed'}
+</button>
+
+{showMessage && !registrationsOpen && (
+  <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+    ⚠️ Volunteer registrations are currently closed. Please try again later.
+  </div>
+)}
       </div>
     </div>
   );

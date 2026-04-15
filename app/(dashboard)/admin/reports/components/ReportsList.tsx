@@ -24,9 +24,10 @@ interface ReportsListProps {
   reports: Report[]
   onDownload: (report: Report) => void
   onRegenerate: (report: Report) => void
+  onDelete: (report: Report) => void  // ✅ new
 }
 
-export default function ReportsList({ reports, onDownload, onRegenerate }: ReportsListProps) {
+export default function ReportsList({ reports, onDownload, onRegenerate, onDelete }: ReportsListProps) {
   const getReportTypeColor = (type: ReportType) => {
     switch (type) {
       case 'issues': return 'bg-blue-100 text-blue-800 border-blue-200'
@@ -65,14 +66,6 @@ export default function ReportsList({ reports, onDownload, onRegenerate }: Repor
     return null
   }
 
-  const handleDownload = (report: Report) => {
-    onDownload(report)
-  }
-
-  const handleRegenerate = (report: Report) => {
-    onRegenerate(report)
-  }
-
   if (reports.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -95,7 +88,7 @@ export default function ReportsList({ reports, onDownload, onRegenerate }: Repor
           {reports.length} report{reports.length !== 1 ? 's' : ''}
         </span>
       </div>
-      
+
       <div className="divide-y divide-gray-200">
         {reports.map((report) => (
           <div key={report.id} className="p-6 hover:bg-gray-50 transition-colors">
@@ -127,10 +120,11 @@ export default function ReportsList({ reports, onDownload, onRegenerate }: Repor
                   )}
                 </div>
               </div>
+
               <div className="flex items-center space-x-2 lg:ml-4 flex-shrink-0">
                 {report.downloadUrl && report.status === 'completed' && (
                   <button
-                    onClick={() => handleDownload(report)}
+                    onClick={() => onDownload(report)}
                     className="flex items-center space-x-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                     aria-label={`Download ${report.title}`}
                   >
@@ -140,12 +134,22 @@ export default function ReportsList({ reports, onDownload, onRegenerate }: Repor
                 )}
                 {report.status === 'failed' && (
                   <button
-                    onClick={() => handleRegenerate(report)}
+                    onClick={() => onRegenerate(report)}
                     className="flex items-center space-x-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                     aria-label={`Regenerate ${report.title}`}
                   >
                     <RefreshIcon className="h-4 w-4" aria-hidden="true" />
                     <span>Retry</span>
+                  </button>
+                )}
+                {/* ✅ Delete button — generating wali report delete nahi ho sakdi */}
+                {report.status !== 'generating' && (
+                  <button
+                    onClick={() => onDelete(report)}
+                    className="flex items-center space-x-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+                    aria-label={`Delete ${report.title}`}
+                  >
+                    <span>🗑</span>
                   </button>
                 )}
               </div>

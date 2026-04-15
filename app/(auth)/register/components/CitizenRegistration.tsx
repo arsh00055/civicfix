@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -21,7 +21,7 @@ const citizenSchema = z.object({
   address: z.string().min(5, 'Address is required'),
   city: z.string().min(2, 'City is required'),
   zipCode: z.string().min(3, 'ZIP code is required'),
-  avatar: z.string().optional(), 
+  avatar: z.string().optional(),
   agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -33,20 +33,38 @@ interface CitizenRegistrationProps {
   onSwitchToLogin: () => void
 }
 
-export default function CitizenRegistration({ 
-  onSuccess, 
-  onSwitchToLogin 
+export default function CitizenRegistration({
+  onSuccess,
+  onSwitchToLogin
 }: CitizenRegistrationProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
   const [showSuccess, setShowSuccess] = useState(false)
-const [registeredEmail, setRegisteredEmail] = useState('')
+  const [registeredEmail, setRegisteredEmail] = useState('')
 
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors } 
+  // ✅ null = loading, true = closed, false = open
+  const [registrationClosed, setRegistrationClosed] = useState<boolean | null>(null)
+  const [supportEmail, setSupportEmail] = useState('support@civicfix.com')
+
+  useEffect(() => {
+    const checkRegistration = async () => {
+      try {
+        const response = await apiClient.get('/admin/settings')
+        const settings = response.data?.data
+        setRegistrationClosed(settings?.allowCitizenRegistration === false)
+        if (settings?.supportEmail) setSupportEmail(settings.supportEmail)
+      } catch {
+        setRegistrationClosed(false)
+      }
+    }
+    checkRegistration()
+  }, [])
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
   } = useForm({
     resolver: zodResolver(citizenSchema),
   })
@@ -54,20 +72,20 @@ const [registeredEmail, setRegisteredEmail] = useState('')
   const onSubmit = async (data: any) => {
     setIsLoading(true)
     setError('')
-  
+
     try {
       const { confirmPassword, agreeToTerms, ...registrationData } = data
-      
-      await apiClient.post('/auth/register', {
+
+      await apiClient.post('/auth/register/citizen', {
         ...registrationData,
-        role: 'citizen'
       })
-      
-      setRegisteredEmail(data.email)  // 👈 ADD THIS
-      setShowSuccess(true)             // 👈 ADD THIS
-      
+
+      setRegisteredEmail(data.email)
+      setShowSuccess(true)
+
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.')
+      const message = err.response?.data?.message || err.message
+      setError(message || 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -78,6 +96,7 @@ const [registeredEmail, setRegisteredEmail] = useState('')
     onSwitchToLogin()
   }
 
+  // ✅ Success screen
   if (showSuccess) {
     return (
       <RegistrationSuccess
@@ -87,6 +106,61 @@ const [registeredEmail, setRegisteredEmail] = useState('')
     )
   }
 
+  // ✅ Loading
+  if (registrationClosed === null) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  // ✅ Registration Closed screen
+  if (registrationClosed) {
+    return (
+      <div className="py-6 px-2">
+        <div className="text-center">
+          <div className="flex items-center justify-center w-20 h-20 bg-orange-50 border-2 border-orange-100 rounded-full mx-auto mb-6">
+            <span className="text-4xl">🔒</span>
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Citizen Registration is Temporarily Closed
+          </h2>
+
+          <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+            We're not accepting new citizen registrations at the moment.
+            Please try again after some time — we open registrations periodically.
+          </p>
+
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400">Need help?</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 inline-block mb-8">
+            <p className="text-xs text-gray-500 mb-1">Contact our support team</p>
+            <a
+              href={`mailto:${supportEmail}`}
+              className="text-blue-600 font-semibold text-sm hover:text-blue-700 hover:underline transition-colors"
+            >
+              {supportEmail}
+            </a>
+          </div>
+
+          <button
+            onClick={onSwitchToLogin}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm"
+          >
+            Back to Login
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ✅ Normal registration form
   return (
     <div>
       <div className="text-center mb-6">

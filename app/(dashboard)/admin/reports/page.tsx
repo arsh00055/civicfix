@@ -36,57 +36,107 @@ export default function ReportsPage() {
     try {
       setLoading(true)
       setError(null)
-      
       const response = await apiClient.get('/admin/reports')
-      setReports(response.data.reports || response.data.data || []);
+      setReports(response.data.reports || response.data.data || [])
     } catch (err: any) {
       console.error('Failed to fetch reports:', err)
-      setError(err.message || 'Failed to load reports. Please try again.')
+      setError(err.message || 'Failed to load reports.')
     } finally {
       setLoading(false)
     }
   }
 
   const generateReport = async (type: ReportType, format: ReportFormat) => {
-    const reportId = `${type}-${format}-${Date.now()}`
-    setGenerating(reportId)
+    const tempId = `${type}-${format}-${Date.now()}`
+    setGenerating(tempId)
     setError(null)
 
     try {
-      const response = await apiClient.get('/analytics/export', {
-        params: { format }
-      })
+      // ── Step 1: Direct blob fetch from export endpoint ──
+      // apiClient parses JSON by default, so use native fetch for blob
+      const exportFormat = format === 'excel' ? 'csv' : format  // backend supports csv/json
+      const exportUrl = `/api/admin/analytics/export?format=${exportFormat}&type=${type}`
 
-      const newReport: Report = {
-        id: reportId,
+      const res = await fetch(exportUrl, { credentials: 'include' })
+
+      if (!res.ok) {
+        throw new Error(`Export failed: ${res.status} ${res.statusText}`)
+      }
+
+      const blob = await res.blob()
+      const ext = format === 'excel' ? 'csv' : format === 'pdf' ? 'json' : format
+      const fileName = `civicfix-${type}-report-${new Date().toISOString().split('T')[0]}.${ext}`
+
+      // ── Step 2: Trigger browser download immediately ──
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+      // ── Step 3: Save record to DB ──
+      const savePayload = {
         title: `${type.charAt(0).toUpperCase() + type.slice(1)} Report`,
         description: getReportDescription(type),
         type,
         format,
-        generatedAt: new Date().toISOString(),
         period: getReportPeriod(),
-        downloadUrl: response.data.downloadUrl,
         status: 'completed',
-        fileSize: response.data.fileSize
+        fileSize: String(blob.size),
+        downloadUrl: null,  // no persistent URL — file was downloaded directly
       }
 
-      setReports(prev => [newReport, ...prev])
+      try {
+        const saveRes = await apiClient.post('/admin/reports', savePayload)
+        const saved: Report = saveRes.data.data
+        // Prepend to list
+        setReports(prev => [{ ...saved, status: 'completed' }, ...prev])
+      } catch {
+        // Save failed but download worked — still show a local entry
+        const localEntry: Report = {
+          id: tempId,
+          ...savePayload,
+          downloadUrl: undefined,
+          generatedAt: new Date().toISOString(),
+          status: 'completed',
+        }
+        setReports(prev => [localEntry, ...prev])
+      }
+
     } catch (err: any) {
       console.error('Failed to generate report:', err)
-      setError(`Failed to generate ${type} report. Please try again.`)
-      
-      const failedReport: Report = {
-        id: reportId,
-        title: `${type.charAt(0).toUpperCase() + type.slice(1)} Report`,
-        description: getReportDescription(type),
-        type,
-        format,
-        generatedAt: new Date().toISOString(),
-        period: getReportPeriod(),
-        status: 'failed'
+      setError(`Failed to generate ${type} ${format.toUpperCase()} report. Please try again.`)
+
+      // Try to save failed record
+      try {
+        const failPayload = {
+          title: `${type.charAt(0).toUpperCase() + type.slice(1)} Report`,
+          description: getReportDescription(type),
+          type,
+          format,
+          period: getReportPeriod(),
+          status: 'failed',
+        }
+        const saveRes = await apiClient.post('/admin/reports', failPayload)
+        const saved: Report = saveRes.data.data
+        setReports(prev => [{ ...saved, status: 'failed' }, ...prev])
+      } catch {
+        const failEntry: Report = {
+          id: tempId,
+          title: `${type.charAt(0).toUpperCase() + type.slice(1)} Report`,
+          description: getReportDescription(type),
+          type,
+          format,
+          generatedAt: new Date().toISOString(),
+          period: getReportPeriod(),
+          status: 'failed',
+        }
+        setReports(prev => [failEntry, ...prev])
       }
-      
-      setReports(prev => [failedReport, ...prev])
+
     } finally {
       setGenerating(null)
     }
@@ -94,45 +144,33 @@ export default function ReportsPage() {
 
   const getReportDescription = (type: ReportType): string => {
     switch (type) {
-      case 'issues':
-        return 'Comprehensive overview of all issues reported, resolved, and in progress'
-      case 'users':
-        return 'Detailed analysis of user registration, activity patterns, and demographics'
-      case 'performance':
-        return 'Platform performance metrics and volunteer performance statistics'
-      case 'financial':
-        return 'Financial overview and resource allocation analysis'
-      case 'system':
-        return 'System health metrics and platform usage statistics'
-      default:
-        return 'Automatically generated system report'
+      case 'issues':     return 'Comprehensive overview of all issues reported, resolved, and in progress'
+      case 'users':      return 'Detailed analysis of user registration, activity patterns, and demographics'
+      case 'performance':return 'Platform performance metrics and volunteer performance statistics'
+      case 'financial':  return 'Financial overview and resource allocation analysis'
+      case 'system':     return 'System health metrics and platform usage statistics'
+      default:           return 'Automatically generated system report'
     }
   }
 
   const getReportPeriod = (): string => {
     const now = new Date()
-    const month = now.toLocaleString('default', { month: 'long' })
-    const year = now.getFullYear()
-    return `${month} ${year}`
+    return `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`
   }
 
-  const handleRetry = () => {
-    fetchReports()
-  }
-
+  // Download button in list — re-fetch from export (no persistent URL stored)
   const handleDownload = async (report: Report) => {
-    if (!report.downloadUrl) return
-
-    try {
+    if (report.downloadUrl) {
+      // If a real URL exists, use it
       const link = document.createElement('a')
       link.href = report.downloadUrl
       link.download = `${report.title.toLowerCase().replace(/\s+/g, '-')}.${report.format}`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-    } catch (err) {
-      console.error('Failed to download report:', err)
-      setError('Failed to download report. Please try again.')
+    } else {
+      // Re-generate download on the fly
+      await generateReport(report.type, report.format)
     }
   }
 
@@ -140,13 +178,19 @@ export default function ReportsPage() {
     generateReport(report.type, report.format)
   }
 
-  const handleDismissError = () => {
-    setError(null)
+  const handleDelete = async (report: Report) => {
+    try {
+      await apiClient.delete(`/admin/reports?id=${report.id}`)
+      setReports(prev => prev.filter(r => r.id !== report.id))
+    } catch {
+      setError('Failed to delete report. Please try again.')
+    }
   }
 
-  if (loading && !reports.length) {
-    return null
-  }
+  const handleRetry = () => fetchReports()
+  const handleDismissError = () => setError(null)
+
+  if (loading && !reports.length) return null
 
   if (error && !reports.length) {
     return (
@@ -171,45 +215,44 @@ export default function ReportsPage() {
   }
 
   return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ReportsHeader onRefresh={handleRetry} />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ReportsHeader onRefresh={handleRetry} />
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-red-800 font-medium">{error}</p>
-                </div>
-                <div className="flex space-x-2 ml-4">
-                  <button
-                    onClick={handleRetry}
-                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                  >
-                    Retry
-                  </button>
-                  <button
-                    onClick={handleDismissError}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-                  >
-                    Dismiss
-                  </button>
-                </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start justify-between">
+              <p className="text-red-800 font-medium flex-1">{error}</p>
+              <div className="flex space-x-2 ml-4">
+                <button
+                  onClick={handleRetry}
+                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={handleDismissError}
+                  className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                >
+                  Dismiss
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          <ReportGenerator 
-            generating={generating} 
-            onGenerateReport={generateReport} 
-          />
+        <ReportGenerator
+          generating={generating}
+          onGenerateReport={generateReport}
+        />
 
-          <ReportsList 
-            reports={reports} 
-            onDownload={handleDownload}
-            onRegenerate={handleRegenerate}
-          />
-        </div>
+        <ReportsList
+          reports={reports}
+          onDownload={handleDownload}
+          onRegenerate={handleRegenerate}
+          onDelete={handleDelete}
+        />
       </div>
+    </div>
   )
 }

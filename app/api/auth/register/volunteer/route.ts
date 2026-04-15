@@ -6,9 +6,21 @@ export async function POST(request: NextRequest) {
   try {
     const { db } = await connectToDatabase();
     const data = await request.json();
+
+    // ✅ Check if volunteer registration is allowed
+    const settings = await db.collection('systemSettings').findOne({ key: 'global' })
+    if (settings?.allowVolunteerRegistration === false) {
+      return NextResponse.json({
+        success: false,
+        message: "Volunteer registration is currently closed. Please contact support for more information."
+      }, { status: 403 });
+    }
+
+    // ================= VALIDATION =================
+
     const requiredFields = ['email', 'password', 'firstName', 'lastName', 'skills', 'availability', 'experienceLevel'];
     const missingFields = requiredFields.filter(field => !data[field]);
-    
+
     if (missingFields.length > 0) {
       return NextResponse.json({
         success: false,
@@ -68,9 +80,9 @@ export async function POST(request: NextRequest) {
     }
 
     // ================= CHECK DUPLICATE EMAIL =================
-    
+
     const email = data.email.toLowerCase();
-    
+
     const existingCitizen = await db.collection('citizens').findOne({ email });
     if (existingCitizen) {
       return NextResponse.json({
@@ -78,7 +90,7 @@ export async function POST(request: NextRequest) {
         message: "Email already registered as citizen. Please login with citizen account."
       }, { status: 409 });
     }
-    
+
     const existingVolunteer = await db.collection('volunteers').findOne({ email });
     if (existingVolunteer) {
       return NextResponse.json({
@@ -88,17 +100,17 @@ export async function POST(request: NextRequest) {
     }
 
     // ================= HASH PASSWORD =================
-    
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // ================= CREATE VOLUNTEER OBJECT =================
-    
+
     const fullName = `${data.firstName} ${data.lastName}`;
-    
+
     const volunteerData = {
       firstName: data.firstName,
       lastName: data.lastName,
-      name: `${data.firstName} ${data.lastName}`,
+      name: fullName,
       email: email,
       password: hashedPassword,
       phone: data.phone || null,
@@ -107,14 +119,11 @@ export async function POST(request: NextRequest) {
       experienceLevel: data.experienceLevel,
       bio: data.bio || null,
       role: 'volunteer',
-      
-      // 👇 FIX: isActive should be false until approved
       isActive: false,
       isEmailVerified: false,
       approvalStatus: 'pending',
-      
       achievements: [],
-      status: 'inactive',  // 👈 FIX: inactive until approved
+      status: 'inactive',
       rating: 0,
       totalTasks: 0,
       completedTasks: 0,
@@ -126,15 +135,12 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // ================= INSERT INTO DATABASE =================
-    
     const result = await db.collection('volunteers').insertOne(volunteerData);
 
     if (!result.acknowledged) {
       throw new Error('Failed to insert volunteer data');
     }
-    // ================= RETURN SUCCESS RESPONSE =================
-    
+
     return NextResponse.json({
       success: true,
       message: "Registration successful! Your application has been submitted for admin approval.",
@@ -152,7 +158,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("❌ Volunteer registration error:", error);
-    
     return NextResponse.json({
       success: false,
       message: error instanceof Error ? error.message : "Server error. Please try again later."
