@@ -288,7 +288,7 @@ export default function BulletinPage() {
   return (
     <MainLayout role={user?.role ?? null}>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
           {/* Header */}
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -324,7 +324,7 @@ export default function BulletinPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                  className={`flex-shrink-0 px-3 py-1.5 text-xs cursor-pointer font-medium rounded-full border transition-colors ${
                     activeCategory === cat
                       ? 'bg-orange-600 border-orange-600 text-white'
                       : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'

@@ -161,7 +161,7 @@ if (userAvatar?.startsWith('/upload/')) {
             {/* Logout */}
             <button
               onClick={logout}
-              className="flex items-center w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors group"
+              className="flex items-center w-full cursor-pointer px-3 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors group"
             >
               <ArrowRightStartOnRectangleIcon className="h-5 w-5 mr-3 text-gray-500 group-hover:text-red-500" />
               <span className="font-medium group-hover:text-red-600">Logout</span>

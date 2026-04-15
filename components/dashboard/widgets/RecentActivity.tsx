@@ -160,7 +160,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm cursor-pointer text-blue-600 hover:text-blue-800 font-medium"
             >
               Retry
             </button>
@@ -180,7 +180,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
         {onRefresh && (
           <button 
             onClick={onRefresh}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            className="text-sm text-blue-600 cursor-pointer hover:text-blue-800 font-medium"
           >
             Refresh
           </button>
@@ -193,7 +193,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
             <button
               key={notification.id}
               onClick={() => handleNotificationClick(notification)}
-              className="w-full flex items-start space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-all cursor-pointer text-left"
+              className="w-full flex items-start cursor-pointer space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-all cursor-pointer text-left"
             >
               <div className={`w-10 h-10 ${getActivityColor(notification.type)} rounded-full flex items-center justify-center shadow-sm flex-shrink-0`}>
                 {getActivityIcon(notification.type)}
@@ -226,7 +226,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button 
             onClick={handleViewAll}
-            className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium"
+            className="w-full text-center cursor-pointer text-sm text-blue-600 hover:text-blue-800 font-medium"
           >
             View All Activity
           </button>
