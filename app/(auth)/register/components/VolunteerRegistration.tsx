@@ -385,7 +385,7 @@ export default function VolunteerRegistration({
           <input
             type="checkbox"
             {...register('agreeToTerms')}
-            className="text-black h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+            className="text-black h-4 w-4 cursor-pointer text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
             id="volunteerAgreeToTerms"
           />
           <label htmlFor="volunteerAgreeToTerms" className="ml-2 block text-sm text-gray-900">
@@ -418,7 +418,7 @@ export default function VolunteerRegistration({
             className="text-gray-600 hover:text-gray-800"
           >
             Already have an account?{' '}
-            <span className="text-blue-600 hover:text-blue-500 font-medium">
+            <span className="text-blue-600 cursor-pointer hover:text-blue-500 font-medium">
               Sign in here
             </span>
           </button>

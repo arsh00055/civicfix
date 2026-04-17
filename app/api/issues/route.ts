@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
     await updateUserStatsAndCheckAchievements(
       user.id,
       user.role as 'citizen' | 'volunteer',
-      { totalReports: 1, points: 10 } // +10 points for reporting
+      { totalReports: 1 }
     );
 
     // 🔔 Send notifications based on priority

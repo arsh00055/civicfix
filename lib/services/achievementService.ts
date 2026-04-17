@@ -106,17 +106,6 @@ export async function checkAndAwardAchievements(
         }
       }
 
-      // Award bonus points (skip for point-milestone achievements to avoid infinite loop)
-      if (pointsToAdd > 0) {
-        await col.updateOne(
-          { _id: new ObjectId(userId) },
-          {
-            $inc: { "stats.points": pointsToAdd },
-            $set: { updatedAt: now },
-          } as any
-        );
-      }
-
       for (const achievement of unlockedAchievements) {
         await notifyAchievementUnlocked(
           userId,

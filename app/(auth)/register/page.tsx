@@ -125,7 +125,7 @@ export default function RegistrationPage() {
         {selectedRole && (
           <button
             onClick={handleBack}
-            className="flex items-center text-sm text-gray-600 hover:text-gray-800 mb-6"
+            className="flex items-center cursor-pointer text-sm text-gray-600 hover:text-gray-800 mb-6"
             aria-label="Back to role selection"
           >
             ← Back to role selection

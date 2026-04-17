@@ -55,7 +55,7 @@ export async function POST(
       await updateUserStatsAndCheckAchievements(
         user.id,
         user.role as 'citizen' | 'volunteer',
-        { totalVotes: 1, points: 5 }
+        { totalVotes: 1 }
       );
     }
 

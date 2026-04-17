@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import LoginHeader from './components/LoginHeader'
 import LoginRoleSelector from './components/LoginRoleSelector'
 import LoginFormContainer from './components/LoginFormContainer'
 import Loading from '@/app/loading'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 
 const CitizenLogin = dynamic(() => import('@/features/auth/components/CitizenLogin'), {
   ssr: false,
@@ -24,8 +25,14 @@ const AdminLogin = dynamic(() => import('@/features/auth/components/AdminLogin')
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<'citizen' | 'volunteer' | 'admin' | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  // const [showPassword, setShowPassword ] = useState(false)
-  const { isLoading } = useAuth()
+  const { isLoading, user } = useAuth()
+  const router = useRouter() ;
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace(`/${user.role}`);
+    }
+  }, [user, isLoading, router]);
 
   const handleRoleSelect = (role: 'citizen' | 'volunteer' | 'admin') => {
     setIsTransitioning(true)
@@ -53,6 +60,10 @@ export default function LoginPage() {
         {selectedRole === 'admin' && <AdminLogin />}
       </div>
     )
+  }
+
+  if (!isLoading && user) {
+    return null;
   }
 
   if (isLoading) {

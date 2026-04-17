@@ -127,7 +127,7 @@ export async function POST(
     await updateUserStatsAndCheckAchievements(
       user.id,
       user.role as 'citizen' | 'volunteer',
-      { totalComments: 1, points: 3 } // +3 points for commenting
+      { totalComments: 1 }
     );
 
     return NextResponse.json(newComment, { status: 201 });
