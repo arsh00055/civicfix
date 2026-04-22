@@ -117,6 +117,7 @@ export interface DisplaySettings {
 }
 
 export interface Achievement {
+  tier: any;
   id: string;
   userId: string;
   name: string;

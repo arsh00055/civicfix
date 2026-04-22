@@ -6,6 +6,37 @@ import { checkAndAwardAchievements } from '@/lib/services/achievementService'
 import { sendEmail } from '@/lib/email'
 import { getDeactivationEmail, getActivationEmail } from '@/lib/emails/accountStatusEmail'
 
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const currentUser = getCurrentUser(req);
+    if (!currentUser) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = params;
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ success: false, message: 'Invalid user ID' }, { status: 400 });
+    }
+
+    const { db } = await connectToDatabase();
+    const collections = ['citizens', 'volunteers', 'admins'];
+
+    let foundUser = null;
+    for (const col of collections) {
+      const user = await db.collection(col).findOne({ _id: new ObjectId(id) });
+      if (user) { foundUser = user; break; }
+    }
+
+    if (!foundUser) {
+      return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: foundUser });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const adminUser = getCurrentUser(req)

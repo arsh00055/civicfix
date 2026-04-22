@@ -130,8 +130,7 @@ const AchievementsSection: React.FC = () => {
           const target = hasProgress ? achievement.progress!.target : 0;
           const isUnlocked = !!achievement.unlockedAt;
           const progressPercent = target > 0 ? Math.round((current / target) * 100) : 0;
-          const tier = TIER_CONFIG[achievement.type] || TIER_CONFIG.bronze;
-
+          const tier = TIER_CONFIG[achievement.tier] || TIER_CONFIG.bronze;
           return (
             <div
               key={achievement.id}
@@ -177,7 +176,7 @@ const AchievementsSection: React.FC = () => {
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border font-semibold ${tier.badge}`}
                 >
                   {tier.icon}
-                  {achievement.type.charAt(0).toUpperCase() + achievement.type.slice(1)}
+                  {achievement.tier ? achievement.tier.charAt(0).toUpperCase() + achievement.tier.slice(1) : 'Bronze'}
                 </span>
 
                 {isUnlocked ? (
