@@ -395,19 +395,25 @@ export default function UserManagementPage() {
       await apiClient.post(`/admin/volunteers/${volunteerId}/approve`)
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
       fetchUsers()
-      alert('✅ Volunteer approved successfully!')
+      toast.success('Volunteer approved successfully!', {
+        description: 'The volunteer has been notified via email',
+        duration: 3000,
+      })
     } catch (err: any) {
       console.error('Failed to approve volunteer:', err)
       alert(err.response?.data?.message || 'Failed to approve volunteer. Please try again.')
     }
   }
 
-  const handleRejectVolunteer = async (volunteerId: string) => {
-    const reason = prompt('Please enter reason for rejection (optional):')
+  const handleRejectVolunteer = async (volunteerId: string, reason: string) => {
+    
     try {
       await apiClient.post(`/admin/volunteers/${volunteerId}/reject`, { reason: reason || 'No reason provided' })
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
-      alert('❌ Volunteer rejected successfully!')
+      toast.success('Volunteer rejected successfully!', {
+        description: 'The volunteer has been notified via email.',
+        duration: 3000,
+      })
     } catch (err: any) {
       console.error('Failed to reject volunteer:', err)
       alert(err.response?.data?.message || 'Failed to reject volunteer. Please try again.')

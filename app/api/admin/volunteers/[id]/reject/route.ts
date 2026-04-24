@@ -40,6 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       }
     )
     // ✅ Rejection email bhejo
+    try{
 await sendEmail({
   to: volunteer.email,
   subject: '😞 Volunteer Application Update — CivicFix',
@@ -54,6 +55,10 @@ await sendEmail({
     </div>
   `
 })
+}catch (emailError) {
+  // Email fail hone se approval rok nahi sakde — sirf log kar do
+  console.error('rejection email failed (non-critical):', emailError)
+}
 
     await db.collection('admins').updateOne(
       { _id: new ObjectId(user.id) },

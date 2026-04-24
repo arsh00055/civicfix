@@ -126,12 +126,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Admin specific fields
+    // if (role === 'admin') {
+    //   formattedUser.department = user.department || 'Administration'
+    //   formattedUser.permissions = user.permissions || ['all']
+    //   formattedUser.isSuperAdmin = user.isSuperAdmin || false
+    // }
+
     if (role === 'admin') {
       formattedUser.department = user.department || 'Administration'
       formattedUser.permissions = user.permissions || ['all']
       formattedUser.isSuperAdmin = user.isSuperAdmin || false
+      // ↓ ithe add karo
+      formattedUser.bio = user.bio || null
+      formattedUser.city = user.city || null
+      formattedUser.phone = user.phone || null
     }
-
     return NextResponse.json({
       success: true,
       user: formattedUser,

@@ -156,12 +156,17 @@ const EditProfilePage: React.FC = () => {
 
       const response = await apiClient.put('/users/profile', updateData);
 
+      // if (response.data.success) {
+      //   console.log('✅ Profile saved, refreshing user...');
+      //   setSuccess(true);
+      //   setTimeout(() => router.replace('/profile'), 800);
+      // } else {
+      //   setError(response.data.message || 'Failed to update profile');
+      // }
       if (response.data.success) {
-        console.log('✅ Profile saved, refreshing user...');
         setSuccess(true);
+        await refreshUser(); // ← ithe add karo — cache update hoga
         setTimeout(() => router.replace('/profile'), 800);
-      } else {
-        setError(response.data.message || 'Failed to update profile');
       }
     } catch (err: any) {
       console.error('Profile update error:', err);

@@ -1075,7 +1075,7 @@ interface Props {
   pendingVolunteers: PendingVolunteer[]
   loading: boolean
   onApprove: (id: string) => Promise<void>
-  onReject: (id: string) => Promise<void>
+  onReject: (id: string, reason: string) => Promise<void>
 }
 
 export default function PendingVolunteersSection({
@@ -1102,7 +1102,7 @@ export default function PendingVolunteersSection({
     if (!rejectModalId) return
     setProcessingId(rejectModalId)
     try {
-      await onReject(rejectModalId)
+      await onReject(rejectModalId,rejectReason)
       setRejectModalId(null)
       setRejectReason('')
     } finally {
