@@ -203,7 +203,7 @@ const AdminIssuesPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setActiveTab('pending')}
                   className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${

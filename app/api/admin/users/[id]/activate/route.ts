@@ -50,6 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       }
     )
 
+    try{
     await sendEmail({
       to: foundUser.email,
       subject: 'Your CivicFix Account Has Been Reactivated',
@@ -72,6 +73,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         </div>
       `
     })
+  }catch (emailErr) {
+    console.error('Email send failed (activate):', emailErr)
+  }
 
     await db.collection('admins').updateOne(
       { _id: new ObjectId(user.id) },

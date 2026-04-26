@@ -65,7 +65,7 @@ const PrivacySecurityPage: React.FC = () => {
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Profile Visibility</label>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                   {['public', 'community', 'private'].map(v => (
                     <button
                       key={v}

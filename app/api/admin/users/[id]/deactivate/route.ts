@@ -57,6 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       }
     )
 
+    try{
     await sendEmail({
       to: foundUser.email,
       subject: 'Your CivicFix Account Has Been Deactivated',
@@ -91,6 +92,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         </div>
       `
     })
+  }catch (emailErr) {
+    console.error('Email send failed (deactivate):', emailErr)
+  }
 
     await db.collection('admins').updateOne(
       { _id: new ObjectId(user.id) },

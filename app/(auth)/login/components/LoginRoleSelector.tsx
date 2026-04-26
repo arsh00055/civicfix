@@ -50,7 +50,8 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
 
   return (
     <div className="max-w-4xl mx-auto">
-  <div className="bg-white rounded-2xl p-8 pt-4 shadow-xl border border-gray-100 overflow-auto max-h-[90vh]">
+  {/* <div className="bg-white rounded-2xl p-8 pt-4 shadow-xl border border-gray-100 overflow-auto max-h-[90vh]"> */}
+  <div className="bg-white rounded-2xl p-4 sm:p-8 sm:pt-4 pt-3 shadow-xl border border-gray-100 overflow-auto max-h-[90vh]">
         <div className="text-center mb-5">
           <h2 className="text-1xl font-bold text-gray-900 mb-1">
             Welcome back
@@ -58,7 +59,8 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
           <p className="text-gray-800 text-md">Choose how you&apos;d like to sign in</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4"> */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 mb-4">
           {roles.map((role) => {
             const IconComponent = role.icon
             
@@ -69,9 +71,11 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
                 className="group relative cursor-pointer text-left w-full bg-transparent border-none p-0"
                 aria-label={`Sign in as ${role.title}`}
               >
-                <div className="relative bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-gray-300 h-full flex flex-col">
+                {/* <div className="relative bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-gray-300 h-full flex flex-col"> */}
+                <div className="relative bg-white rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 group-hover:border-gray-300 h-full flex flex-col">
                   
-                  <div className={`w-12 h-12 bg-gradient-to-r ${role.gradient} rounded-xl flex items-center justify-center shadow-md mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  {/* <div className={`w-12 h-12 bg-gradient-to-r ${role.gradient} rounded-xl flex items-center justify-center shadow-md mb-4 group-hover:scale-110 transition-transform duration-300`}> */}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r ${role.gradient} rounded-xl flex items-center justify-center shadow-md mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <IconComponent className="w-6 h-6 text-white" />
                   </div>
 

@@ -84,18 +84,18 @@ export default function SystemSettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between sm:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">System Settings</h1>
             <p className="text-sm text-gray-500 mt-1">Manage platform configuration and preferences</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={fetchSettings}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowPathIcon className="h-4 w-4" />
               Refresh
@@ -103,7 +103,7 @@ export default function SystemSettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-5 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -112,27 +112,28 @@ export default function SystemSettingsPage() {
 
         {/* Maintenance Banner */}
         {settings.maintenanceMode && (
-          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-6 flex items-center gap-3">
+          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-6 flex flex-col sm:flex-row sm:items-center gap-2">
             <span className="text-yellow-600 font-semibold text-sm">⚠️ Maintenance Mode is ON</span>
-            <span className="text-yellow-700 text-sm">Citizens and volunteers cannot log in right now. Admins are unaffected.</span>
+            <span className="text-yellow-700 text-sm">Citizens and volunteers cannot log in right now.</span>
           </div>
         )}
 
-        <div className="flex gap-6">
+        {/* Tabs + Panel — stack on mobile, side by side on sm+ */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
-          {/* Tab Sidebar */}
-          <div className="w-52 shrink-0">
-            <nav className="space-y-1">
+          {/* Tab Sidebar — horizontal on mobile, vertical on sm+ */}
+          <div className="sm:w-52 sm:shrink-0">
+            <nav className="flex sm:flex-col gap-2 sm:gap-1 overflow-x-auto sm:overflow-visible">
               {tabs.map(tab => {
                 const Icon = tab.icon
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-colors text-left ${
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg transition-colors text-left whitespace-nowrap flex-shrink-0 sm:w-full ${
                       activeTab === tab.id
                         ? 'bg-purple-50 text-purple-700 font-semibold border border-purple-200'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        : 'text-gray-600 hover:bg-gray-100 border border-transparent'
                     }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -144,9 +145,9 @@ export default function SystemSettingsPage() {
           </div>
 
           {/* Panel */}
-          <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+          <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
 
-            {/* ── GENERAL ── */}
+            {/* GENERAL */}
             {activeTab === 'general' && (
               <div className="space-y-6">
                 <h2 className="text-base font-semibold text-gray-800 border-b pb-2">General Settings</h2>
@@ -183,7 +184,7 @@ export default function SystemSettingsPage() {
               </div>
             )}
 
-            {/* ── USER REGISTRATION ── */}
+            {/* USER REGISTRATION */}
             {activeTab === 'users' && (
               <div className="space-y-6">
                 <h2 className="text-base font-semibold text-gray-800 border-b pb-2">User Registration</h2>

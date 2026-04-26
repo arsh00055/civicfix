@@ -125,13 +125,6 @@ export async function GET(request: NextRequest) {
       formattedUser.completedTasks = user.completedTasks || 0
     }
 
-    // Admin specific fields
-    // if (role === 'admin') {
-    //   formattedUser.department = user.department || 'Administration'
-    //   formattedUser.permissions = user.permissions || ['all']
-    //   formattedUser.isSuperAdmin = user.isSuperAdmin || false
-    // }
-
     if (role === 'admin') {
       formattedUser.department = user.department || 'Administration'
       formattedUser.permissions = user.permissions || ['all']
