@@ -137,8 +137,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   const userEmail  = userData?.email;
   const userName   = userData?.name;
   let userAvatar   = userData?.avatar;
-  if (userAvatar?.startsWith('/upload/')) {
-    userAvatar = `/api${userAvatar}`;
+  if (userAvatar && !userAvatar.startsWith('http') && !userAvatar.startsWith('/')) {
+    userAvatar = `/${userAvatar}`;
   }
 
   const userRole = role || 'user';
@@ -245,9 +245,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
         </div>
         <div className="hidden md:block text-left">
           <p className="text-white font-medium text-sm leading-tight">
-            {userName?.split(' ')[0] || 'User'}
+            {mounted ? (userName?.split(' ')[0] || 'User') : 'User'}
           </p>
-          <p className="text-white/70 text-xs capitalize">{roleIcon} {userRole}</p>
+          <p className="text-white/70 text-xs capitalize">
+            {mounted ? `${roleIcon} ${userRole}` : userRole}
+          </p>
         </div>
       </motion.button>
 

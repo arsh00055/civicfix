@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 import { 
   CheckCircleIcon, 
   ClockIcon, 

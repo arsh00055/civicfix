@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/MainLayout';
 import Loading from '@/app/loading';
@@ -9,7 +9,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { volunteersAPI, issuesAPI } from '@/lib/services/api/endpoints';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XMarkIcon, PhotoIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { SubmitProofModal } from './components/SubmitModal';
 
 interface Assignment {
@@ -36,31 +36,125 @@ interface Assignment {
   resolutionNotes?: string;
   resolutionProof?: string[];
   submittedForReview?: boolean;
+  // Deadline tracking fields from DB
+  deadlineWarningsSent?: boolean;
+  adminOverdueAlertSent?: boolean;
+  deadlineExtendedUntil?: string;
 }
+
+// ─── Deadline helpers ────────────────────────────────────────────────────────
+
+const DEADLINE_DAYS = 7;
+
+function getDeadlineInfo(assignment: Assignment): {
+  daysLeft: number | null;
+  isOverdue: boolean;
+  isWarning: boolean; // <= 2 days left
+  deadlineDate: Date | null;
+} {
+  if (!assignment.claimedAt || ['resolved', 'closed', 'pending_review'].includes(assignment.status)) {
+    return { daysLeft: null, isOverdue: false, isWarning: false, deadlineDate: null };
+  }
+
+  // If admin extended the deadline, use that
+  const baseDate = assignment.deadlineExtendedUntil
+    ? new Date(assignment.deadlineExtendedUntil)
+    : (() => {
+        const d = new Date(assignment.claimedAt);
+        d.setDate(d.getDate() + DEADLINE_DAYS);
+        return d;
+      })();
+
+  const daysLeft = Math.ceil((baseDate.getTime() - Date.now()) / 86_400_000);
+
+  return {
+    daysLeft,
+    isOverdue:  daysLeft < 0,
+    isWarning:  daysLeft >= 0 && daysLeft <= 2,
+    deadlineDate: baseDate,
+  };
+}
+
+function DeadlineBadge({ assignment }: { assignment: Assignment }) {
+  const { daysLeft, isOverdue, isWarning, deadlineDate } = getDeadlineInfo(assignment);
+
+  if (daysLeft === null) return null;
+
+  if (isOverdue) {
+    return (
+      <div className="mb-4 flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-700 border border-red-200 rounded-full text-xs font-semibold">
+          <ExclamationTriangleIcon className="w-3 h-3" />
+          {Math.abs(daysLeft)} day{Math.abs(daysLeft) !== 1 ? 's' : ''} overdue — admin has been notified
+        </span>
+      </div>
+    );
+  }
+
+  if (isWarning) {
+    return (
+      <div className="mb-4 flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-full text-xs font-semibold">
+          ⚠️ {daysLeft === 0 ? 'Due today!' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`}
+          {deadlineDate && ` — due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-xs font-medium">
+        <ClockIcon className="w-3 h-3" />
+        {daysLeft} day{daysLeft !== 1 ? 's' : ''} to complete
+        {deadlineDate && ` — due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+      </span>
+    </div>
+  );
+}
+
+// ─── Status / Priority config (unchanged from your original) ─────────────────
+
+const STATUS_CONFIG = Object.freeze({
+  assigned:       { color: 'bg-yellow-50 text-yellow-800 border-yellow-200', icon: '⏳', label: 'Assigned',        bgColor: 'bg-yellow-100', dotColor: 'bg-yellow-500' },
+  in_progress:    { color: 'bg-blue-50 text-blue-800 border-blue-200',       icon: '🔄', label: 'In Progress',     bgColor: 'bg-blue-100',   dotColor: 'bg-blue-500'   },
+  pending_review: { color: 'bg-purple-50 text-purple-800 border-purple-200', icon: '⏰', label: 'Pending Review',  bgColor: 'bg-purple-100', dotColor: 'bg-purple-500' },
+  resolved:       { color: 'bg-green-50 text-green-800 border-green-200',    icon: '✅', label: 'Resolved',        bgColor: 'bg-green-100',  dotColor: 'bg-green-500'  },
+  closed:         { color: 'bg-gray-50 text-gray-800 border-gray-200',       icon: '🔒', label: 'Closed',          bgColor: 'bg-gray-100',   dotColor: 'bg-gray-500'   },
+});
+const STATUS_CONFIG_DEFAULT = Object.freeze({ color: 'bg-gray-50 text-gray-800 border-gray-200', icon: '📋', label: 'Unknown', bgColor: 'bg-gray-100', dotColor: 'bg-gray-500' });
+
+const PRIORITY_CONFIG = Object.freeze({
+  critical: { color: 'bg-red-100 text-red-800',    label: 'Critical', icon: '🔴' },
+  high:     { color: 'bg-orange-100 text-orange-800', label: 'High',  icon: '🟠' },
+  medium:   { color: 'bg-yellow-100 text-yellow-800', label: 'Medium',icon: '🟡' },
+  low:      { color: 'bg-green-100 text-green-800', label: 'Low',     icon: '🟢' },
+});
+const PRIORITY_CONFIG_DEFAULT = Object.freeze({ color: 'bg-gray-100 text-gray-800', label: 'Normal', icon: '⚪' });
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 const AssignmentsPage: React.FC = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
-  const [showResolved, setShowResolved] = useState(false);
+  const [assignments, setAssignments]         = useState<Assignment[]>([]);
+  const [loading, setLoading]                 = useState(true);
+  const [error, setError]                     = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus]   = useState<string | null>(null);
+  const [showResolved, setShowResolved]       = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [showProofModal, setShowProofModal] = useState(false);
+  const [showProofModal, setShowProofModal]   = useState(false);
   const [isSubmittingProof, setIsSubmittingProof] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      fetchAssignments();
-    }
+    if (user) fetchAssignments();
   }, [user]);
 
   const fetchAssignments = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (!user || (user.role !== 'volunteer' && user.role !== 'admin')) {
         setError('Only volunteers can view assignments');
         return;
@@ -69,7 +163,6 @@ const AssignmentsPage: React.FC = () => {
       const response = await volunteersAPI.getMyAssignments();
       const data = response.data;
       setAssignments(data.assignments || []);
-      
     } catch (err: any) {
       console.error('Failed to fetch assignments:', err);
       setError(err?.message || 'Failed to load your assignments. Please try again.');
@@ -81,24 +174,14 @@ const AssignmentsPage: React.FC = () => {
   const handleStartWork = async (assignmentId: string, taskId: string) => {
     try {
       setUpdatingStatus(assignmentId);
-      
       await volunteersAPI.updateTaskStatus(taskId, 'in_progress');
-      
-      setAssignments(prev => prev.map(assignment => 
-        assignment.id === assignmentId 
-          ? { 
-              ...assignment, 
-              status: 'in_progress',
-              progress: 50,
-              updatedAt: new Date().toISOString()
-            }
-          : assignment
+      setAssignments(prev => prev.map(a =>
+        a.id === assignmentId
+          ? { ...a, status: 'in_progress', progress: 50, updatedAt: new Date().toISOString() }
+          : a
       ));
-      
       toast.success('Work started! Good luck! 🚀');
-      
     } catch (err: any) {
-      console.error('Failed to start work:', err);
       toast.error(err?.message || 'Failed to update status. Please try again.');
     } finally {
       setUpdatingStatus(null);
@@ -107,124 +190,51 @@ const AssignmentsPage: React.FC = () => {
 
   const handleSubmitProof = async (proofData: { notes: string; images: string[] }) => {
     if (!selectedAssignment) return;
-
     try {
       setIsSubmittingProof(true);
-      
-      // Update the issue with resolution proof and set status to pending_review
       await issuesAPI.updateIssue(selectedAssignment.taskId, {
         status: 'pending_review',
         resolutionNotes: proofData.notes,
         resolutionProof: proofData.images,
       });
-      
-      // Update local state
-      setAssignments(prev => prev.map(assignment => 
-        assignment.id === selectedAssignment.id 
-          ? { 
-              ...assignment, 
-              status: 'pending_review',
-              resolutionNotes: proofData.notes,
-              resolutionProof: proofData.images,
-              progress: 75,
-              updatedAt: new Date().toISOString()
-            }
-          : assignment
+      setAssignments(prev => prev.map(a =>
+        a.id === selectedAssignment.id
+          ? { ...a, status: 'pending_review', resolutionNotes: proofData.notes, resolutionProof: proofData.images, progress: 75, updatedAt: new Date().toISOString() }
+          : a
       ));
-      
       toast.success('Proof submitted for admin review! 📸');
       setShowProofModal(false);
-      
     } catch (err: any) {
-      console.error('Failed to submit proof:', err);
       toast.error(err?.message || 'Failed to submit proof. Please try again.');
     } finally {
       setIsSubmittingProof(false);
     }
   };
 
-  const handleRetry = () => {
-    fetchAssignments();
-  };
-
-  const getStatusConfig = (status: string) => {
-    const configs = {
-      assigned: {
-        color: 'bg-yellow-50 text-yellow-800 border-yellow-200',
-        icon: '⏳',
-        label: 'Assigned',
-        bgColor: 'bg-yellow-100',
-        dotColor: 'bg-yellow-500'
-      },
-      in_progress: {
-        color: 'bg-blue-50 text-blue-800 border-blue-200',
-        icon: '🔄',
-        label: 'In Progress',
-        bgColor: 'bg-blue-100',
-        dotColor: 'bg-blue-500'
-      },
-      pending_review: {
-        color: 'bg-purple-50 text-purple-800 border-purple-200',
-        icon: '⏰',
-        label: 'Pending Review',
-        bgColor: 'bg-purple-100',
-        dotColor: 'bg-purple-500'
-      },
-      resolved: {
-        color: 'bg-green-50 text-green-800 border-green-200',
-        icon: '✅',
-        label: 'Resolved',
-        bgColor: 'bg-green-100',
-        dotColor: 'bg-green-500'
-      },
-      closed: {
-        color: 'bg-gray-50 text-gray-800 border-gray-200',
-        icon: '🔒',
-        label: 'Closed',
-        bgColor: 'bg-gray-100',
-        dotColor: 'bg-gray-500'
-      },
-      default: {
-        color: 'bg-gray-50 text-gray-800 border-gray-200',
-        icon: '📋',
-        label: status,
-        bgColor: 'bg-gray-100',
-        dotColor: 'bg-gray-500'
-      }
-    };
-    return configs[status as keyof typeof configs] || configs.default;
-  };
-
-  const getPriorityConfig = (priority: string) => {
-    const configs = {
-      critical: { color: 'bg-red-100 text-red-800', label: 'Critical', icon: '🔴' },
-      high: { color: 'bg-orange-100 text-orange-800', label: 'High', icon: '🟠' },
-      medium: { color: 'bg-yellow-100 text-yellow-800', label: 'Medium', icon: '🟡' },
-      low: { color: 'bg-green-100 text-green-800', label: 'Low', icon: '🟢' },
-      default: { color: 'bg-gray-100 text-gray-800', label: 'Normal', icon: '⚪' }
-    };
-    return configs[priority as keyof typeof configs] || configs.default;
-  };
+  const getStatusConfig  = (s: string) => STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]   ?? STATUS_CONFIG_DEFAULT;
+  const getPriorityConfig = (p: string) => PRIORITY_CONFIG[p as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG_DEFAULT;
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+    const diffDays = Math.floor((Date.now() - new Date(dateString).getTime()) / 86_400_000);
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffDays < 7)   return `${diffDays} days ago`;
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const filteredAssignments = assignments.filter(assignment => 
-    showResolved ? true : assignment.status !== 'resolved'
-  );
-
-  const activeCount = assignments.filter(a => a.status !== 'resolved' && a.status !== 'closed').length;
-  const resolvedCount = assignments.filter(a => a.status === 'resolved').length;
-  const pendingCount = assignments.filter(a => a.status === 'pending_review').length;
+  const { filteredAssignments, activeCount, resolvedCount, pendingCount, overdueCount } = useMemo(() => {
+    let active = 0, resolved = 0, pending = 0, overdue = 0;
+    for (const a of assignments) {
+      if (a.status !== 'resolved' && a.status !== 'closed') active++;
+      if (a.status === 'resolved') resolved++;
+      if (a.status === 'pending_review') pending++;
+      if (getDeadlineInfo(a).isOverdue) overdue++;
+    }
+    return {
+      filteredAssignments: showResolved ? assignments : assignments.filter(a => a.status !== 'resolved'),
+      activeCount: active, resolvedCount: resolved, pendingCount: pending, overdueCount: overdue,
+    };
+  }, [assignments, showResolved]);
 
   if (!user || (user.role !== 'volunteer' && user.role !== 'admin')) {
     return (
@@ -234,12 +244,9 @@ const AssignmentsPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Volunteer Access Required</h2>
               <p className="text-gray-600 mb-6">
-                This page is only accessible to volunteers. If you're a volunteer, please log in with your volunteer account.
+                This page is only accessible to volunteers.
               </p>
-              <button
-                onClick={() => router.push('/')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
+              <button onClick={() => router.push('/')} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                 Back to Dashboard
               </button>
             </div>
@@ -253,6 +260,7 @@ const AssignmentsPage: React.FC = () => {
     <MainLayout role={user?.role}>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+
           {/* Header */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -266,53 +274,57 @@ const AssignmentsPage: React.FC = () => {
                   <h1 className="text-2xl font-bold text-gray-900">My Assignments</h1>
                   <p className="text-gray-600 mt-1">
                     {activeCount} active · {pendingCount} pending review · {resolvedCount} resolved
+                    {overdueCount > 0 && (
+                      <span className="text-red-600 font-medium"> · {overdueCount} overdue</span>
+                    )}
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowResolved(false)}
-                  className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${
-                    !showResolved 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${!showResolved ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                   Active ({activeCount})
                 </button>
                 <button
                   onClick={() => setShowResolved(true)}
-                  className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${
-                    showResolved 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${showResolved ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                 >
                   All ({assignments.length})
                 </button>
                 <button
-                  onClick={handleRetry}
-                  className="flex items-center cursor-pointer justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                  onClick={fetchAssignments}
+                  className="flex items-center cursor-pointer gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  <span>Refresh</span>
+                  Refresh
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Loading State */}
-          {loading && assignments.length === 0 && (<Loading />)}
-
-          {/* Error State */}
-          {error && !loading && (
-            <Error error={error as unknown as Error & { digest?: string }} reset={handleRetry} />
+          {/* Overdue warning banner */}
+          {overdueCount > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+              <ExclamationTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-red-900">
+                  You have {overdueCount} overdue task{overdueCount > 1 ? 's' : ''}
+                </p>
+                <p className="text-sm text-red-700 mt-0.5">
+                  Tasks not completed within 7 days are flagged to admins. Please submit your work or contact your admin if you need more time.
+                </p>
+              </div>
+            </div>
           )}
 
-          {/* Empty State */}
+          {loading && assignments.length === 0 && <Loading />}
+          {error && !loading && <Error error={error as unknown as Error & { digest?: string }} reset={fetchAssignments} />}
+
           {!loading && !error && filteredAssignments.length === 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
               <svg className="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -322,7 +334,7 @@ const AssignmentsPage: React.FC = () => {
                 {showResolved ? 'No assignments found' : 'No active assignments'}
               </h3>
               <p className="text-gray-600 max-w-md mx-auto mb-6">
-                {showResolved 
+                {showResolved
                   ? "You haven't completed any assignments yet."
                   : "You don't have any active assignments. Browse available tasks to find work that needs to be done."
                 }
@@ -338,29 +350,32 @@ const AssignmentsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Assignments List */}
           {!loading && !error && filteredAssignments.length > 0 && (
             <div className="space-y-4">
               {filteredAssignments.map(assignment => {
-                const statusConfig = getStatusConfig(assignment.status);
+                const statusConfig   = getStatusConfig(assignment.status);
                 const priorityConfig = getPriorityConfig(assignment.priority);
-                const isUpdating = updatingStatus === assignment.id;
-                const isResolved = assignment.status === 'resolved';
+                const isUpdating     = updatingStatus === assignment.id;
+                const isResolved     = assignment.status === 'resolved';
                 const isPendingReview = assignment.status === 'pending_review';
-                
+                const deadline       = getDeadlineInfo(assignment);
+
                 return (
                   <motion.div
                     key={assignment.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow ${
-                      isResolved ? 'border-gray-200 opacity-75' : 'border-gray-200'
+                      deadline.isOverdue ? 'border-red-300' :
+                      deadline.isWarning ? 'border-orange-300' :
+                      isResolved         ? 'border-gray-200 opacity-75' :
+                      'border-gray-200'
                     }`}
                   >
                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
-                      {/* Left Content */}
                       <div className="flex-1">
-                        {/* Title and Status Badge */}
+
+                        {/* Title + status */}
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <h3 className={`text-xl font-bold ${isResolved ? 'text-gray-600' : 'text-gray-900'}`}>
                             {assignment.title}
@@ -370,8 +385,8 @@ const AssignmentsPage: React.FC = () => {
                             {statusConfig.label}
                           </span>
                         </div>
-                        
-                        {/* Priority and Category Tags */}
+
+                        {/* Priority + category */}
                         <div className="flex flex-wrap gap-2 mb-3">
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${priorityConfig.color}`}>
                             {priorityConfig.icon} {priorityConfig.label}
@@ -380,13 +395,15 @@ const AssignmentsPage: React.FC = () => {
                             {assignment.category?.toUpperCase()}
                           </span>
                         </div>
-                        
-                        {/* Description */}
+
                         <p className={`text-sm mb-4 line-clamp-2 ${isResolved ? 'text-gray-500' : 'text-gray-600'}`}>
                           {assignment.description}
                         </p>
-                        
-                        {/* Progress Bar */}
+
+                        {/* ── Deadline badge — shown for active tasks ── */}
+                        <DeadlineBadge assignment={assignment} />
+
+                        {/* Progress bar */}
                         {!isResolved && !isPendingReview && (
                           <div className="mb-4">
                             <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -394,15 +411,18 @@ const AssignmentsPage: React.FC = () => {
                               <span>{assignment.progress}%</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-green-600 rounded-full h-2 transition-all duration-300"
+                              <div
+                                className={`rounded-full h-2 transition-all duration-300 ${
+                                  deadline.isOverdue ? 'bg-red-500' :
+                                  deadline.isWarning ? 'bg-orange-500' :
+                                  'bg-green-600'
+                                }`}
                                 style={{ width: `${assignment.progress}%` }}
                               />
                             </div>
                           </div>
                         )}
-                        
-                        {/* Pending Review Badge */}
+
                         {isPendingReview && (
                           <div className="mb-4 flex items-center gap-2">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
@@ -411,8 +431,7 @@ const AssignmentsPage: React.FC = () => {
                             </span>
                           </div>
                         )}
-                        
-                        {/* Completion Badge for Resolved */}
+
                         {isResolved && (
                           <div className="mb-4 flex items-center gap-2">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
@@ -421,46 +440,45 @@ const AssignmentsPage: React.FC = () => {
                             </span>
                           </div>
                         )}
-                        
+
                         {/* Metadata */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-500">
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <span className="truncate">{assignment.location}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span>Claimed {formatDate(assignment.claimedAt)}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span>By {assignment.reportedBy}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                             <span>{assignment.commentsCount} comments</span>
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Action Buttons */}
+
+                      {/* Action buttons */}
                       <div className="flex flex-col sm:flex-row gap-2 lg:flex-col xl:flex-row">
                         {assignment.status === 'assigned' && (
                           <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                             onClick={() => handleStartWork(assignment.id, assignment.taskId)}
                             disabled={isUpdating}
-                            className="px-5 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+                            className="px-5 py-2 cursor-pointer bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 shadow-sm flex items-center gap-2"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -469,15 +487,11 @@ const AssignmentsPage: React.FC = () => {
                             {isUpdating ? 'Starting...' : 'Start Work'}
                           </motion.button>
                         )}
-                        
+
                         {assignment.status === 'in_progress' && (
                           <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => {
-                              setSelectedAssignment(assignment);
-                              setShowProofModal(true);
-                            }}
+                            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                            onClick={() => { setSelectedAssignment(assignment); setShowProofModal(true); }}
                             disabled={isUpdating}
                             className="px-5 py-2 cursor-pointer bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 shadow-sm flex items-center gap-2"
                           >
@@ -487,10 +501,9 @@ const AssignmentsPage: React.FC = () => {
                             Submit for Review
                           </motion.button>
                         )}
-                        
+
                         <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                           onClick={() => router.push(`/issues/${assignment.taskId}?role=${user?.role || ''}`)}
                           className="px-5 py-2 cursor-pointer bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center gap-2"
                         >
@@ -510,13 +523,9 @@ const AssignmentsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Submit Proof Modal */}
       <SubmitProofModal
         isOpen={showProofModal}
-        onClose={() => {
-          setShowProofModal(false);
-          setSelectedAssignment(null);
-        }}
+        onClose={() => { setShowProofModal(false); setSelectedAssignment(null); }}
         onSubmit={handleSubmitProof}
         assignment={selectedAssignment}
         isSubmitting={isSubmittingProof}

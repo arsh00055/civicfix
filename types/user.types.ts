@@ -1,5 +1,6 @@
 // types/user.types.ts
 import type { BaseUser } from './base.types';
+import { Issue } from './issue.types';
 import type { NotificationPreferences } from './notification.types';
 
 export interface UserProfile extends BaseUser {
@@ -250,4 +251,35 @@ export interface UserUpdateData {
   preferences?: Partial<UserProfile['preferences']>;
   avatar?: File | string;
   coverImage?: File | string;
+}
+
+export interface CitizenDashboardStats {
+  reportsSubmitted: number;
+  issuesResolved: number;
+  achievementsEarned: number;
+  communityRank: string;
+  communityImpact: string;
+  totalVotes: number;
+  totalComments: number;
+  activeVolunteers: number;
+  resolutionRate: number;
+  averageResolutionTime: string;
+  pendingIssues: number;
+  totalCommunityIssues: number;
+  thisWeekReports: number;
+  thisWeekResolved: number;
+}
+
+export interface CitizenDashboardResponse {
+  stats: CitizenDashboardStats;
+  myReports: Issue[];
+  recentNotifications: any[];
+  communityStats: {
+    totalVolunteers: number;
+    activeVolunteers: number;
+    totalIssues: number;
+    resolvedIssues: number;
+    pendingIssues: number;
+    avgResolutionHours: number;
+  };
 }

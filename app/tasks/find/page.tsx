@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/MainLayout';
 import Loading from '@/app/loading';
@@ -12,6 +12,7 @@ import TasksStats from './components/TasksStats';
 import TasksFilters from './components/TasksFilters';
 import TasksGrid from './components/TasksGrid';
 import { Issue } from '@/types/issue.types';
+import { toast } from 'sonner';
 
 type Priority = 'low' | 'medium' | 'high' | 'critical';
 type Urgency = 'low' | 'medium' | 'high';
@@ -49,21 +50,12 @@ const FindTasksPage: React.FC = () => {
     distance: ''
   });
 
+  const isFirstMount = useRef(true);
   useEffect(() => {
-    if (user) {
-      fetchTasks();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      const timer = setTimeout(() => {
-        fetchTasksWithFilters();
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [filters, user]);
+    if (isFirstMount.current) { isFirstMount.current = false; fetchTasks(); return; }
+    const t = setTimeout(fetchTasksWithFilters, 300);
+    return () => clearTimeout(t);
+  }, [filters]);
 
   const fetchTasks = async () => {
     try {
@@ -81,18 +73,8 @@ const FindTasksPage: React.FC = () => {
       setTasks(data.tasks || []);
       
     } catch (err) {
-      console.error('Failed to fetch tasks:', err);
+      toast.error('Failed to fetch tasks');
       setError('Failed to load tasks. Please try again.');
-      
-      // Fallback to available tasks if find endpoint fails
-      try {
-        const fallbackResponse = await apiClient.get('/volunteers/tasks/available');
-        const fallbackData = fallbackResponse.data || fallbackResponse;
-        setTasks(fallbackData.tasks || []);
-        setError(null);
-      } catch (fallbackErr) {
-        console.error('Failed to fetch fallback tasks:', fallbackErr);
-      }
     } finally {
       setLoading(false);
     }
@@ -121,7 +103,7 @@ const FindTasksPage: React.FC = () => {
       setTasks(data.tasks || []);
       
     } catch (err) {
-      console.error('Failed to fetch filtered tasks:', err);
+      toast.error('Failed to fetch filtered tasks');
       // If filtered request fails, use client-side filtering
       fetchTasks();
     } finally {
@@ -147,10 +129,10 @@ const FindTasksPage: React.FC = () => {
       setTasks(prev => prev.filter(task => task.id !== taskId));
       
       // Show success message
-      alert('Task claimed successfully! You can now view it in your assignments.');
+      toast.success('Task claimed successfully! You can now view it in your assignments.');
       
     } catch (err) {
-      console.error('Failed to claim task:', err);
+      toast.error('Failed to claim task');
       setError('Failed to claim task. Please try again.');
     } finally {
       setClaimingTask(null);
@@ -285,7 +267,7 @@ const FindTasksPage: React.FC = () => {
               {/* Tasks Grid */}
               <TasksGrid
                 tasks={tasks as unknown as Issue[]}
-                filteredTasks = {tasks as unknown as Issue[]}
+                filteredTasks={filteredTasks as unknown as Issue[]}
                 claimingTask={claimingTask}
                 onClaimTask={handleClaimTask}
                 onClearFilters={clearFilters} 

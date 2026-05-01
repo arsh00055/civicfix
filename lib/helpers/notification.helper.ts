@@ -200,6 +200,204 @@ export async function notifyIssueClaimed(
   });
 }
 
+// These functions follow the same pattern as your existing helpers like
+// notifyAdminIssueClaimed, notifyAllVolunteersNewTask etc.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Helper already exists in your file — reuse it, don't duplicate
+// async function getAdminIds(db): Promise<string[]>
+// async function createNotification(db, notification): Promise<void>
+
+// ── 1. Day-5 warning to volunteer ────────────────────────────────────────────
+// Called by cron job when a task is 5 days old and not yet resolved.
+export async function notifyDeadlineWarning(
+  volunteerId:  string,
+  issueId:      string,
+  issueTitle:   string,
+  daysLeft:     number
+): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+    await db.collection('notifications').insertOne({
+      type:          'deadline_warning',
+      title:         '⏰ Task Deadline Approaching',
+      message:       `Your task "${issueTitle}" is due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Please complete it or contact your admin.`,
+      targetUserId:  volunteerId,
+      targetRole:    'volunteer',
+      targetType:    'specific_user',
+      isRead:        false,
+      createdAt:     new Date().toISOString(),
+      metadata: {
+        issueId,
+        issueTitle,
+        daysLeft,
+        actionUrl: `/issues/${issueId}`,
+      },
+    });
+  } catch (error) {
+    console.error('notifyDeadlineWarning error:', error);
+  }
+}
+
+// ── 2. Admin alert — task overdue (day 7+) ───────────────────────────────────
+// Called by cron job when a claimed task exceeds the 7-day deadline.
+export async function notifyAdminOverdueTask(
+  issueId:       string,
+  issueTitle:    string,
+  volunteerName: string,
+  volunteerId:   string,
+  daysOverdue:   number,
+  priority:      string
+): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+
+    // Get all admin IDs — reuse your existing pattern
+    const admins = await db.collection('admins').find(
+      { isActive: true },
+      { projection: { _id: 1 } }
+    ).toArray();
+
+    const notifications = admins.map(admin => ({
+      type:          'overdue_task',
+      title:         '🔴 Overdue Task Alert',
+      message:       `"${issueTitle}" assigned to ${volunteerName} is ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue (${priority} priority). Action required.`,
+      targetUserId:  admin._id.toString(),
+      targetRole:    'admin',
+      targetType:    'specific_user',
+      isRead:        false,
+      createdAt:     new Date().toISOString(),
+      metadata: {
+        issueId,
+        issueTitle,
+        volunteerName,
+        volunteerId,
+        daysOverdue,
+        priority,
+        actionUrl:   `/admin/issues`,
+      },
+    }));
+
+    if (notifications.length > 0) {
+      await db.collection('notifications').insertMany(notifications);
+    }
+  } catch (error) {
+    console.error('notifyAdminOverdueTask error:', error);
+  }
+}
+
+// ── 3. Admin alert — issue stale (21+ days old, not resolved) ────────────────
+// Called by cron job for issues that have been sitting unresolved for 3+ weeks.
+export async function notifyAdminStaleIssue(
+  issueId:       string,
+  issueTitle:    string,
+  status:        string,
+  priority:      string,
+  daysOld:       number,
+  assigneeName?: string
+): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+
+    const admins = await db.collection('admins').find(
+      { isActive: true },
+      { projection: { _id: 1 } }
+    ).toArray();
+
+    const assigneeText = assigneeName
+      ? `Currently assigned to ${assigneeName}.`
+      : 'Not yet assigned to any volunteer.';
+
+    const notifications = admins.map(admin => ({
+      type:          'stale_issue',
+      title:         '⏳ Stale Issue Alert',
+      message:       `"${issueTitle}" has been ${status.replace('_', ' ')} for ${daysOld} days. ${assigneeText} Consider taking action.`,
+      targetUserId:  admin._id.toString(),
+      targetRole:    'admin',
+      targetType:    'specific_user',
+      isRead:        false,
+      createdAt:     new Date().toISOString(),
+      metadata: {
+        issueId,
+        issueTitle,
+        status,
+        priority,
+        daysOld,
+        assigneeName,
+        actionUrl:   `/admin/issues`,
+      },
+    }));
+
+    if (notifications.length > 0) {
+      await db.collection('notifications').insertMany(notifications);
+    }
+  } catch (error) {
+    console.error('notifyAdminStaleIssue error:', error);
+  }
+}
+
+// ── 4. Volunteer warning from admin (via EscalateModal warn_volunteer) ────────
+// Called when admin clicks "Warn Volunteer" in the escalate modal.
+export async function notifyVolunteerWarning(
+  volunteerId:   string,
+  issueId:       string,
+  issueTitle:    string,
+  reason:        string,
+  daysExtended:  number
+): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+    await db.collection('notifications').insertOne({
+      type:          'admin_warning',
+      title:         '⚠️ Admin Warning — Action Required',
+      message:       `${reason} Your deadline for "${issueTitle}" has been extended by ${daysExtended} day${daysExtended !== 1 ? 's' : ''}.`,
+      targetUserId:  volunteerId,
+      targetRole:    'volunteer',
+      targetType:    'specific_user',
+      isRead:        false,
+      createdAt:     new Date().toISOString(),
+      metadata: {
+        issueId,
+        issueTitle,
+        daysExtended,
+        actionUrl: `/issues/${issueId}`,
+      },
+    });
+  } catch (error) {
+    console.error('notifyVolunteerWarning error:', error);
+  }
+}
+
+// ── 5. Volunteer notification — task reassigned away from them ────────────────
+// Called when admin clicks "Reassign to Pool" in the escalate modal.
+export async function notifyIssueReassigned(
+  volunteerId: string,
+  issueId:     string,
+  issueTitle:  string,
+  reason:      string
+): Promise<void> {
+  try {
+    const { db } = await connectToDatabase();
+    await db.collection('notifications').insertOne({
+      type:          'task_reassigned',
+      title:         '🔄 Task Reassigned',
+      message:       `The task "${issueTitle}" has been reassigned. Reason: ${reason}`,
+      targetUserId:  volunteerId,
+      targetRole:    'volunteer',
+      targetType:    'specific_user',
+      isRead:        false,
+      createdAt:     new Date().toISOString(),
+      metadata: {
+        issueId,
+        issueTitle,
+        reason,
+        actionUrl: `/assignments`,
+      },
+    });
+  } catch (error) {
+    console.error('notifyIssueReassigned error:', error);
+  }
+}
 // Notify everyone about status change
 export async function notifyIssueStatusChanged(
   issueId: string,

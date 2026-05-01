@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { Provider } from 'react-redux';
 import { makeStore, AppStore } from '@/lib/store';
-import { useAuthPersistence } from '@/hooks/useAuthPersistence';
+import { useAuthPersistence } from '@/lib/hooks/useAuthPersistence';
 
 export default function StoreProvider({
   children,

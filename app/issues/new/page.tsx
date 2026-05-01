@@ -48,7 +48,7 @@ const NewIssuePage: React.FC = () => {
       return;
     }
 
-    if (!formData.latitude || !formData.longitude) {
+    if (formData.latitude == null || formData.longitude == null) {
       toast.warning('Please select a location on the map');
       return;
     }
@@ -77,6 +77,9 @@ const NewIssuePage: React.FC = () => {
       const response = await issuesAPI.createIssue(issueData);
       const created = response.data?.id ? response.data : response.data?.data;
       const newId = created?.id || created?._id;
+
+      if (!newId) throw new Error('API did not return a valid issue ID')
+        router.push(`/issues/${newId}?role=${user.role ?? ''}`)
 
       toast.success('Issue reported successfully!');
       router.push(`/issues/${newId}?role=${user?.role || ''}`);

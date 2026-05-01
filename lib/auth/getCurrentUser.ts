@@ -8,6 +8,13 @@ export function getCurrentUser(req: NextRequest) {
       req.cookies.get('auth_token')?.value;
     if (!token) return null;
     const decoded = verifyToken(token) as any;
-    return { id: decoded.id ?? decoded.userId, role: decoded.role, name: decoded.name };
-  } catch { return null; }
+    return {
+      // toString() handles both string and ObjectId cases
+      id: decoded.id?.toString() ?? decoded.userId?.toString(),
+      role: decoded.role,
+      name: decoded.name,
+    };
+  } catch {
+    return null;
+  }
 }

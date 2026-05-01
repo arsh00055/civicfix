@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import apiClient from '@/lib/services/api/client'
 import Error from '@/app/error'
 import UserManagementHeader from './components/UserManagementHeader'
@@ -11,28 +11,23 @@ import PendingVolunteersSection from './components/PendingVolunteersSection'
 import { User } from '@/types/auth.types'
 import { toast } from 'sonner'
 
+
 type UserRole = 'citizen' | 'volunteer' | 'admin'
 
 interface PendingVolunteer {
-  _id: string;
-  name: string;
-  email: string;
-  skills: string[];
-  experienceLevel: string;
-  phone?: string;
-  bio?: string;
-  createdAt: string;
+  _id: string; name: string; email: string; skills: string[];
+  experienceLevel: string; phone?: string; bio?: string; createdAt: string;
 }
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers]                         = useState<User[]>([])
   const [pendingVolunteers, setPendingVolunteers] = useState<PendingVolunteer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadingPending, setLoadingPending] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState<UserRole | ''>('')
-  const [updatingUser, setUpdatingUser] = useState<string | null>(null)
+  const [loading, setLoading]                     = useState(true)
+  const [loadingPending, setLoadingPending]       = useState(true)
+  const [error, setError]                         = useState<string | null>(null)
+  const [searchTerm, setSearchTerm]               = useState('')
+  const [roleFilter, setRoleFilter]               = useState<UserRole | ''>('')
+  const [updatingUser, setUpdatingUser]           = useState<string | null>(null)
 
   // Deactivate modal state
   const [deactivateModalUserId, setDeactivateModalUserId] = useState<string | null>(null)
@@ -69,7 +64,7 @@ export default function UserManagementPage() {
     }
   }
 
-  const updateUserRole = async (userId: string, newRole: UserRole) => {
+  const updateUserRole = useCallback(async (userId: string, newRole: UserRole) => {
     try {
       setUpdatingUser(userId)
       await apiClient.patch(`/admin/users/${userId}/role`, { role: newRole })
@@ -81,11 +76,12 @@ export default function UserManagementPage() {
     } finally {
       setUpdatingUser(null)
     }
-  }
+  }, [])
 
-  const toggleUserActive = async (userId: string, currentStatus: boolean) => {
+  const toggleUserActive = useCallback(async (userId: string, currentStatus: boolean) => {
     const newStatus = !currentStatus
 
+    let reason = ''
     if (!newStatus) {
       // Deactivate — custom modal kholo
       setDeactivateModalUserId(userId)
@@ -102,14 +98,23 @@ export default function UserManagementPage() {
         onClick: async () => {
           try {
             setUpdatingUser(userId)
-            await apiClient.patch(`/admin/users/${userId}/activate`)
+            if (newStatus) {
+              await apiClient.patch(`/admin/users/${userId}/activate`)
+            } else {
+              await apiClient.patch(`/admin/users/${userId}/deactivate`, { reason })
+            }
             setUsers(prev => prev.map(u =>
               u.id === userId ? { ...u, isActive: true } as any : u
             ))
-            toast.success('User activated successfully', {
-              description: 'The user can now log in. Notification email sent.',
-              duration: 3000,
-            })
+            toast.success(
+              newStatus ? 'User activated successfully' : 'User deactivated successfully',
+              {
+                description: newStatus
+                  ? 'The user can now log in. Notification email sent.'
+                  : 'The user has been notified via email.',
+                duration: 3000,
+              }
+            )
           } catch (err: any) {
             toast.error('Action failed', {
               description: err.response?.data?.message || 'Please try again.',
@@ -125,91 +130,62 @@ export default function UserManagementPage() {
         onClick: () => toast.info('Action cancelled', { duration: 2000 }),
       },
     })
-  }
+  }, [])
 
-  const handleDeactivateConfirm = async () => {
-    if (!deactivateModalUserId) return
-    if (!deactivateReason.trim()) {
-      toast.error('Reason is required to deactivate an account.')
-      return
-    }
-
-    try {
-      setDeactivating(true)
-      await apiClient.patch(`/admin/users/${deactivateModalUserId}/deactivate`, {
-        reason: deactivateReason
-      })
-      setUsers(prev => prev.map(u =>
-        u.id === deactivateModalUserId ? { ...u, isActive: false } as any : u
-      ))
-      toast.success('User deactivated successfully', {
-        description: 'The user has been notified via email.',
-        duration: 3000,
-      })
-      setDeactivateModalUserId(null)
-      setDeactivateReason('')
-    } catch (err: any) {
-      toast.error('Action failed', {
-        description: err.response?.data?.message || 'Please try again.',
-        duration: 4000,
-      })
-    } finally {
-      setDeactivating(false)
-    }
-  }
-
-  const handleApproveVolunteer = async (volunteerId: string) => {
+  const handleApproveVolunteer = useCallback(async (volunteerId: string) => {
     try {
       await apiClient.post(`/admin/volunteers/${volunteerId}/approve`)
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
       fetchUsers()
-      toast.success('Volunteer approved successfully!', {
-        description: 'The volunteer has been notified via email',
-        duration: 3000,
-      })
+      toast.success('Volunteer approved successfully!')
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to approve volunteer.')
+      console.error('Failed to approve volunteer:', err)
+      toast.error(err.response?.data?.message || 'Failed to approve volunteer. Please try again.')
     }
-  }
+  }, [])
 
-  const handleRejectVolunteer = async (volunteerId: string, reason: string) => {
+  const handleRejectVolunteer = useCallback(async (volunteerId: string) => {
+    const reason = prompt('Please enter reason for rejection (optional):')
     try {
       await apiClient.post(`/admin/volunteers/${volunteerId}/reject`, {
-        reason: reason || 'No reason provided'
+        reason: reason || 'No reason provided',
       })
       setPendingVolunteers(prev => prev.filter(v => v._id !== volunteerId))
-      toast.success('Volunteer rejected successfully!', {
-        description: 'The volunteer has been notified via email.',
-        duration: 3000,
-      })
+      toast.success('Volunteer rejected successfully.')
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to reject volunteer.')
+      console.error('Failed to reject volunteer:', err)
+      toast.error(err.response?.data?.message || 'Failed to reject volunteer. Please try again.')
     }
-  }
+  }, [])
 
-  const handleClearFilters = () => {
-    setSearchTerm('')
-    setRoleFilter('')
-  }
-
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     fetchUsers()
     fetchPendingVolunteers()
-  }
+  }, [])
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = !roleFilter || user.role === roleFilter
-    return matchesSearch && matchesRole
-  })
+  const handleDismissError = useCallback(() => setError(null), [])
+  const handleSearch       = useCallback((term: string) => setSearchTerm(term), [])
+  const handleClearFilters = useCallback(() => { setSearchTerm(''); setRoleFilter('') }, [])
+
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm && !roleFilter) return users
+
+    const lowerSearch = searchTerm.toLowerCase() // compute once, not per user
+    return users.filter(user => {
+      const matchesSearch =
+        !searchTerm ||
+        user.name.toLowerCase().includes(lowerSearch) ||
+        user.email.toLowerCase().includes(lowerSearch)
+      const matchesRole = !roleFilter || user.role === roleFilter
+      return matchesSearch && matchesRole
+    })
+  }, [users, searchTerm, roleFilter])
 
   if (loading && !users.length) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
           <p className="mt-4 text-gray-600">Loading users...</p>
         </div>
       </div>
@@ -217,7 +193,12 @@ export default function UserManagementPage() {
   }
 
   if (error && !users.length) {
-    return (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => {}} />)
+    return (
+      <Error
+        error={error as unknown as Error & { digest?: string | undefined }}
+        reset={() => {}}
+      />
+    )
   }
 
   return (
@@ -288,7 +269,10 @@ export default function UserManagementPage() {
                 Cancel
               </button>
               <button
-                onClick={handleDeactivateConfirm}
+                onClick={() => {
+                  setDeactivateModalUserId(null)
+                  setDeactivateReason('')
+                }}
                 disabled={deactivating}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
-import { setUser } from '../lib/store/slices/authSlice';
+import { setUser } from '../store/slices/authSlice';
 
 export const useAuthPersistence = () => {
   const dispatch = useDispatch();

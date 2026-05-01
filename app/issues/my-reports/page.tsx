@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -116,10 +116,15 @@ export default function MyReportsPage() {
 
   useEffect(() => { fetchReports(); }, [page, status]);
 
-  // stats derived from current full list (re-fetched without filters for accuracy)
-  const resolved    = issues.filter(i => i.status === 'resolved').length;
-  const inProgress  = issues.filter(i => ['assigned', 'in_progress'].includes(i.status)).length;
-  const pending     = issues.filter(i => ['reported', 'in_review'].includes(i.status)).length;
+  const { resolved, inProgress, pending } = useMemo(() => {
+    let resolved = 0, inProgress = 0, pending = 0;
+    for (const i of issues) {
+      if (i.status === 'resolved') resolved++;
+      else if (i.status === 'assigned' || i.status === 'in_progress') inProgress++;
+      else if (i.status === 'reported' || i.status === 'in_review') pending++;
+    }
+    return { resolved, inProgress, pending };
+  }, [issues]);
 
   return (
     <MainLayout role={user?.role ?? null}>

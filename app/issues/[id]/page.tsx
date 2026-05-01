@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import apiClient from '@/lib/services/api/client'
 import type { Issue } from '@/types/issue.types'
 import Loading from '@/app/loading'
@@ -30,10 +30,9 @@ import ResolutionRating from '@/components/issues/ResolutionRating'
 export default function IssueDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const { user } = useAuth()
-  const userRole = searchParams.get('role') || user?.role || null
+  const userRole = user?.role ?? null;
 
   const [issue, setIssue] = useState<Issue | null>(null)
   const [loading, setLoading] = useState(true)
@@ -160,7 +159,7 @@ export default function IssueDetailPage() {
                 <div className="flex flex-wrap gap-2 sm:gap-3 mb-4">
                   <span className={`inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium border ${getStatusColor(issue.status)}`}>
                     <StatusIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                    {issue.status.replace('_', ' ').toUpperCase()}
+                    {issue.status.replaceAll('_', ' ').toUpperCase()}
                   </span>
                   <span className={`inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium border ${getPriorityColor(issue.priority)}`}>
                     <ExclamationTriangleIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
@@ -337,7 +336,7 @@ export default function IssueDetailPage() {
                     </div>
                   )}
 
-                  {issue.latitude !== 0 && issue.longitude !== 0 && (
+                  {issue.latitude != null && issue.longitude != null && (
                     <div>
                       {/* FIX: text-sm → sm:text-lg */}
                       <h4 className="text-sm sm:text-lg font-medium text-gray-900 mb-3">Location Coordinates</h4>
@@ -362,32 +361,33 @@ export default function IssueDetailPage() {
           </div>
         </div>
       </MainLayout>
-
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-          onClick={() => setSelectedImage(null)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="relative max-w-4xl max-h-[90vh]"
+      <AnimatePresence>
+        {selectedImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
+            onClick={() => setSelectedImage(null)}
           >
-            <img
-              src={selectedImage}
-              alt="Preview"
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            />
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative max-w-4xl max-h-[90vh]"
             >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </motion.div>
-        </div>
-      )}
+              <img
+                src={selectedImage}
+                alt="Preview"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              />
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
