@@ -442,7 +442,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
       {/* Action bar */}
       {showActions && !compact && (
         <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100 gap-2">
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
             {canUpdateStatus && (
               <>
                 {currentStatus !== 'in_progress' && (

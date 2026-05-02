@@ -154,7 +154,7 @@ const MapPage: React.FC = () => {
         {/* Filters */}
         <div className="px-6 pb-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex flex-wrap gap-4 items-center">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 items-center">
               <div className="w-full sm:w-auto">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category
@@ -207,18 +207,19 @@ const MapPage: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex-1 hidden sm:block"></div>
+              <div className="w-full sm:w-auto">
+                <label className="block h-5 text-sm font-medium text-gray-700 mb-1"></label>
+                <button
+                  onClick={handleClearFilters}
+                  className="w-full cursor-pointer sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
 
               <div className="w-full sm:w-auto text-sm text-gray-600">
                 Showing {filteredIssues.length} of {issues.length} issues
               </div>
-
-              <button
-                onClick={handleClearFilters}
-                className="w-full cursor-pointer sm:w-auto px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Clear Filters
-              </button>
             </div>
           </div>
         </div>
@@ -226,7 +227,7 @@ const MapPage: React.FC = () => {
         {error && (<Error error={error as unknown as Error & { digest?: string | undefined }} reset={() => {}} />)}
 
         <div className="flex-1 px-6 pb-6">
-          <div className="h-full rounded-xl overflow-hidden border border-gray-200 bg-gray-50 relative">
+          <div className="h-full rounded-xl overflow-hidden z-10 border border-gray-200 bg-gray-50 relative">
             {loading ? (
               <div className="h-full flex items-center justify-center">
                 <Loading />

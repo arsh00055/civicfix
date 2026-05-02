@@ -83,7 +83,7 @@ export default function PendingVolunteersSection({
         <div className="flex items-center gap-2 mb-3">
           <span className="text-lg">✅</span>
           <h2 className="text-lg font-semibold text-gray-800">Pending Volunteer Approvals</h2>
-          <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+          <span className="ml-auto text-xs bg-green-100 text-center text-green-700 px-2 py-1 rounded-full font-medium">
             All clear
           </span>
         </div>

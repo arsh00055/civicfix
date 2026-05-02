@@ -420,7 +420,7 @@ const AdminIssuesPage: React.FC = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-2 flex-shrink-0">
+                      <div className="grid grid-cols-2 lg:grid-cols-1 flex-shrink-0">
                         {/* Review button — for pending_review / in_review */}
                         {issue.status === 'in_review' && (
                           <button

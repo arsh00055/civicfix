@@ -66,7 +66,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-      <div className="flex flex-col lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Search Issues
@@ -79,7 +79,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
           />
         </div>
 
-        <div className="w-full lg:w-48">
+        <div className="w-full lg:w-74">
           <SelectField
             label="Status"
             value={filters.status}
@@ -88,7 +88,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
           />
         </div>
 
-        <div className="w-full lg:w-48">
+        <div className="w-full lg:w-74">
           <SelectField
             label="Category"
             value={filters.category}
@@ -97,7 +97,7 @@ const IssueFilters: React.FC<IssueFiltersProps> = ({ filters, onFiltersChange })
           />
         </div>
 
-        <div className="w-full lg:w-48">
+        <div className="w-full lg:w-74">
           <SelectField
             label="Priority"
             value={filters.priority}

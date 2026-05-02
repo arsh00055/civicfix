@@ -516,7 +516,7 @@ const AssignmentsPage: React.FC = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex flex-col sm:flex-row gap-2 lg:flex-col xl:flex-row">
+                      <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
                         {assignment.status === 'assigned' && (
                           <motion.button
                             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

@@ -42,15 +42,6 @@ export default function UserStats({ users, pendingVolunteersCount = 0 }: Props) 
       valueColor: 'text-green-900',
     },
     {
-      label: 'Admins',
-      value: admins,
-      icon: '🛡️',
-      bg: 'bg-purple-50',
-      border: 'border-purple-100',
-      text: 'text-purple-700',
-      valueColor: 'text-purple-900',
-    },
-    {
       label: 'Pending Approvals',
       value: pendingVolunteersCount,
       icon: '⏳',

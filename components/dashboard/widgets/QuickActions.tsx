@@ -56,7 +56,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ userRole: propUserRole }) =
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
         {actions.map((action, index) => (
           action.primary ? (
             <PrimaryButton

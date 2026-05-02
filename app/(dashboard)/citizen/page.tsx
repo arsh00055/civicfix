@@ -222,7 +222,7 @@ export default function CitizenDashboard() {
       </div>
 
       {/* Personal Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Reports Submitted"
           value={stats.reportsSubmitted.toString()}
@@ -248,7 +248,7 @@ export default function CitizenDashboard() {
       </div>
 
       {/* Community Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Active Volunteers"
           value={stats.activeVolunteers.toString()}
