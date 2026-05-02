@@ -35,7 +35,7 @@ const SidebarHeader: React.FC = () => {
           Community<span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Fix</span>
         </h1>
         <p className="text-sm text-gray-600 mt-1">
-        {getRoleDisplay(userRole)} Portal
+        {getRoleDisplay(userRole)}
       </p>
       </div>
     </div>
