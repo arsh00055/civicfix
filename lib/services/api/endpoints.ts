@@ -137,6 +137,7 @@ export const volunteersAPI = {
 
 
 export const adminAPI = {
+  getSupportEmail: () => apiClient.get('/admin/support-email'),
   getStats:         () => apiClient.get('/users/stats'),
   getUsers:         (params?: any) => apiClient.get('/admin/users', { params }),
   updateUser:       (userId: string, userData: any) => apiClient.put(`/admin/users/${userId}`, userData),

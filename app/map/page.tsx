@@ -7,7 +7,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import Loading from '@/app/loading'
 import Error from '@/app/error'
 import { issuesAPI } from '@/lib/services/api/endpoints';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 const MapComponent = dynamic(() => import('@/components/map/mapComponent'), {
@@ -57,6 +57,7 @@ const MapPage: React.FC = () => {
       const validIssues = issuesData.filter((issue: any) => 
         issue.latitude && issue.longitude &&
         typeof issue.latitude === 'number' && 
+        issue.status !== 'resolved' &&
         typeof issue.longitude === 'number'
       );
       
@@ -202,7 +203,7 @@ const MapPage: React.FC = () => {
                   <option value="reported">Reported</option>
                   <option value="assigned">Assigned</option>
                   <option value="in_progress">In Progress</option>
-                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
                 </select>
               </div>
 

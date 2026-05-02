@@ -33,18 +33,26 @@ const NotificationBell: React.FC = () => {
 
   return (
     <div className="relative" ref={ref}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 text-gray-600 cursor-pointer hover:text-gray-900 hover:bg-gray-100 rounded-full relative transition-colors"
-        aria-label="Notifications"
-      >
-        <BellIcon className="h-6 w-6" />
-        {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-            {unreadCount}
-          </span>
-        )}
-      </button>
+      <span style={{ 
+        display: 'inline-block',
+        animation: unreadCount > 0 ? 'ring 1.2s ease infinite' : 'none',
+        transformOrigin: 'top center'
+      }}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-gray-600 cursor-pointer hover:text-gray-900 hover:bg-gray-100 rounded-full relative transition-colors"
+          aria-label="Notifications"
+        >
+          <BellIcon className="h-6 w-6" />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center"
+                  style={{ animation: 'ring 1.2s ease infinite', transformOrigin: 'top center' }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+        </button>
+      </span>
 
       {isOpen && (
         <div className="fixed sm:absolute right-1 sm:right-0 mt-2 w-[calc(100vw-1rem)] sm:w-80 bg-white rounded-lg shadow-xl z-50" style={{top: 'auto'}}>

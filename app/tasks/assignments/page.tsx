@@ -6,11 +6,12 @@ import MainLayout from '@/components/layout/MainLayout';
 import Loading from '@/app/loading';
 import Error from '@/app/error';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { volunteersAPI, issuesAPI } from '@/lib/services/api/endpoints';
+import { volunteersAPI, issuesAPI, adminAPI } from '@/lib/services/api/endpoints';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { SubmitProofModal } from './components/SubmitModal';
+import apiClient from '@/lib/services/api/client';
 
 interface Assignment {
   id: string;
@@ -171,6 +172,46 @@ const AssignmentsPage: React.FC = () => {
     }
   };
 
+  const AdminContactReveal = () => {
+    const [revealed, setRevealed] = useState(false);
+    const [adminEmail, setAdminEmail] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+  
+    const handleReveal = async () => {
+      setLoading(true);
+      try {
+        const res = await adminAPI.getSupportEmail();
+        setAdminEmail(res.data.email);
+      } catch {
+        setAdminEmail('admin@civicfix.com'); // fallback
+      } finally {
+        setLoading(false);
+        setRevealed(true);
+      }
+    };
+  
+    if (revealed) {
+      return (
+        <a
+          href={`mailto:${adminEmail}`}
+          className="font-medium text-red-700 underline cursor-pointer hover:text-red-800"
+        >
+          {adminEmail}
+        </a>
+      );
+    }
+  
+    return (
+      <button
+        onClick={handleReveal}
+        disabled={loading}
+        className="underline cursor-pointer text-red-700 font-medium hover:text-red-800 transition-colors disabled:opacity-50"
+      >
+        {loading ? 'loading...' : 'contact your admin'}
+      </button>
+    );
+  }
+
   const handleStartWork = async (assignmentId: string, taskId: string) => {
     try {
       setUpdatingStatus(assignmentId);
@@ -316,7 +357,10 @@ const AssignmentsPage: React.FC = () => {
                   You have {overdueCount} overdue task{overdueCount > 1 ? 's' : ''}
                 </p>
                 <p className="text-sm text-red-700 mt-0.5">
-                  Tasks not completed within 7 days are flagged to admins. Please submit your work or contact your admin if you need more time.
+                  Tasks not completed within 7 days are flagged to admins. Please submit
+                  your work or{' '}
+                  <span className="underline cursor-pointer text-red-700 font-medium hover:text-red-800 transition-colors"><AdminContactReveal /></span>{' '}
+                  if you need more time.
                 </p>
               </div>
             </div>
