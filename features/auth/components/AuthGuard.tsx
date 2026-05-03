@@ -49,13 +49,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
           <div className="space-y-3">
             <button
               onClick={() => router.push('/login')}
-              className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="w-full py-2.5 px-4 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               Go to Login
             </button>
             <button
               onClick={() => router.push('/')}
-              className="w-full py-2.5 px-4 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="w-full py-2.5 px-4 cursor-pointer bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               Go to Home
             </button>

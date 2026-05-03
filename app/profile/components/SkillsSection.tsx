@@ -131,7 +131,7 @@ function SkillsSection() {
                   key={skill}
                   onClick={() => addSkill(skill)}
                   disabled={skills.includes(skill)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                  className={`px-3 py-1 rounded-full cursor-pointer text-sm transition-colors ${
                     skills.includes(skill)
                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
@@ -156,7 +156,7 @@ function SkillsSection() {
             {isEditing && (
               <button
                 onClick={() => removeSkill(skill)}
-                className="w-4 h-4 rounded-full bg-blue-200 hover:bg-blue-300 text-blue-800 flex items-center justify-center text-xs"
+                className="w-4 h-4 rounded-full cursor-pointer bg-blue-200 hover:bg-blue-300 text-blue-800 flex items-center justify-center text-xs"
                 disabled={saving}
               >
                 ×
@@ -181,7 +181,7 @@ function SkillsSection() {
               <div key={skill} className="flex items-center justify-between">
                 <span className="text-sm text-gray-700">{skill}</span>
                 <select 
-                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="text-sm border border-gray-300 cursor-pointer rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   defaultValue="intermediate"
                 >
                   <option value="beginner">Beginner</option>

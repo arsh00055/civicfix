@@ -156,7 +156,7 @@ function CreatePostModal({ onClose, onCreated }: { onClose: () => void; onCreate
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">New Post</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button onClick={onClose} className="p-1 cursor-pointer hover:bg-gray-100 rounded-lg">
             <XMarkIcon className="h-5 w-5 text-gray-500" />
           </button>
         </div>

@@ -203,7 +203,7 @@ export default function ReportsPage() {
               <p className="text-gray-600 text-sm mb-4">{error}</p>
               <button
                 onClick={handleRetry}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 cursor-pointer text-white rounded hover:bg-blue-700"
               >
                 Try Again
               </button>
@@ -226,13 +226,13 @@ export default function ReportsPage() {
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={handleRetry}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  className="px-3 py-1 bg-red-600 cursor-pointer text-white text-sm rounded hover:bg-red-700"
                 >
                   Retry
                 </button>
                 <button
                   onClick={handleDismissError}
-                  className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                  className="px-3 py-1 bg-gray-200 cursor-pointer text-gray-700 text-sm rounded hover:bg-gray-300"
                 >
                   Dismiss
                 </button>

@@ -90,7 +90,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({
     }
   };
 
-  const buttonClass = `flex items-center justify-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${
+  const buttonClass = `flex items-center cursor-pointer justify-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${
     hasVoted
       ? 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100'
       : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'

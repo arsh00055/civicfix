@@ -204,7 +204,7 @@ export default function VolunteerDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+              className="bg-white/10 hover:bg-white/20 cursor-pointer border border-white/20 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
             >
               {isRefreshing ? 'Refreshing…' : 'Refresh'}
             </button>
@@ -263,7 +263,7 @@ export default function VolunteerDashboard() {
               </h2>
               <button
                 onClick={() => router.push('/notifications')}
-                className="text-xs text-green-600 hover:text-green-700 font-medium"
+                className="text-xs text-green-600 cursor-pointer hover:text-green-700 font-medium"
               >
                 View all
               </button>
@@ -295,14 +295,14 @@ export default function VolunteerDashboard() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => router.push('/tasks/available')}
-                  className="text-xs text-green-600 hover:text-green-700 font-medium"
+                  className="text-xs text-green-600 cursor-pointer hover:text-green-700 font-medium"
                 >
                   Browse all →
                 </button>
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                  className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 disabled:opacity-50"
                 >
                   {isRefreshing ? 'Refreshing…' : 'Refresh'}
                 </button>
@@ -329,7 +329,7 @@ export default function VolunteerDashboard() {
                   <p className="text-xs text-gray-400 mb-3">Check back soon for new opportunities</p>
                   <button
                     onClick={() => router.push('/tasks/available')}
-                    className="px-4 py-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 bg-green-600 text-white cursor-pointer text-xs font-medium rounded-lg hover:bg-green-700 transition-colors"
                   >
                     Browse all tasks
                   </button>
@@ -352,7 +352,7 @@ export default function VolunteerDashboard() {
                 </h2>
                 <button
                   onClick={() => router.push('/tasks/assignments')}
-                  className="text-xs text-green-600 hover:text-green-700 font-medium"
+                  className="text-xs text-green-600 cursor-pointer hover:text-green-700 font-medium"
                 >
                   View all →
                 </button>
@@ -386,7 +386,7 @@ export default function VolunteerDashboard() {
                         </div>
                         <button
                           onClick={() => router.push(`/issues/${assignment.taskId}?role=volunteer`)}
-                          className="flex-shrink-0 px-2.5 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                          className="flex-shrink-0 px-2.5 py-1 cursor-pointer text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                         >
                           View
                         </button>

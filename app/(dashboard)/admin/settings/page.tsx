@@ -95,7 +95,7 @@ export default function SystemSettingsPage() {
           <div className="flex gap-2">
             <button
               onClick={fetchSettings}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center cursor-pointer gap-2 px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <ArrowPathIcon className="h-4 w-4" />
               Refresh
@@ -103,7 +103,7 @@ export default function SystemSettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm cursor-pointer font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -130,7 +130,7 @@ export default function SystemSettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg transition-colors text-left whitespace-nowrap flex-shrink-0 sm:w-full ${
+                    className={`flex items-center cursor-pointer gap-2 px-4 py-2.5 text-sm rounded-lg transition-colors text-left whitespace-nowrap flex-shrink-0 sm:w-full ${
                       activeTab === tab.id
                         ? 'bg-purple-50 text-purple-700 font-semibold border border-purple-200'
                         : 'text-gray-600 hover:bg-gray-100 border border-transparent'
@@ -210,7 +210,7 @@ export default function SystemSettingsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-6 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60"
+                className="px-6 py-2 text-sm font-medium cursor-pointer text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-60"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -240,7 +240,7 @@ function ToggleRow({
       </div>
       <button
         onClick={() => onChange(!value)}
-        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 mt-0.5 ${
+        className={`relative inline-flex h-6 w-11 cursor-pointer shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 mt-0.5 ${
           value
             ? danger ? 'bg-red-500 focus:ring-red-500' : 'bg-purple-600 focus:ring-purple-500'
             : 'bg-gray-300 focus:ring-gray-400'

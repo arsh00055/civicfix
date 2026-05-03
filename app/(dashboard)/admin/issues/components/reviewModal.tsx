@@ -56,7 +56,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               <h3 className="text-lg font-semibold text-gray-900">Review Resolution</h3>
               <button
                 onClick={onClose}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1 hover:bg-gray-100 cursor-pointer rounded-lg transition-colors"
               >
                 <XCircleIcon className="w-5 h-5 text-gray-500" />
               </button>
@@ -105,7 +105,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         <img
                           src={image}
                           alt={`Proof ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+                          className="w-full h-24 object-cover rounded-lg cursor-pointer border border-gray-200 hover:shadow-md transition-shadow"
                         />
                       </button>
                     ))}
@@ -205,7 +205,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               />
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
+                className="absolute top-4 cursor-pointer right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70"
               >
                 <XCircleIcon className="w-6 h-6" />
               </button>

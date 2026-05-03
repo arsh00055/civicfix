@@ -34,7 +34,7 @@ const ReportsFilters: React.FC<ReportsFiltersProps> = ({
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium"
           >
             Clear Filters
           </button>

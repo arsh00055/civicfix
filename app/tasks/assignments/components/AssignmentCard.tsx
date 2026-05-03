@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@/components/UI/icons';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 
 type AssignmentStatus = 'reported' | 'in_review' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
 
@@ -149,7 +149,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
             <button
               onClick={() => onUpdateStatus(assignment.id, 'in_progress')}
               disabled={isUpdating}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-w-[120px]"
+              className="bg-blue-600 text-white cursor-pointer px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-w-[120px]"
             >
               {isUpdating ? (
                 <>
@@ -165,7 +165,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
             <button
               onClick={() => onUpdateStatus(assignment.id, 'resolved')}
               disabled={isUpdating}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-w-[140px]"
+              className="bg-green-600 text-white cursor-pointer px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 min-w-[140px]"
             >
               {isUpdating ? (
                 <>
@@ -179,7 +179,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
           )}
           <button
             onClick={() => onViewDetails(assignment.id)}
-            className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="border border-gray-300 cursor-pointer text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             View Details
           </button>

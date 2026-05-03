@@ -130,7 +130,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ limit = 3 }) => {
             </div>
             <button 
               onClick={() => handleTaskClick(task.id)}
-              className="w-full mt-2 bg-blue-600 text-white text-xs py-1 px-2 rounded hover:bg-blue-700 transition-colors"
+              className="w-full mt-2 bg-blue-600 text-white cursor-pointer text-xs py-1 px-2 rounded hover:bg-blue-700 transition-colors"
             >
               View Details
             </button>
@@ -174,7 +174,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ limit = 3 }) => {
         <h2 className="text-lg font-semibold text-gray-900">Task Board</h2>
         <button 
           onClick={fetchTasks}
-          className="text-sm text-blue-600 hover:text-blue-700"
+          className="text-sm cursor-pointer text-blue-600 hover:text-blue-700"
           disabled={loading}
         >
           {loading ? 'Refreshing...' : 'Refresh'}
@@ -204,7 +204,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({ limit = 3 }) => {
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button 
             onClick={handleViewAll}
-            className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="w-full text-center cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             View All Tasks
           </button>

@@ -34,7 +34,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
           <select
             value={filters.category}
             onChange={(e) => onCategoryFilter(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border cursor-pointer border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Categories</option>
             <option value="infrastructure">Infrastructure</option>
@@ -49,7 +49,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
           <select
             value={filters.priority}
             onChange={(e) => onPriorityFilter(e.target.value as Priority | '')}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border cursor-pointer border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Priorities</option>
             <option value="critical">Critical</option>
@@ -71,7 +71,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
         <div className="flex justify-end mt-4">
           <button
             onClick={onClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="text-sm cursor-pointer text-blue-600 hover:text-blue-700 font-medium"
           >
             Clear Filters
           </button>

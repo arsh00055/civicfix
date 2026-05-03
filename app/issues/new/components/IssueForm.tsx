@@ -223,7 +223,7 @@ const IssueForm: React.FC<IssueFormProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || !userId || formData.images.length >= 5}
-            className={`flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-4 cursor-pointer py-2 border-2 border-dashed rounded-lg transition-colors ${
               uploading || !userId || formData.images.length >= 5
                 ? 'border-gray-300 bg-gray-50 cursor-not-allowed'
                 : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50 cursor-pointer'
@@ -270,7 +270,7 @@ const IssueForm: React.FC<IssueFormProps> = ({
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                    className="absolute -top-2 -right-2 p-1 cursor-pointer bg-red-500 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                   >
                     <XMarkIcon className="w-3 h-3" />
                   </button>

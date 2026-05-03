@@ -117,7 +117,7 @@ export default function IssueDetailPage() {
           </p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+            className="px-6 py-3 bg-yellow-600 cursor-pointer text-white rounded-lg hover:bg-yellow-700 transition-colors"
           >
             Return to Issues
           </button>
@@ -176,7 +176,7 @@ export default function IssueDetailPage() {
                 {user?.id === issue.reporterId && issue.status === 'reported' && (
                   <button
                   onClick={() => router.push(`/issues/${issue.id}/edit?role=${userRole}`)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                  className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                   >
                     ✏️ Edit
                     </button>
@@ -380,7 +380,7 @@ export default function IssueDetailPage() {
               />
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                className="absolute top-4 right-4 p-2 bg-black/50 cursor-pointer text-white rounded-full hover:bg-black/70 transition-colors"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>

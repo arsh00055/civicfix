@@ -124,7 +124,7 @@ const [showMessage, setShowMessage] = useState(false)
               {errorCode === 'ACCOUNT_REJECTED' && (
                 <button
                   onClick={() => window.location.href = '/contact-support'}
-                  className="mt-1 text-xs underline hover:no-underline"
+                  className="mt-1 text-xs underline cursor-pointer hover:no-underline"
                 >
                   Contact Support
                 </button>
@@ -154,7 +154,7 @@ const [showMessage, setShowMessage] = useState(false)
       setTimeout(() => setShowMessage(false), 3000)
     }
   }}
-  className={`px-6 py-2 rounded-lg transition-colors font-medium ${
+  className={`px-6 py-2 rounded-lg cursor-pointer transition-colors font-medium ${
     registrationsOpen 
       ? 'bg-green-600 text-white hover:bg-green-700' 
       : 'bg-gray-400 text-gray-200 cursor-not-allowed'

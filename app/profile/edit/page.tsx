@@ -175,7 +175,7 @@ const EditProfilePage: React.FC = () => {
           <p className="text-gray-600">Please log in to edit your profile.</p>
           <button
             onClick={() => router.push('/login')}
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg"
+            className="mt-4 bg-blue-600 cursor-pointer text-white px-6 py-2 rounded-lg"
           >
             Log In
           </button>
@@ -255,7 +255,7 @@ const EditProfilePage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100"
+                      className="px-4 py-2 bg-blue-50 text-blue-700 cursor-pointer border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100"
                     >
                       Choose Image
                     </button>
@@ -267,7 +267,7 @@ const EditProfilePage: React.FC = () => {
                           setAvatarPreview(currentUser.avatar || null);
                           if (fileInputRef.current) fileInputRef.current.value = '';
                         }}
-                        className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200"
+                        className="px-4 py-2 bg-gray-100 cursor-pointer text-gray-600 rounded-lg text-sm hover:bg-gray-200"
                       >
                         Remove
                       </button>
@@ -413,7 +413,7 @@ const EditProfilePage: React.FC = () => {
                       }))
                     }
                     disabled={saving}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border cursor-pointer border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     <option value="">Select level</option>
                     <option value="beginner">Beginner</option>

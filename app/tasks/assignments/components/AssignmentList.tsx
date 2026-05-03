@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircleIcon } from '@/components/UI/icons';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 import AssignmentCard from './AssignmentCard';
 
 type AssignmentStatus = 'reported' | 'in_review' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
@@ -46,7 +46,7 @@ const AssignmentsList: React.FC<AssignmentsListProps> = ({
           {assignments.length === 0 && (
             <button
               onClick={onBrowseTasks}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white cursor-pointer px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Browse Available Tasks
             </button>
@@ -54,14 +54,14 @@ const AssignmentsList: React.FC<AssignmentsListProps> = ({
           {assignments.length > 0 && statusFilter && (
             <button
               onClick={onClearFilter}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="bg-gray-600 text-white cursor-pointer px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
             >
               Clear Filter
             </button>
           )}
           <button
             onClick={() => router.push('/dashboard')}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="border border-gray-300 cursor-pointer text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Back to Dashboard
           </button>

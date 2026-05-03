@@ -138,7 +138,7 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowEmailModal(true)}
-                  className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
+                  className="shrink-0 px-4 py-2 cursor-pointer bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
                 >
                   Verify Now →
                 </button>
@@ -198,7 +198,7 @@ const ProfilePage: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => setShowEmailModal(true)}
-                          className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full border border-amber-200 hover:bg-amber-200 transition-colors"
+                          className="text-xs bg-amber-100 cursor-pointer text-amber-700 font-bold px-2 py-0.5 rounded-full border border-amber-200 hover:bg-amber-200 transition-colors"
                         >
                           Verify
                         </button>

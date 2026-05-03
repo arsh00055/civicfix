@@ -129,7 +129,7 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
           {isLoginPage && (
             <p className="mt-2">
               Don&apos;t have an account?{' '}
-              <a href="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+              <a href="/register" className="text-blue-600 cursor-pointer hover:text-blue-500 font-medium">
                 Sign up here
               </a>
             </p>
@@ -138,7 +138,7 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
           {isRegisterPage && (
             <p className="mt-2">
               Already have an account?{' '}
-              <a href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+              <a href="/login" className="text-blue-600 cursor-pointer hover:text-blue-500 font-medium">
                 Sign in here
               </a>
             </p>

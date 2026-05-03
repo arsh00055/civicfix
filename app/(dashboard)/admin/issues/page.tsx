@@ -181,7 +181,7 @@ const AdminIssuesPage: React.FC = () => {
             <p className="text-gray-600 mb-6">This page is only accessible to administrators.</p>
             <button
               onClick={() => router.push('/')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white cursor-pointer px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Back to Dashboard
             </button>

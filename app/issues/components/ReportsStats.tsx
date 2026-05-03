@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 
 interface ReportsStatsProps {
   reports: Issue[];

@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
             </div>
             <button
               onClick={() => router.push('/login')}
-              className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium"
+              className="w-full px-4 py-3 bg-gradient-to-r cursor-pointer from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all font-medium"
             >
               Return to Login
             </button>
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-6">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
+              className="inline-flex items-center gap-2 cursor-pointer text-gray-600 hover:text-gray-800 mb-4"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Login

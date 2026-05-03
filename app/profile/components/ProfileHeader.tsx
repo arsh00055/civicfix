@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { UserProfile } from '@/types';
 import { formatDate } from '@/lib/utils/helpers/formatters';
 import { PencilIcon, MapPinIcon, PhoneIcon, CalendarIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { UserProfile } from '@/types/user.types';
 
 interface ProfileHeaderProps {
   user: UserProfile;
@@ -151,7 +151,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
           <div className="sm:pb-1">
             <button
               onClick={() => router.push('/profile/edit')}
-              className={`flex items-center gap-2 px-5 py-2.5 ${roleConfig.buttonBg} text-white text-sm font-bold rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0`}
+              className={`flex items-center cursor-pointer gap-2 px-5 py-2.5 ${roleConfig.buttonBg} text-white text-sm font-bold rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0`}
             >
               <PencilIcon className="w-4 h-4" />
               Edit Profile

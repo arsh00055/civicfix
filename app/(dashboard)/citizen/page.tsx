@@ -231,7 +231,7 @@ export default function CitizenDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+              className="bg-white/10 hover:bg-white/20 cursor-pointer border border-white/20 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
             >
               {isRefreshing ? 'Refreshing…' : 'Refresh'}
             </button>
@@ -320,7 +320,7 @@ export default function CitizenDashboard() {
               </h2>
               <button
                 onClick={() => router.push('/notifications')}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                className="text-xs text-blue-600 cursor-pointer hover:text-blue-700 font-medium"
               >
                 View all
               </button>
@@ -344,14 +344,14 @@ export default function CitizenDashboard() {
                 {/* UX: link to full list */}
                 <button
                   onClick={() => router.push('/issues/my-reports')}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-xs cursor-pointer text-blue-600 hover:text-blue-700 font-medium"
                 >
                   View all →
                 </button>
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                  className="text-xs text-gray-500 cursor-pointer hover:text-gray-700 disabled:opacity-50"
                 >
                   {isRefreshing ? 'Refreshing…' : 'Refresh'}
                 </button>
@@ -382,7 +382,7 @@ export default function CitizenDashboard() {
                   <p className="text-xs text-gray-400 mb-4">Be the first to report an issue in your area</p>
                   <button
                     onClick={() => router.push('/issues/new?role=' + (user?.role || ''))}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center cursor-pointer gap-1.5 px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <PlusIcon className="w-3.5 h-3.5" aria-hidden="true" />
                     Report your first issue

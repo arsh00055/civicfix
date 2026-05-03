@@ -90,7 +90,7 @@ export default function FAQSection() {
                 <div key={faqIndex} className="px-6 py-4">
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="flex items-center justify-between w-full text-left "
+                    className="flex items-center justify-between cursor-pointer w-full text-left "
                     aria-expanded={openFaq === index}
                     aria-controls={`faq-answer-${index}`}
                   >

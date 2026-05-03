@@ -33,7 +33,7 @@ const SecondaryButton: React.FC<SecondaryButtonProps> = ({
       onClick={onClick}
       disabled={disabled || isLoading}
       className={`
-        inline-flex items-center justify-center
+        inline-flex items-center justify-center cursor-pointer 
         bg-white hover:bg-gray-50 
         disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
         text-gray-700 font-medium rounded-lg border border-gray-300

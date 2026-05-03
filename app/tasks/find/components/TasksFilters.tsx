@@ -43,7 +43,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
           <select
             value={filters.category}
             onChange={(e) => onCategoryFilter(e.target.value)}
-            className="w-full text-black border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full text-black cursor-pointer border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Categories</option>
             <option value="infrastructure">Infrastructure</option>
@@ -59,7 +59,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
           <select
             value={filters.priority}
             onChange={(e) => onPriorityFilter(e.target.value as Priority | '')}
-            className="w-full text-black border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full text-black cursor-pointer border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Priorities</option>
             <option value="critical">Critical</option>
@@ -75,7 +75,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
         <div className="mt-4 flex items-center space-x-2 flex-wrap gap-2">
           <span className="text-sm text-gray-600">Active filters:</span>
           {filters.category && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 border border-blue-200">
+            <span className="inline-flex items-center cursor-pointer px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 border border-blue-200">
               Category: {filters.category}
               <button
                 onClick={() => onCategoryFilter('')}
@@ -86,7 +86,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
             </span>
           )}
           {filters.priority && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">
+            <span className="inline-flex items-center cursor-pointer px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">
               Priority: {filters.priority}
               <button
                 onClick={() => onPriorityFilter('')}
@@ -101,7 +101,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
               Search: {filters.search}
               <button
                 onClick={() => onSearch('')}
-                className="ml-1 text-gray-600 hover:text-gray-800"
+                className="ml-1 text-gray-600 cursor-pointer hover:text-gray-800"
               >
                 ×
               </button>
@@ -109,7 +109,7 @@ const TasksFilters: React.FC<TasksFiltersProps> = ({
           )}
           <button
             onClick={onClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            className="text-sm text-blue-600 cursor-pointer hover:text-blue-800 font-medium"
           >
             Clear all
           </button>

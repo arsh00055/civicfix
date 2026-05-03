@@ -27,7 +27,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       href={href}
       onClick={onClick}
       className={`
-        flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors group
+        flex items-center cursor-pointer px-3 py-2.5 text-sm font-medium rounded-lg transition-colors group
         ${isActive 
           ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-600' 
           : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'

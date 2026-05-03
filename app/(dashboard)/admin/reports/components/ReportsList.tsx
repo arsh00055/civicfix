@@ -125,7 +125,7 @@ export default function ReportsList({ reports, onDownload, onRegenerate, onDelet
                 {report.downloadUrl && report.status === 'completed' && (
                   <button
                     onClick={() => onDownload(report)}
-                    className="flex items-center space-x-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    className="flex items-center cursor-pointer space-x-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                     aria-label={`Download ${report.title}`}
                   >
                     <DownloadIcon className="h-4 w-4" aria-hidden="true" />
@@ -135,7 +135,7 @@ export default function ReportsList({ reports, onDownload, onRegenerate, onDelet
                 {report.status === 'failed' && (
                   <button
                     onClick={() => onRegenerate(report)}
-                    className="flex items-center space-x-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                    className="flex items-center cursor-pointer space-x-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                     aria-label={`Regenerate ${report.title}`}
                   >
                     <RefreshIcon className="h-4 w-4" aria-hidden="true" />
@@ -146,7 +146,7 @@ export default function ReportsList({ reports, onDownload, onRegenerate, onDelet
                 {report.status !== 'generating' && (
                   <button
                     onClick={() => onDelete(report)}
-                    className="flex items-center space-x-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
+                    className="flex items-center cursor-pointer space-x-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
                     aria-label={`Delete ${report.title}`}
                   >
                     <span>🗑</span>

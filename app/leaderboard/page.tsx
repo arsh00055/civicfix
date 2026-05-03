@@ -100,7 +100,7 @@ export default function LeaderboardPage() {
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`flex-1 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${period === p ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`flex-1 py-2 text-xs sm:text-sm cursor-pointer font-medium rounded-lg transition-all ${period === p ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {PERIOD_LABELS[p]}
               </button>
@@ -110,7 +110,7 @@ export default function LeaderboardPage() {
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
               {error}
-              <button onClick={fetchLeaderboard} className="font-medium underline">Retry</button>
+              <button onClick={fetchLeaderboard} className="font-medium cursor-pointer underline">Retry</button>
             </div>
           )}
 
@@ -216,7 +216,7 @@ export default function LeaderboardPage() {
             </>
           )}
 
-          <button onClick={fetchLeaderboard} className="w-full flex items-center justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+          <button onClick={fetchLeaderboard} className="w-full flex items-center cursor-pointer justify-center gap-2 py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors">
             <ArrowPathIcon className="h-4 w-4" />
             Refresh
           </button>

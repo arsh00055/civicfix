@@ -192,9 +192,6 @@ export default function UserManagementPage() {
     fetchUsers()
     fetchPendingVolunteers()
   }, [])
-
-  const handleDismissError = useCallback(() => setError(null), [])
-  const handleSearch       = useCallback((term: string) => setSearchTerm(term), [])
   const handleClearFilters = useCallback(() => { setSearchTerm(''); setRoleFilter('') }, [])
 
   const filteredUsers = useMemo(() => {
@@ -241,8 +238,8 @@ export default function UserManagementPage() {
             <div className="flex items-start justify-between">
               <p className="text-red-800 font-medium flex-1">{error}</p>
               <div className="flex space-x-2 ml-4">
-                <button onClick={handleRetry} className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">Retry</button>
-                <button onClick={() => setError(null)} className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">Dismiss</button>
+                <button onClick={handleRetry} className="px-3 py-1 bg-red-600 cursor-pointer text-white text-sm rounded hover:bg-red-700">Retry</button>
+                <button onClick={() => setError(null)} className="px-3 py-1 cursor-pointer bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">Dismiss</button>
               </div>
             </div>
           </div>
@@ -294,24 +291,27 @@ export default function UserManagementPage() {
                   setDeactivateModalUserId(null)
                   setDeactivateReason('')
                 }}
-                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm cursor-pointer text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
-    onClick={handleDeactivateConfirm}
-    disabled={deactivating}
-    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-  >
-    {deactivating ? (
-      <>
-        <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        Deactivating...
-      </>
-    ) : (
-      'Confirm Deactivate'
-    )}
-  </button>
+                onClick={() => {
+                  setDeactivateModalUserId(null)
+                  setDeactivateReason('')
+                }}
+                disabled={deactivating}
+                className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deactivating ? (
+                  <>
+                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deactivating...
+                  </>
+                ) : (
+                  'Confirm Deactivate'
+                )}
+              </button>
             </div>
           </div>
         </div>

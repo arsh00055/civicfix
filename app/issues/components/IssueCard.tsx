@@ -204,7 +204,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
             <button
               onClick={handleClaim}
               disabled={isLoading}
-              className="ml-2 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="ml-2 px-3 py-1 bg-green-600 text-white text-xs rounded cursor-pointer hover:bg-green-700 transition-colors disabled:opacity-50"
             >
               Claim
             </button>
@@ -245,7 +245,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
           <button
             onClick={handleVote}
             disabled={isLoading}
-            className="flex items-center space-x-1 px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 ml-4 flex-shrink-0"
+            className="flex items-center space-x-1 px-3 py-2 cursor-pointer bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 ml-4 flex-shrink-0"
           >
             <span className="text-lg">▲</span>
             <span className="font-semibold text-gray-700">{issue.upvotes || 0}</span>
@@ -301,14 +301,14 @@ const IssueCard: React.FC<IssueCardProps> = ({
                 <button
                   onClick={(e) => handleStatusUpdate('in_progress', e)}
                   disabled={isLoading || currentStatus === 'in_progress'}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 text-white text-sm cursor-pointer rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Start Work
                 </button>
                 <button
                   onClick={(e) => handleStatusUpdate('resolved', e)}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-green-600 cursor-pointer text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
                   Mark Resolved
                 </button>
@@ -321,14 +321,14 @@ const IssueCard: React.FC<IssueCardProps> = ({
               <button
                 onClick={handleClaim}
                 disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-green-600 text-white cursor-pointer text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
                 Claim Task
               </button>
             )}
             <button 
               onClick={handleViewDetails}
-              className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-gray-100 text-gray-700 cursor-pointer text-sm rounded-lg hover:bg-gray-200 transition-colors"
             >
               View Details
             </button>

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { EnvelopeIcon, UserCircleIcon, UsersIcon } from '@/components/UI/icons'
-import type { User } from '@/types'
+import { User } from '@/types/auth.types'
 
 type UserRole = 'citizen' | 'volunteer' | 'admin'
 
@@ -118,7 +118,7 @@ export default function UsersTable({
                       onClick={() => onToggleActive(user.id, isActive)}
                       disabled={updatingUser === user.id}
                       aria-label={`${isActive ? 'Deactivate' : 'Activate'} user ${user.name}`}
-                      className={`text-sm px-3 py-1 rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed border ${
+                      className={`text-sm px-3 py-1 cursor-pointer rounded font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed border ${
                         isActive
                           ? 'text-red-600 border-red-300 hover:bg-red-600 hover:text-white focus:ring-red-500'
                           : 'text-green-600 border-green-300 hover:bg-green-600 hover:text-white focus:ring-green-500'

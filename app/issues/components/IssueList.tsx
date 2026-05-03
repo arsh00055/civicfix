@@ -261,14 +261,14 @@ const IssueList: React.FC<IssueListProps> = ({
               {hasActiveFilters && (
                 <button
                   onClick={handleClearFilters}
-                  className="bg-gray-600 text-white px-5 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                  className="bg-gray-600 text-white px-5 py-2 cursor-pointer rounded-lg hover:bg-gray-700 transition-colors text-sm"
                 >
                   Clear filters
                 </button>
               )}
               <button
                 onClick={() => router.push('/issues/new')}
-                className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="bg-blue-600 text-white px-5 py-2 cursor-pointer rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
                 Report an issue
               </button>
@@ -287,7 +287,7 @@ const IssueList: React.FC<IssueListProps> = ({
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
-                className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-xs text-blue-600 cursor-pointer hover:text-blue-700 transition-colors"
               >
                 Clear all filters
               </button>

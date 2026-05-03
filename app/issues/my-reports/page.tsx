@@ -184,7 +184,7 @@ export default function MyReportsPage() {
               </div>
               <button
                 onClick={() => setShowFilters(v => !v)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
+                className={`flex items-center cursor-pointer gap-1.5 px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
                   showFilters || status
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
@@ -202,7 +202,7 @@ export default function MyReportsPage() {
                   <button
                     key={s}
                     onClick={() => { setStatus(s); setPage(1); }}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+                    className={`px-3 py-1.5 text-xs cursor-pointer font-medium rounded-full border transition-colors ${
                       status === s
                         ? 'bg-blue-600 border-blue-600 text-white'
                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
@@ -220,7 +220,7 @@ export default function MyReportsPage() {
             <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
               {error}
-              <button onClick={fetchReports} className="ml-auto font-medium underline">Retry</button>
+              <button onClick={fetchReports} className="ml-auto cursor-pointer font-medium underline">Retry</button>
             </div>
           )}
 
@@ -249,7 +249,7 @@ export default function MyReportsPage() {
               {!search && !status && (
                 <button
                   onClick={() => router.push('/issues/new')}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="px-5 py-2.5 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Report Your First Issue
                 </button>
@@ -257,7 +257,7 @@ export default function MyReportsPage() {
               {(search || status) && (
                 <button
                   onClick={() => { setSearch(''); setStatus(''); }}
-                  className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+                  className="px-5 py-2.5 bg-gray-100 cursor-pointer hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
                 >
                   Clear Filters
                 </button>

@@ -66,12 +66,7 @@ export default function CitizenRegistration({
       setIsLoading(false)
     }
   }
-
-  const handleSwitchToLogin = (e: React.MouseEvent) => {
-    e.preventDefault()
-    onSwitchToLogin()
-  }
-
+  
   return (
     <div>
       <div className="text-center mb-6">

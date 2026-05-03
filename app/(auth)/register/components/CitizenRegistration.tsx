@@ -112,14 +112,14 @@ export default function CitizenRegistration({
             <p className="text-xs text-gray-500 mb-1">Contact our support team</p>
             <a
               href={`mailto:${supportEmail}`}
-              className="text-blue-600 font-semibold text-sm hover:text-blue-700 hover:underline transition-colors"
+              className="text-blue-600 font-semibold cursor-pointer text-sm hover:text-blue-700 hover:underline transition-colors"
             >
               {supportEmail}
             </a>
           </div>
           <button
             onClick={onSwitchToLogin}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="w-full bg-blue-600 text-white cursor-pointer py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm"
           >
             Back to Login
           </button>

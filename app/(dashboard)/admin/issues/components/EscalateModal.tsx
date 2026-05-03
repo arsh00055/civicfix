@@ -115,7 +115,7 @@ export const EscalateModal: React.FC<EscalateModalProps> = ({
                 <button
                   onClick={handleClose}
                   disabled={isSubmitting}
-                  className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                  className="p-1 rounded-full cursor-pointer hover:bg-white/20 transition-colors"
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
@@ -192,7 +192,7 @@ export const EscalateModal: React.FC<EscalateModalProps> = ({
                 <button
                   onClick={handleClose}
                   disabled={isSubmitting}
-                  className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-sm text-gray-700 cursor-pointer border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>

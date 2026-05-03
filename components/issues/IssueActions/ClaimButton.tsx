@@ -81,7 +81,7 @@ const ClaimButton: React.FC<ClaimButtonProps> = ({
       return (
         <PrimaryButton
           disabled={true}
-          className={`px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-lg shadow-sm ${className}`}
+          className={`px-6 py-3 bg-gradient-to-r from-emerald-500 cursor-pointer  to-emerald-600 text-white font-medium rounded-lg shadow-sm ${className}`}
         >
           <CheckCircleIcon className="h-5 w-5 inline mr-2" />
           Claimed

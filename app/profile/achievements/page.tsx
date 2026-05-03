@@ -145,7 +145,7 @@ export default function AchievementsPage() {
             <p className="text-red-600">{error}</p>
             <button
               onClick={fetchAchievements}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="mt-4 px-4 py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700"
             >
               Try Again
             </button>

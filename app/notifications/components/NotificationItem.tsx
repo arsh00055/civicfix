@@ -106,7 +106,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onCli
             <button
               key={index}
               onClick={(e) => handleActionClick(e, action)}
-              className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+              className="text-xs bg-blue-600 text-white px-2 py-1 rounded cursor-pointer hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
             >
               {action.label}
             </button>

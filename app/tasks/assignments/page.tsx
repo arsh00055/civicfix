@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { SubmitProofModal } from './components/SubmitModal';
-import apiClient from '@/lib/services/api/client';
 
 interface Assignment {
   id: string;

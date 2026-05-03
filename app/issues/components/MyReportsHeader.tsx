@@ -33,14 +33,14 @@ const MyReportsHeader: React.FC<MyReportsHeaderProps> = ({ onRefresh, onReportNe
         <div className="flex items-center space-x-2">
           <button
             onClick={onRefresh}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center cursor-pointer space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <RefreshIcon className="h-4 w-4" />
             <span>Refresh</span>
           </button>
           <button
             onClick={onReportNew || handleReportNew}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Report New Issue
           </button>

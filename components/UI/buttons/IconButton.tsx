@@ -27,7 +27,7 @@ const IconButton: React.FC<IconButtonProps> = ({
       title={title}
       aria-label={ariaLabel || title}
       className={`
-        inline-flex items-center justify-center p-2 rounded-lg
+        inline-flex cursor-pointer items-center justify-center p-2 rounded-lg
         text-gray-600 hover:text-gray-900 hover:bg-gray-100
         disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:bg-transparent
         transition-colors duration-200 ease-in-out

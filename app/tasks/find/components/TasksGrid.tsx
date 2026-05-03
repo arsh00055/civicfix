@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FilterIcon } from '@/components/UI/icons';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 import TaskCard from './TaskCard';
 
 interface TasksGridProps {
@@ -37,7 +37,7 @@ const TasksGrid: React.FC<TasksGridProps> = ({
           {tasks.length > 0 && (
             <button
               onClick={onClearFilters}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="bg-gray-600 cursor-pointer text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
             >
               Clear All Filters
             </button>

@@ -36,7 +36,7 @@ export default function VolunteerSuccess({
       </div>
       <button
         onClick={handleContinue}
-        className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+        className="w-full bg-green-600 cursor-pointer text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
         aria-label="Continue to login page"
       >
         Continue to Login

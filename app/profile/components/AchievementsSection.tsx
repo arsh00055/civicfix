@@ -10,10 +10,10 @@ import {
   CheckCircleIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
-import type { Achievement } from '@/types';
 import { achievementsAPI } from '@/lib/services/api/endpoints';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import Loading from '@/app/loading';
+import { Achievement } from '@/types/user.types';
 
 const TIER_CONFIG: Record<
   string,
@@ -115,7 +115,7 @@ const AchievementsSection: React.FC = () => {
         </div>
         <button
           onClick={() => router.push('/profile/achievements')}
-          className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors"
+          className="text-xs font-bold cursor-pointer text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors"
         >
           View All →
         </button>
@@ -231,7 +231,7 @@ const AchievementsSection: React.FC = () => {
           </p>
           <button
             onClick={() => router.push('/issues/new')}
-            className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 cursor-pointer text-white text-xs font-bold rounded-xl hover:bg-blue-700 transition-colors"
           >
             Report an Issue
           </button>

@@ -106,14 +106,14 @@ const ChangePasswordPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm"
+                className="px-6 py-2 border border-gray-300 cursor-pointer text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-sm"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                className="px-6 py-2 bg-blue-600 text-white cursor-pointer rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
               >
                 {saving ? 'Changing...' : 'Change Password'}
               </button>

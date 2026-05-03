@@ -135,7 +135,7 @@ if (userAvatar?.startsWith('/upload/')) {
             <Link
               href="/profile"
               onClick={handleLinkClick}
-              className="flex items-center px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors group mb-2"
+              className="flex items-center px-3 cursor-pointer py-2.5 rounded-lg hover:bg-gray-100 transition-colors group mb-2"
             >
               {userAvatar ? (
                 <img

@@ -87,7 +87,7 @@ const NotificationBell: React.FC = () => {
           <div className="p-4 border-t border-gray-200">
             <a
               href="/notifications"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-blue-600 cursor-pointer hover:text-blue-800 font-medium"
             >
               View all notifications
             </a>

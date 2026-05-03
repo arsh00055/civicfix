@@ -88,7 +88,7 @@ const StatisticsPage: React.FC = () => {
     <MainLayout role={currentUser?.role || null}>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">← Back</button>
+          <button onClick={() => router.back()} className="text-gray-500 cursor-pointer hover:text-gray-700">← Back</button>
           <h1 className="text-2xl font-bold text-gray-900">My Statistics</h1>
         </div>
 
@@ -102,7 +102,7 @@ const StatisticsPage: React.FC = () => {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-600">
             {error}
-            <button onClick={fetchStats} className="block mx-auto mt-3 text-sm underline">Try again</button>
+            <button onClick={fetchStats} className="block cursor-pointer mx-auto mt-3 text-sm underline">Try again</button>
           </div>
         )}
 

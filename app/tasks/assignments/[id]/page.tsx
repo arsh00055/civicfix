@@ -285,13 +285,13 @@ const AssignmentDetailPage = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => router.push('/assignments')}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 text-white px-6 py-2 cursor-pointer rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Back to My Assignments
               </button>
               <button
                 onClick={fetchAssignment}
-                className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="border border-gray-300 cursor-pointer text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Try Again
               </button>
@@ -309,7 +309,7 @@ const AssignmentDetailPage = () => {
         <div className="mb-6">
           <button
             onClick={() => router.push('/assignments')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center cursor-pointer text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
             Back to My Assignments
@@ -364,7 +364,7 @@ const AssignmentDetailPage = () => {
                     <div key={task.id} className="flex items-center">
                       <button
                         onClick={() => toggleTaskCompletion(task.id)}
-                        className={`w-5 h-5 rounded border mr-3 flex items-center justify-center ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}
+                        className={`w-5 h-5 rounded border mr-3 flex cursor-pointer items-center justify-center ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}
                       >
                         {task.completed && <CheckCircleIcon className="h-3 w-3 text-white" />}
                       </button>
@@ -409,7 +409,7 @@ const AssignmentDetailPage = () => {
                 <button
                   onClick={addNewUpdate}
                   disabled={!updateMessage.trim()}
-                  className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mt-3 bg-blue-600 text-white px-4 py-2 cursor-pointer rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Post Update
                 </button>
@@ -534,7 +534,7 @@ const AssignmentDetailPage = () => {
                   View Original Issue
                 </SecondaryButton>
 
-                <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="w-full flex items-center cursor-pointer justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
                   <PhotoIcon className="h-5 w-5 mr-2" />
                   Upload Photos
                 </button>
@@ -589,7 +589,7 @@ const AssignmentDetailPage = () => {
                   setShowUpdateModal(false);
                   setUpdateMessage('');
                 }}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
                 disabled={isUpdating}
               >
                 Cancel

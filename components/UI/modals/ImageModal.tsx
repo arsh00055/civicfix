@@ -30,7 +30,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
       <div className="relative">
         <button
           onClick={onClose}
-          className="absolute -top-10 right-0 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute -top-10 cursor-pointer right-0 text-gray-400 hover:text-gray-600 transition-colors"
           aria-label="Close modal"
         >
           <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

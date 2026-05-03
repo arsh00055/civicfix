@@ -104,8 +104,7 @@ const IssueForm: React.FC<IssueFormProps> = ({ formData, onUpdate, onNext }) => 
           value={formData.title}
           onChange={(value) => onUpdate({ title: value })}
           placeholder="Brief, descriptive title for the issue"
-          required
-        />
+          required showPasswordToggle={false}        />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -145,8 +144,7 @@ const IssueForm: React.FC<IssueFormProps> = ({ formData, onUpdate, onNext }) => 
           value={formData.location}
           onChange={(value) => onUpdate({ location: value })}
           placeholder="Street address, landmark, or area description"
-          required
-        />
+          required showPasswordToggle={false}        />
 
         {/* Image Upload */}
         <div>
@@ -190,7 +188,7 @@ const IssueForm: React.FC<IssueFormProps> = ({ formData, onUpdate, onNext }) => 
                     />
                     <button
                       onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute cursor-pointer  -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       type="button"
                     >
                       ×

@@ -92,7 +92,7 @@ const LocationSettingsPage: React.FC = () => {
     <MainLayout role={currentUser?.role || null}>
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+          <button onClick={() => router.back()} className="text-gray-500 cursor-pointer hover:text-gray-700">
             ← Back
           </button>
           <h1 className="text-2xl font-bold text-gray-900">Location Settings</h1>
@@ -109,7 +109,7 @@ const LocationSettingsPage: React.FC = () => {
               type="button"
               onClick={handleDetectLocation}
               disabled={detecting}
-              className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-50 text-blue-700 cursor-pointer border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 disabled:opacity-50"
             >
               {detecting ? '📍 Detecting...' : '📍 Detect My Location'}
             </button>
@@ -185,13 +185,13 @@ const LocationSettingsPage: React.FC = () => {
 
           {/* Actions */}
           <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-            <button type="button" onClick={() => router.back()} className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button type="button" onClick={() => router.back()} className="px-4 py-2 cursor-pointer text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+              className="px-6 py-2 bg-blue-600 text-white cursor-pointer rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
             >
               {saving ? 'Saving...' : 'Save Location'}
             </button>

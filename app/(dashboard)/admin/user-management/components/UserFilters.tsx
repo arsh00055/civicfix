@@ -44,7 +44,7 @@ export default function UserFilters({
           <select
             value={roleFilter}
             onChange={(e) => onRoleFilterChange(e.target.value as UserRole | '')}
-            className="w-full border text-black border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full border cursor-pointer text-black border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             aria-label="Filter users by role"
           >
             <option value="">All Roles</option>
@@ -56,7 +56,7 @@ export default function UserFilters({
         <div className="flex items-end">
           <button
             onClick={handleClear}
-            className="w-full bg-gray-600 text-black text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1"
+            className="w-full bg-gray-600 cursor-pointer text-black text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1"
             aria-label="Clear all filters"
           >
             Clear Filters

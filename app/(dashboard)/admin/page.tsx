@@ -164,7 +164,7 @@ export default function AdminDashboard() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 text-sm transition-colors disabled:opacity-50"
+              className="bg-white/10 cursor-pointer hover:bg-white/20 rounded-lg px-3 py-2 text-sm transition-colors disabled:opacity-50"
             >
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium disabled:opacity-50"
+                className="text-sm text-purple-600 cursor-pointer hover:text-purple-700 font-medium disabled:opacity-50"
               >
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </button>
@@ -232,7 +232,7 @@ export default function AdminDashboard() {
                         </span>
                         <button
                           onClick={() => handleResolveAlert(alert.id)}
-                          className="text-gray-400 hover:text-gray-600"
+                          className="text-gray-400 cursor-pointer hover:text-gray-600"
                         >
                           <CheckCircleIcon className="w-4 h-4" />
                         </button>
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Pending Review</h2>
                 <button
                   onClick={() => router.push('/admin/issues')}
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-sm text-purple-600 cursor-pointer hover:text-purple-700 font-medium"
                 >
                   View All →
                 </button>
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                       </div>
                       <button
                         onClick={() => router.push(`/admin/issues?issueId=${issue.id}`)}
-                        className="flex-shrink-0 px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                        className="flex-shrink-0 px-3 cursor-pointer py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
                       >
                         Review
                       </button>
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
                 <h2 className="text-base sm:text-lg font-semibold text-gray-900">Recent Users</h2>
                 <button
                   onClick={() => router.push('/admin/user-management')}
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-sm text-purple-600 cursor-pointer hover:text-purple-700 font-medium"
                 >
                   View All →
                 </button>

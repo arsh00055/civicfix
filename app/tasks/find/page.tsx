@@ -257,7 +257,7 @@ const FindTasksPage: React.FC = () => {
                 {(filters.search || filters.category || filters.priority || filters.urgency || filters.distance) && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-blue-600 hover:text-blue-700"
+                    className="text-sm cursor-pointer text-blue-600 hover:text-blue-700"
                   >
                     Clear all filters
                   </button>

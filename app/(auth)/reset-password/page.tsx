@@ -126,7 +126,7 @@ function ResetPasswordForm() {
           </div>
           <button
             onClick={() => router.push('/forgot-password')}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="w-full py-2.5 bg-blue-600 text-white cursor-pointer rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             Request New Link
           </button>
@@ -155,7 +155,7 @@ function ResetPasswordForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 cursor-pointer -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
@@ -210,7 +210,7 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={loading || password !== confirmPassword}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-blue-600 text-white cursor-pointer rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

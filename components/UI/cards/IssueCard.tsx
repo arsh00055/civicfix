@@ -271,7 +271,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       className={`
-        relative bg-white rounded-2xl border transition-all duration-200
+        relative bg-white rounded-2xl cursor-pointer border transition-all duration-200
         ${isOverdue
           ? 'border-red-300 shadow-sm shadow-red-50'
           : variant === 'featured'
@@ -363,7 +363,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
             disabled={isLoading || !onVote}
             aria-label={isVoted ? 'Remove vote' : 'Add vote'}
             className={`
-              flex flex-col items-center justify-center min-w-[52px] px-2.5 py-2 rounded-xl border transition-all
+              flex flex-col items-center cursor-pointer justify-center min-w-[52px] px-2.5 py-2 rounded-xl border transition-all
               ${isVoted ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300'}
               disabled:cursor-not-allowed
             `}
@@ -450,7 +450,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     onClick={e => handleStatusUpdate('in_progress', e)}
                     disabled={isLoading}
-                    className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 bg-blue-600 cursor-pointer text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                   >
                     Start work
                   </motion.button>
@@ -459,7 +459,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   onClick={e => handleStatusUpdate('resolved', e)}
                   disabled={isLoading}
-                  className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 bg-green-600 cursor-pointer text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
                   Mark resolved
                 </motion.button>
@@ -473,7 +473,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 onClick={handleClaim}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-1.5 bg-green-600 cursor-pointer text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
               >
                 <BriefcaseIcon className="w-3.5 h-3.5" />
                 Claim task
@@ -482,7 +482,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
             <motion.button
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               onClick={handleViewDetails}
-              className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-gray-100 cursor-pointer text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1.5"
             >
               View details
               <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
@@ -498,7 +498,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
             onClick={handleClaim}
             disabled={isLoading}
-            className="px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50"
+            className="px-3 py-1 bg-green-600 cursor-pointer text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
             Claim
           </motion.button>

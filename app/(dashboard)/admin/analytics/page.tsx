@@ -121,7 +121,7 @@ export default function AnalyticsPage() {
               <p className="text-gray-600 text-sm mb-4">{error}</p>
               <button
                 onClick={fetchAllData}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white cursor-pointer rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Try Again
               </button>
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
               </div>
               <button
                 onClick={fetchAllData}
-                className="flex-shrink-0 px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+                className="flex-shrink-0 px-3 py-1 bg-yellow-600 cursor-pointer text-white text-sm rounded hover:bg-yellow-700"
               >
                 Retry
               </button>

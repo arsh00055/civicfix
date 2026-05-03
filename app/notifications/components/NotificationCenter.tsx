@@ -97,7 +97,7 @@ const NotificationCenter: React.FC = () => {
         <IconButton
           icon={BellIcon}
           onClick={() => setIsOpen(!isOpen)}
-          className={`relative p-2 hover:bg-gray-100 rounded-full transition-colors ${
+          className={`relative p-2 hover:bg-gray-100 cursor-pointer rounded-full transition-colors ${
             !isConnected ? 'text-orange-500 hover:text-orange-600' : ''
           }`}
           title={`Notifications ${!isConnected ? '(Offline)' : ''}`}
@@ -201,7 +201,7 @@ const NotificationCenter: React.FC = () => {
             <div className="p-3 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={handleViewAllClick}
-                className="block w-full text-center text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="block w-full text-center text-sm cursor-pointertext-blue-600 hover:text-blue-500 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!isConnected}
               >
                 {isConnected ? 'View all notifications' : 'View all (requires connection)'}

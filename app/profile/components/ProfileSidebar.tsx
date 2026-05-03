@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import type { UserProfile } from '@/types';
 import {
   UserIcon, MapIcon, ShieldCheckIcon, CogIcon,
   TrophyIcon, BellIcon, ChartBarIcon,
 } from '@/components/UI/icons';
+import { UserProfile } from '@/types/user.types';
 
 interface ProfileSidebarProps {
   user: UserProfile;
@@ -98,7 +98,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ user }) => {
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className={`group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-150 ${
+                className={`group flex items-center cursor-pointer gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-150 ${
                   isActive
                     ? `${rc.activeBg} shadow-sm`
                     : `text-gray-600 ${rc.hoverBg} hover:text-gray-900`
@@ -139,7 +139,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ user }) => {
             </h3>
             <button
               onClick={() => router.push('/profile/edit')}
-              className="text-xs text-emerald-600 hover:text-emerald-700 font-bold"
+              className="text-xs text-emerald-600 cursor-pointer hover:text-emerald-700 font-bold"
             >
               Edit
             </button>

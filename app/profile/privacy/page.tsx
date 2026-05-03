@@ -52,7 +52,7 @@ const PrivacySecurityPage: React.FC = () => {
     <MainLayout role={currentUser?.role || null}>
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center gap-3 mb-2">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">← Back</button>
+          <button onClick={() => router.back()} className="text-gray-500 cursor-pointer hover:text-gray-700">← Back</button>
           <h1 className="text-2xl font-bold text-gray-900">Privacy & Security</h1>
         </div>
 
@@ -71,7 +71,7 @@ const PrivacySecurityPage: React.FC = () => {
                       key={v}
                       type="button"
                       onClick={() => setPrivacy(p => ({ ...p, profileVisibility: v }))}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                      className={`px-4 py-2 rounded-lg text-sm fcursor-pointer ont-medium border transition-colors ${
                         privacy.profileVisibility === v
                           ? 'bg-blue-600 text-white border-blue-600'
                           : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -116,7 +116,7 @@ const PrivacySecurityPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={savingPrivacy}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
+                className="px-6 py-2 bg-blue-600 text-white cursor-pointer rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm"
               >
                 {savingPrivacy ? 'Saving...' : 'Save Privacy Settings'}
               </button>
@@ -131,7 +131,7 @@ const PrivacySecurityPage: React.FC = () => {
           <button
             type="button"
             onClick={() => router.push('/profile/change-password')}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
+            className="px-6 py-2 bg-blue-600 cursor-pointer text-white rounded-lg hover:bg-blue-700 font-medium text-sm"
           >
             Change Password →
           </button>
@@ -158,7 +158,7 @@ const PrivacySecurityPage: React.FC = () => {
                 }
               }
             }}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+            className="px-4 py-2 bg-red-600 cursor-pointer text-white rounded-lg hover:bg-red-700 text-sm font-medium"
           >
             Delete My Account
           </button>

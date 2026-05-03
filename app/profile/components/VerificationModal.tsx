@@ -111,7 +111,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold"
+          className="absolute top-4 right-4 cursor-pointer text-gray-400 hover:text-gray-600 text-xl font-bold"
         >
           ✕
         </button>
@@ -128,7 +128,7 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 text-yellow-800 text-sm">
               ⚠️ Please verify your <strong>Phone Number</strong> first before proceeding with Identity verification.
             </div>
-            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+            <button onClick={onClose} className="px-6 py-2 cursor-pointer bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
               Close
             </button>
           </div>
@@ -157,12 +157,12 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
             <button
               onClick={handleSendOtp}
               disabled={loading}
-              className={`w-full py-3 rounded-xl text-white font-semibold transition-colors ${btnColor} disabled:opacity-50`}
+              className={`w-full py-3 rounded-xl text-white cursor-pointer font-semibold transition-colors ${btnColor} disabled:opacity-50`}
             >
               {loading ? 'Sending...' : cfg.sendLabel}
             </button>
 
-            <button onClick={onClose} className="w-full py-2 text-sm text-gray-500 hover:text-gray-700">
+            <button onClick={onClose} className="w-full py-2 cursor-pointer text-sm text-gray-500 hover:text-gray-700">
               Cancel
             </button>
           </div>
@@ -200,14 +200,14 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
             <button
               onClick={handleVerifyOtp}
               disabled={loading || otp.length !== 6}
-              className={`w-full py-3 rounded-xl text-white font-semibold transition-colors ${btnColor} disabled:opacity-50`}
+              className={`w-full py-3 rounded-xl text-white cursor-pointer font-semibold transition-colors ${btnColor} disabled:opacity-50`}
             >
               {loading ? 'Verifying...' : 'Verify OTP ✓'}
             </button>
 
             <button
               onClick={() => { setStep('input'); setOtp(''); setError(''); setDevOtp(null) }}
-              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              className="w-full py-2 text-sm text-gray-500 cursor-pointer hover:text-gray-700"
             >
               ← Resend OTP
             </button>

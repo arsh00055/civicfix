@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { UserActivity } from '@/types';
 import { formatRelativeTime, formatDateTime } from '@/lib/utils/helpers/formatters';
 import { usersAPI } from '@/lib/services/api/endpoints';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { UserActivity } from '@/types/user.types';
 
 const ActivityTimeline: React.FC = () => {
   const router = useRouter();
@@ -83,7 +83,7 @@ const ActivityTimeline: React.FC = () => {
         {activities.length > 0 && (
           <button 
             onClick={handleViewAllActivity}
-            className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+            className="text-sm text-blue-600 cursor-pointer hover:text-blue-500 font-medium"
           >
             View All
           </button>
@@ -122,7 +122,7 @@ const ActivityTimeline: React.FC = () => {
                   <div className="mt-3 flex space-x-2">
                     <button 
                       onClick={() => router.push(`/issues/${activity.metadata?.issueId}`)}
-                      className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+                      className="text-sm cursor-pointer text-blue-600 hover:text-blue-500 font-medium"
                     >
                       View Issue
                     </button>
@@ -145,7 +145,7 @@ const ActivityTimeline: React.FC = () => {
         <div className="mt-6 text-center">
           <button 
             onClick={handleViewAllActivity}
-            className="text-blue-600 hover:text-blue-500 font-medium"
+            className="text-blue-600 cursor-pointer hover:text-blue-500 font-medium"
           >
             View All Activity →
           </button>

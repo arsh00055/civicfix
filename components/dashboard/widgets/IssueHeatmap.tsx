@@ -108,7 +108,7 @@ const IssueHeatmap: React.FC = () => {
         <h2 className="text-lg font-semibold text-gray-900">Issue Heatmap</h2>
         <button
           onClick={fetchHeatmapData}
-          className="text-sm text-blue-600 hover:text-blue-700"
+          className="text-sm cursor-pointer text-blue-600 hover:text-blue-700"
         >
           Refresh
         </button>
@@ -118,7 +118,7 @@ const IssueHeatmap: React.FC = () => {
           <button
             key={area.name}
             onClick={() => handleAreaClick(area.name)}
-            className="w-full flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors text-left"
+            className="w-full flex items-center cursor-pointer justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors text-left"
           >
             <span className="text-sm text-gray-700">{area.name}</span>
             <div className="flex items-center space-x-2">

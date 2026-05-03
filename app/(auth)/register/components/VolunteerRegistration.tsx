@@ -133,7 +133,7 @@ export default function VolunteerRegistration({
       <div className="py-6 px-2">
         <button
           onClick={onSwitchToLogin}
-          className="flex items-center text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
+          className="flex items-center cursor-pointer text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
         >
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -166,7 +166,7 @@ export default function VolunteerRegistration({
           </div>
           <button
             onClick={onSwitchToLogin}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-sm"
+            className="w-full bg-green-600 cursor-pointer text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-sm"
           >
             Back to Login
           </button>
@@ -256,7 +256,7 @@ export default function VolunteerRegistration({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Experience Level *</label>
           <select {...register('experienceLevel')} value={experienceLevel || ''}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 border border-gray-300 cursor-pointer rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             aria-label="Select your experience level">
             <option value="">Select your experience level</option>
             <option value="beginner">Beginner</option>

@@ -123,8 +123,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           value={formData.location}
           onChange={(value) => onUpdate({ location: value })}
           placeholder="Address will be auto-filled when you click on the map"
-          required
-        />
+          required showPasswordToggle={false}        />
 
         <div>
           <div className="flex justify-between items-center mb-2">
@@ -134,7 +133,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
             <button
               type="button"
               onClick={handleUseCurrentLocation}
-              className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+              className="text-sm cursor-pointer text-blue-600 hover:text-blue-500 font-medium"
             >
               Use My Location
             </button>

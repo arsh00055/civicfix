@@ -11,11 +11,11 @@ export async function GET(req: NextRequest) {
 
   const { db } = await connectToDatabase();
 
-  const admin = await db.collection('admins').findOne({ role: 'admin' });
+  const settings = await db.collection('systemSettings').findOne();
 
-  if (!admin) {
-    return NextResponse.json({ message: 'Admin not found' }, { status: 404 });
+  if (!settings) {
+    return NextResponse.json({ message: 'System Settings not found' }, { status: 404 });
   }
 
-  return NextResponse.json({ email: admin.email });
+  return NextResponse.json({ email: settings.supportEmail });
 }

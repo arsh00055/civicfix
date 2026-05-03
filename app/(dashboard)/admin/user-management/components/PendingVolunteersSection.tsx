@@ -183,14 +183,14 @@ export default function PendingVolunteersSection({
                   <button
                     onClick={() => setRejectModalId(volunteer._id)}
                     disabled={isProcessing}
-                    className="flex-1 text-xs font-medium px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                    className="flex-1 text-xs font-medium cursor-pointer px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
                   >
                     ✕ Reject
                   </button>
                   <button
                     onClick={() => handleApprove(volunteer._id)}
                     disabled={isProcessing}
-                    className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                    className="flex-1 text-xs font-medium cursor-pointer px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
                   >
                     {isProcessing ? (
                       <>
@@ -230,14 +230,14 @@ export default function PendingVolunteersSection({
                   setRejectModalId(null)
                   setRejectReason('')
                 }}
-                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm cursor-pointer text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRejectConfirm}
                 disabled={processingId === rejectModalId}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 text-sm cursor-pointer font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {processingId === rejectModalId ? (
                   <>

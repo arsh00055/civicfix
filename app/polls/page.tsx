@@ -101,7 +101,7 @@ function PollCard({ poll, onVote }: { poll: Poll; onVote: (pollId: string, optio
               key={option.id}
               onClick={() => handleVote(poll.id, option.id)}
               disabled={showResults || voting}
-              className={`w-full text-left relative overflow-hidden rounded-lg border transition-all ${
+              className={`w-full text-left relative cursor-pointer overflow-hidden rounded-lg border transition-all ${
                 showResults
                   ? isUserChoice
                     ? 'border-blue-300 bg-blue-50'
@@ -192,7 +192,7 @@ function CreatePollModal({ onClose, onCreated }: { onClose: () => void; onCreate
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">Create Poll</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 cursor-pointer rounded-lg">
             <XMarkIcon className="h-5 w-5 text-gray-500" />
           </button>
         </div>
@@ -268,7 +268,7 @@ function CreatePollModal({ onClose, onCreated }: { onClose: () => void; onCreate
               <select
                 value={duration}
                 onChange={e => setDuration(Number(e.target.value))}
-                className="w-full text-black  px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-black cursor-pointer px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value={1}>1 day</option>
                 <option value={3}>3 days</option>

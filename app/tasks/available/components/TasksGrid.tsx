@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { ClipboardIcon } from '@/components/UI/icons';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 import TaskCard from './TaskCard';
 
 interface TasksGridProps {
@@ -38,14 +38,14 @@ const TasksGrid: React.FC<TasksGridProps> = ({
           {tasks.length > 0 && (
             <button
               onClick={onClearFilters}
-              className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="bg-gray-600 text-white cursor-pointer px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors"
             >
               Clear Filters
             </button>
           )}
           <button
             onClick={() => router.push('/dashboard')}
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="border border-gray-300 cursor-pointer text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Back to Dashboard
           </button>

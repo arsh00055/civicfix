@@ -158,7 +158,7 @@ export const SubmitProofModal: React.FC<SubmitProofModalProps> = ({
             <h3 className="text-lg font-semibold text-gray-900">Submit Completion Proof</h3>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-gray-100 cursor-pointer rounded-lg transition-colors"
             >
               <XMarkIcon className="w-5 h-5 text-gray-500" />
             </button>
@@ -217,7 +217,7 @@ export const SubmitProofModal: React.FC<SubmitProofModalProps> = ({
                       />
                       <button
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute cursor-pointer -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <XMarkIcon className="w-3 h-3" />
                       </button>

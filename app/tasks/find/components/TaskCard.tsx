@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { MapPinIcon, ClockIcon } from '@/components/UI/icons';
-import type { Issue } from '@/types';
+import type { Issue } from '@/types/issue.types';
 
 type Priority = 'low' | 'medium' | 'high' | 'critical';
 
@@ -139,7 +139,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, isClaiming, onClaimTask }) =>
       <button
         onClick={() => onClaimTask(task.id)}
         disabled={isClaiming}
-        className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 mt-auto"
+        className="w-full bg-green-600 cursor-pointer text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 mt-auto"
       >
         {isClaiming ? (
           <>
