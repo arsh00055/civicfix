@@ -116,6 +116,16 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
 
         <footer className="py-4 px-6 text-center text-gray-500 text-sm border-t border-gray-100">
           <p>© {new Date().getFullYear()} CivicFix. All rights reserved.</p>
+          <p className="text-center text-sm text-gray-500 mt-2">
+  Need help?{' '}
+  <a 
+    href="/help" 
+    className="text-blue-600 hover:underline font-medium"
+  >
+    Visit Help & Support
+  </a>
+</p>
+          
           {isLoginPage && (
             <p className="mt-2">
               Don&apos;t have an account?{' '}
@@ -123,6 +133,7 @@ export default function LoginRoleSelector({ onRoleSelect }: LoginRoleSelectorPro
                 Sign up here
               </a>
             </p>
+
           )}
           {isRegisterPage && (
             <p className="mt-2">

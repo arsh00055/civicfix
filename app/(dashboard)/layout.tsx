@@ -31,7 +31,7 @@ export default function DashboardLayout({
     }
 
     if (!isLoading) {
-      if (!isAuthenticated && !token) {
+      if (!isAuthenticated && !token && pathname !== '/help') {
         router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
       } else if (isAuthenticated && userRole) {
         // Check if user is on correct dashboard

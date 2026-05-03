@@ -59,6 +59,7 @@ const Sidebar: React.FC = () => {
       { icon: FlagIcon, label: 'Manage Issues', href: '/admin/issues' },
       { icon: UsersIcon, label: 'User Management', href: '/admin/user-management' },
       { icon: ChartBarIcon, label: 'Analytics', href: '/admin/analytics' },
+      { icon: ChatBubbleLeftRightIcon, label: 'Support', href: '/admin/support' },
       { icon: Cog6ToothIcon, label: 'System Settings', href: '/admin/settings' },
     ],
   };

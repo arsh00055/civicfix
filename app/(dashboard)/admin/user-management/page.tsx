@@ -132,6 +132,36 @@ export default function UserManagementPage() {
     })
   }, [])
 
+  const handleDeactivateConfirm = async () => {
+    if (!deactivateModalUserId) return
+    if (!deactivateReason.trim()) {
+      toast.error('Reason is required to deactivate an account.')
+      return
+    }
+    try {
+      setDeactivating(true)
+      await apiClient.patch(`/admin/users/${deactivateModalUserId}/deactivate`, {
+        reason: deactivateReason
+      })
+      setUsers(prev => prev.map(u =>
+        u.id === deactivateModalUserId ? { ...u, isActive: false } as any : u
+      ))
+      toast.success('User deactivated successfully', {
+        description: 'The user has been notified via email.',
+        duration: 3000,
+      })
+      setDeactivateModalUserId(null)
+      setDeactivateReason('')
+    } catch (err: any) {
+      toast.error('Action failed', {
+        description: err.response?.data?.message || 'Please try again.',
+        duration: 4000,
+      })
+    } finally {
+      setDeactivating(false)
+    }
+  }
+
   const handleApproveVolunteer = useCallback(async (volunteerId: string) => {
     try {
       await apiClient.post(`/admin/volunteers/${volunteerId}/approve`)
@@ -269,22 +299,19 @@ export default function UserManagementPage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setDeactivateModalUserId(null)
-                  setDeactivateReason('')
-                }}
-                disabled={deactivating}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {deactivating ? (
-                  <>
-                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Deactivating...
-                  </>
-                ) : (
-                  'Confirm Deactivate'
-                )}
-              </button>
+    onClick={handleDeactivateConfirm}
+    disabled={deactivating}
+    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+  >
+    {deactivating ? (
+      <>
+        <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        Deactivating...
+      </>
+    ) : (
+      'Confirm Deactivate'
+    )}
+  </button>
             </div>
           </div>
         </div>
