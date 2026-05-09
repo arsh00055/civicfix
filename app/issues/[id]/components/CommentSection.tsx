@@ -20,9 +20,11 @@ export default function CommentSection({ issueId, initialComments = [] }: Commen
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const { isAuthenticated } = useAuth()
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const { isAuthenticated, user } = useAuth()
 
-  // Fetch comments when component mounts if no initial comments provided
   useEffect(() => {
     if (initialComments.length === 0) {
       fetchComments()
@@ -51,8 +53,6 @@ export default function CommentSection({ issueId, initialComments = [] }: Commen
       const response = await commentsAPI.addComment(issueId, {
         text: newComment.trim()
       })
-      
-      // Add the new comment to the list
       const newCommentData = response.data
       setComments(prev => [newCommentData, ...prev])
       setNewComment('')
@@ -62,6 +62,32 @@ export default function CommentSection({ issueId, initialComments = [] }: Commen
       toast.error(error.message || 'Failed to post comment. Please try again.')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await commentsAPI.deleteComment(issueId, commentId)
+      setComments(prev => prev.filter(c => c.id !== commentId))
+      setDeleteConfirmId(null)
+      toast.success('Comment deleted successfully')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete comment')
+    }
+  }
+
+  const handleEditComment = async (commentId: string) => {
+    if (!editText.trim()) return
+    try {
+      await commentsAPI.editComment(issueId, commentId, { text: editText.trim() })
+      setComments(prev => prev.map(c =>
+        c.id === commentId ? { ...c, text: editText.trim(), isEdited: true } : c
+      ))
+      setEditingCommentId(null)
+      setEditText('')
+      toast.success('Comment updated successfully')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update comment')
     }
   }
 
@@ -78,6 +104,31 @@ export default function CommentSection({ issueId, initialComments = [] }: Commen
 
   return (
     <div className="space-y-6">
+
+      {/* Delete Confirm Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 shadow-xl max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Comment</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete this comment? This action cannot be undone.</p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteComment(deleteConfirmId)}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h3 className="text-lg font-semibold text-gray-900">
         Comments ({comments.length})
       </h3>
@@ -127,15 +178,73 @@ export default function CommentSection({ issueId, initialComments = [] }: Commen
                 />
               </div>
               <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="font-semibold text-gray-900">
-                    {comment.user?.name || 'Anonymous'}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {formatRelativeTime(comment.createdAt)}
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold text-gray-900">
+                      {comment.user?.name || 'Anonymous'}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {formatRelativeTime(comment.createdAt)}
+                    </span>
+                    {comment.isEdited && (
+                      <span className="text-xs text-gray-400">(edited)</span>
+                    )}
+                  </div>
+
+                  {/* Edit/Delete buttons — sirf author ya admin */}
+                  {isAuthenticated && (user?.id === comment.userId || user?.role === 'admin') && (
+                    <div className="flex items-center space-x-2">
+                      {user?.id === comment.userId && (
+                        <button
+                          onClick={() => {
+                            setEditingCommentId(comment.id)
+                            setEditText(comment.text)
+                          }}
+                          className="text-xs text-blue-500 hover:text-blue-700 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setDeleteConfirmId(comment.id)}
+                        className="text-xs text-red-500 hover:text-red-700 cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-700 whitespace-pre-wrap">{comment.text}</p>
+
+                {/* Edit mode ya normal text */}
+                {editingCommentId === comment.id ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      rows={3}
+                      className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditComment(comment.id)}
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 cursor-pointer"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingCommentId(null)
+                          setEditText('')
+                        }}
+                        className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-700 whitespace-pre-wrap">{comment.text}</p>
+                )}
               </div>
             </div>
           </div>

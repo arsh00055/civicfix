@@ -203,10 +203,15 @@ export const activityAPI = {
 };
 
 export const commentsAPI = {
-  getComments:   (issueId: string) => apiClient.get(`/issues/${issueId}/comments`),
-  addComment:    (issueId: string, commentData: any) =>
+  getComments: (issueId: string) => 
+    apiClient.get(`/issues/${issueId}/comments`),
+  
+  addComment: (issueId: string, commentData: any) =>
     apiClient.post(`/issues/${issueId}/comments`, commentData),
-  updateComment: (commentId: string, commentData: any) =>
-    apiClient.put(`/issues/comments/${commentId}`, commentData),
-  deleteComment: (commentId: string) => apiClient.delete(`/issues/comments/${commentId}`),
-};
+  
+  editComment: (issueId: string, commentId: string, commentData: any) =>
+    apiClient.put(`/issues/${issueId}/comments?commentId=${commentId}`, commentData),
+  
+  deleteComment: (issueId: string, commentId: string) => 
+    apiClient.delete(`/issues/${issueId}/comments?commentId=${commentId}`),
+}
