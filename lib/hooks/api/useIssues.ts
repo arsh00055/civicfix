@@ -28,7 +28,6 @@ interface UseIssuesReturn {
   getIssuesByReporter: (reporterId: string) => Issue[];
   getFilteredIssues: (filters: Partial<Issue>) => Issue[];
   searchIssues: (query: string) => Promise<void>;
-  // Vote status helpers
   hasUserVoted: (issueId: string) => boolean;
   getUserVoteStatus: (issueId: string) => boolean;
   getVoteCount: (issueId: string) => number;

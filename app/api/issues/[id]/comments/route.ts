@@ -119,15 +119,24 @@ export async function POST(
       }
     );
 
-    if (issue.reporterId !== user.id) {
-      await notifyReporterNewComment(issue.reporterId, id, issue.title, user.name, text);
+    const reporterId = String(issue.reporterId || '').trim();
+    const currentUserId = String(user.id || '').trim();
+
+    if (reporterId !== currentUserId) {
+      await notifyReporterNewComment(
+        issue.reporterId,
+        id,
+        issue.title || 'Untitled Issue',
+        user.name || 'Anonymous',
+        text
+      );
     }
 
     // Update user stats for commenting
     await updateUserStatsAndCheckAchievements(
       user.id,
       user.role as 'citizen' | 'volunteer',
-      { totalComments: 1 } // +3 points for commenting
+      { totalComments: 1 } 
     );
 
     return NextResponse.json(newComment, { status: 201 });
@@ -224,38 +233,25 @@ export async function PUT(
     const body = await req.json();
     const text = body.text?.trim();
 
-    if (!commentId) {
-      return NextResponse.json({ message: 'Comment ID required' }, { status: 400 });
-    }
-
-    if (!text) {
-      return NextResponse.json({ message: 'Comment text is required' }, { status: 400 });
-    }
+    if (!commentId) return NextResponse.json({ message: 'Comment ID required' }, { status: 400 });
+    if (!text) return NextResponse.json({ message: 'Comment text is required' }, { status: 400 });
 
     const oid = toObjectId(id);
-    if (!oid) {
-      return NextResponse.json({ message: 'Invalid issue ID' }, { status: 400 });
-    }
+    if (!oid) return NextResponse.json({ message: 'Invalid issue ID' }, { status: 400 });
 
     const { db } = await connectToDatabase();
 
-    // Check if issue exists
     const issue = await db.collection('issues').findOne({ _id: oid });
-    if (!issue) {
-      return NextResponse.json({ message: 'Issue not found' }, { status: 404 });
-    }
+    if (!issue) return NextResponse.json({ message: 'Issue not found' }, { status: 404 });
 
     const comment = issue.comments?.find((c: any) => c.id === commentId);
-    if (!comment) {
-      return NextResponse.json({ message: 'Comment not found' }, { status: 404 });
-    }
+    if (!comment) return NextResponse.json({ message: 'Comment not found' }, { status: 404 });
 
-    // Check if user is authorized to edit (comment author or admin)
     if (comment.userId !== user.id && user.role !== 'admin') {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
 
-    // Update the comment - CORRECT SYNTAX
+    // Perform update
     const result = await db.collection('issues').updateOne(
       { _id: oid, 'comments.id': commentId },
       {
@@ -269,21 +265,23 @@ export async function PUT(
     );
 
     if (result.modifiedCount === 0) {
-      return NextResponse.json(
-        { message: 'Failed to update comment' },
-        { status: 500 }
-      );
+      return NextResponse.json({ message: 'Failed to update comment' }, { status: 500 });
     }
 
     const updatedIssue = await db.collection('issues').findOne({ _id: oid });
-    const updatedComment = updatedIssue?.comments?.find((c: any) => c.id === commentId);
+
+    // Return updated comment reliably
+    const updatedComment = {
+      ...comment,
+      text: text,
+      isEdited: true,
+      updatedAt: new Date().toISOString()
+    };
 
     return NextResponse.json(updatedComment);
+
   } catch (error: any) {
     console.error('PUT /api/issues/[id]/comments error:', error);
-    return NextResponse.json(
-      { message: 'Failed to update comment', error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Failed to update comment' }, { status: 500 });
   }
 }

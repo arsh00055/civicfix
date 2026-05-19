@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import apiClient from '@/lib/services/api/client'
+import apiClient from '../services/api/client'
 
 interface RegistrationSettings {
   allowCitizenRegistration: boolean

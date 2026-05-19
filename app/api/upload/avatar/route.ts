@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
     
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
+    if (!ObjectId.isValid(currentUser.id)) {
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid user ID format'
+      }, { status: 400 });
+    }
+    
     const objectId = new ObjectId(currentUser.id)
     
     // Avatar URL

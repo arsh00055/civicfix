@@ -156,10 +156,16 @@ const IssueForm: React.FC<IssueFormProps> = ({
     }
   };
 
-  // Get initials from title for placeholder
-  const getInitials = (imageUrl: string, index: number) => {
-    if (imageErrors[index]) return '📷';
-    return '';
+  const handleContinue = () => {
+    if (!formData.title?.trim() || 
+        !formData.description?.trim() || 
+        !formData.category?.trim() || 
+        !formData.location?.trim()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    onNext();
   };
 
   return (
@@ -287,8 +293,8 @@ const IssueForm: React.FC<IssueFormProps> = ({
 
       <div className="flex justify-end pt-6 border-t border-gray-200">
         <PrimaryButton 
-          type="submit" 
-          role={userRole}
+          type="button" 
+          onClick={handleContinue}
           disabled={uploading}
         >
           Continue to Location
