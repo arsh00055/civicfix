@@ -144,13 +144,13 @@ export default function CitizenRegistration({
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <RHFInputField label="First Name" type="text" className="text-black"
+          <RHFInputField label="First Name" placeholder="First Name" type="text" className="text-black"
             registration={register('firstName')} error={errors.firstName?.message as string} required />
-          <RHFInputField label="Last Name" type="text" className="text-black"
+          <RHFInputField label="Last Name" placeholder="Last Name" type="text" className="text-black"
             registration={register('lastName')} error={errors.lastName?.message as string} required />
         </div>
 
-        <RHFInputField label="Email" type="email" className="text-black"
+        <RHFInputField label="Email" placeholder="email" type="email" className="text-black"
           registration={register('email')} error={errors.email?.message as string} required />
 
         <RHFInputField label="Phone (Optional)" type="tel" registration={register('phone')}

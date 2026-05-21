@@ -55,6 +55,7 @@ const CitizenLogin: React.FC = () => {
         <div>
           <InputField
             label="Password"
+            aria-label="password"
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(value: string) => setPassword(value)}
