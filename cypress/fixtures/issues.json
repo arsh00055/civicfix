@@ -1,0 +1,36 @@
+{
+    "issues": [
+        {
+            "id": "fixture-issue-001",
+            "title": "Broken Street Light on Oak Avenue",
+            "description": "The street light has been broken for 3 days",
+            "category": "safety",
+            "priority": "high",
+            "status": "reported",
+            "location": "456 Oak Avenue",
+            "upvotes": 12,
+            "voters": [],
+            "commentsCount": 3,
+            "reporter": { "id": "user-1", "name": "Jaspreet Kaur" },
+            "createdAt": "2024-01-15T10:00:00.000Z",
+            "updatedAt": "2024-01-15T10:00:00.000Z"
+        },
+        {
+            "id": "fixture-issue-002",
+            "title": "Pothole on Main Street",
+            "description": "Large pothole causing traffic issues",
+            "category": "infrastructure",
+            "priority": "critical",
+            "status": "in_progress",
+            "location": "123 Main Street",
+            "upvotes": 25,
+            "voters": [],
+            "commentsCount": 7,
+            "reporter": { "id": "user-2", "name": "Arshdeep Singh" },
+            "createdAt": "2024-01-10T08:00:00.000Z",
+            "updatedAt": "2024-01-12T14:00:00.000Z"
+        }
+    ],
+    "total": 2,
+    "pagination": { "page": 1, "limit": 10, "total": 2, "totalPages": 1 }
+}
