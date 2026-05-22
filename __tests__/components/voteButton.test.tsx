@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
  jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
 jest.mock('@/features/auth/hooks/useAuth', () => ({ useAuth: jest.fn() }));
 jest.mock('@/lib/services/api/endpoints', () => ({

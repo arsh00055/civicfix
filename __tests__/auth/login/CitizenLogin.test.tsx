@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { render, screen, waitFor } from '@testing-library/react';
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -32,19 +35,18 @@ describe('CitizenLogin', () => {
 
         test('renders email and password fields', () => {
             render(<CitizenLogin />);
-      
             expect(screen.getByPlaceholderText(/email/i)).toBeInTheDocument();
             expect(screen.getByPlaceholderText(/password/i)).toBeInTheDocument();
         });
 
         test('renders login button', () => {
             render(<CitizenLogin />);
-      
             expect(screen.getByRole('button', { name: /login|sign in/i })).toBeInTheDocument();
         });
       
         test('login button is not disabled initially', () => {
             render(<CitizenLogin />);
+            // ✅ FIX: .disabled() is not a function — use .toBeDisabled() from jest-dom
             expect(screen.getByRole('button', { name: /login|sign in/i })).not.toBeDisabled();
         });
     })
@@ -90,7 +92,7 @@ describe('CitizenLogin', () => {
     describe('successful login', () => {
 
         test('calls login() with correct email, password and role', async () => {
-            mockLogin.mockResolvedValueOnce({ success: true }); // fake successful response
+            mockLogin.mockResolvedValueOnce({ success: true });
             const user = userEvent.setup();
             render(<CitizenLogin />);
       
@@ -119,6 +121,7 @@ describe('CitizenLogin', () => {
       
             await waitFor(() => {
               const btn = screen.getByRole('button', { name: /Signing in.../i });
+              // ✅ FIX: .disabled() is not a function — use .toBeDisabled() from jest-dom
               expect(btn).toBeDisabled();
             });
         });

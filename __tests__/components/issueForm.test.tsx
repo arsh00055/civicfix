@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 jest.mock('sonner', () => ({
   toast: { 
     error: jest.fn(), 

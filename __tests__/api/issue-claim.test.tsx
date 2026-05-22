@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { getCurrentUser } from '@/lib/auth/getCurrentUser';
 import { makeRequest, mockFindOne, mockUpdateOne } from '../db/mongodb';
 import { NextRequest } from 'next/server';

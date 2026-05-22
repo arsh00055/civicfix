@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
+    "types": ["jest", "@testing-library/jest-dom"],
     "lib": [
       "dom",
       "dom.iterable",
@@ -29,6 +30,7 @@
     }
   },
   "include": [
+    "src", "src/setupTests.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

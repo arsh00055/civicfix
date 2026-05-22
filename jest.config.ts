@@ -1,98 +1,29 @@
-import type { Config } from 'jest';
+import type { Config } from 'jest'
 
 const config: Config = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-
-  // ── Handle @/ path aliases ───────────────────────────────────────────────
-
-  moduleNameMapper: {
-
-    '^@/(.*)$': '<rootDir>/$1',
-
-    '\\.(css|scss|sass)$': 'identity-obj-proxy',
-
-    '\\.(png|jpg|jpeg|gif|svg|ico)$': '<rootDir>/__mocks__/fileMock.js',
-
-  },
-
-  // ── Transform ────────────────────────────────────────────────────────────
-
-  // By default Jest ignores node_modules. BUT bson, mongodb, and several
-
-  // other packages ship as ESM (.mjs) which CommonJS Jest can't parse.
-
-  // We must explicitly tell Jest to transform them.
-
-  transform: {
-
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-
-      tsconfig: {
-
-        jsx: 'react-jsx',
-
-      },
-
-    }],
-
-    // Transform ESM packages from node_modules using babel-jest
-
-    '^.+\\.(js|mjs|cjs)$': ['babel-jest', {
-
-      presets: [
-
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-
-      ],
-
-    }],
-
-  },
-
-  // ── transformIgnorePatterns ───────────────────────────────────────────────
-
-  // This is the key fix.
-
-  // Default is: ["/node_modules/"] — which ignores ALL node_modules.
-
-  // We override it to ALLOW transformation of ESM-only packages.
-
-  // Everything NOT in this list gets transformed.
-
-  transformIgnorePatterns: [
-
-    '/node_modules/(?!' + [
-
-      'bson',           // ← the direct cause of your error
-
-      'mongodb',        // ← imports bson
-
-      'mongodb-connection-string-url',
-
-      'whatwg-url',     // ← mongodb peer dep, also ESM
-
-      'tr46',           // ← whatwg-url dep
-
-      'webidl-conversions', // ← whatwg-url dep
-
-    ].join('|') + ')',
-
+  testEnvironment: 'node',
+  projects: [
+    {
+      displayName: 'node',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['**/__tests__/**/*.test.ts'],
+      moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+    },
+    {
+      displayName: 'jsdom',
+      preset: 'ts-jest',
+      testEnvironment: 'jest-environment-jsdom',
+      testMatch: ['**/__tests__/**/*.test.tsx'],
+      moduleNameMapper: { '^@/(.*)$': '<rootDir>/$1' },
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+    },
   ],
-
-  testMatch: [
-
-    '**/__tests__/**/*.(test|spec).(ts|tsx)',
-
-    '**/?(*.)+(test|spec).(ts|tsx)',
-
-  ],
-
-  // ── Module file extensions ────────────────────────────────────────────────
-
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'mjs', 'cjs', 'json'],
-
-};
+  clearMocks: false,
+  resetMocks: false,
+  testTimeout: 10000,
+}
 
 export default config

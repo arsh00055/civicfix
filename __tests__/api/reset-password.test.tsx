@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { NextRequest } from 'next/server';
 import { makeRequest, mockFindOne, mockUpdateOne, mockDb } from '../db/mongodb';
 import { ObjectId } from 'mongodb';

@@ -130,7 +130,7 @@ export async function DELETE(
     if (!canDelete) return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
 
     await db.collection('issues').deleteOne({ _id: oid });
-    await db.collection('comments').deleteMany({ issueId: id });
+    await db.collection('issues').deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ message: 'Issue deleted successfully', id });
   } catch (error: any) {

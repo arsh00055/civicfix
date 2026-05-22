@@ -99,45 +99,56 @@ jest.mock('next/server', () => {
   };
 });
 
-// Mock MongoDB updateOne to return proper structure
 export const mockFindOne = jest.fn();
 export const mockUpdateOne = jest.fn();
 export const mockCountDocuments = jest.fn();
-export const mockInsertOne = jest.fn().mockResolvedValue({ 
-  acknowledged: true, insertedId: 'mock-id' 
+export const mockInsertOne = jest.fn().mockResolvedValue({
+  acknowledged: true, insertedId: 'mock-id'
 });
 
-// Default mock implementations
-mockUpdateOne.mockResolvedValue({ 
-  matchedCount: 1, 
+mockUpdateOne.mockResolvedValue({
+  matchedCount: 1,
   modifiedCount: 1,
-  acknowledged: true 
+  acknowledged: true
 });
 
 export const mockFind = jest.fn();
 
+// ✅ FIX: skip + limit added to chain so find().sort().skip().limit().toArray() works
 export const mockChain = {
   project: jest.fn().mockReturnThis(),
   sort:    jest.fn().mockReturnThis(),
+  skip:    jest.fn().mockReturnThis(),
+  limit:   jest.fn().mockReturnThis(),
   toArray: jest.fn().mockResolvedValue([]),
 };
 
 mockFind.mockReturnValue(mockChain);
 
-const mockCollection = {
+// ✅ FIX: sort, skip, limit, toArray also exposed directly on mockCollection
+//         so tests can do mockCollection.sort.mockReturnThis() in beforeEach
+export const mockCollection = {
   findOne:        mockFindOne,
   updateOne:      mockUpdateOne,
   insertOne:      mockInsertOne,
   find:           mockFind,
+  sort:           mockChain.sort,
+  skip:           mockChain.skip,
+  limit:          mockChain.limit,
+  toArray:        mockChain.toArray,
   countDocuments: mockCountDocuments,
+  deleteOne:      jest.fn().mockResolvedValue({ deletedCount: 1 }),
+  aggregate:      jest.fn().mockReturnValue({ toArray: jest.fn().mockResolvedValue([]) }),
 };
 
 export const mockDb = {
-  collection: jest.fn().mockReturnValue(mockCollection), // ← always same object
+  collection: jest.fn().mockReturnValue(mockCollection),
 };
 
+export const connectToDatabase = jest.fn().mockResolvedValue({ db: mockDb });
+
 jest.mock('@/lib/db', () => ({
-  connectToDatabase: jest.fn().mockResolvedValue({ db: mockDb }),
+  connectToDatabase,
 }));
 
 jest.mock('bcryptjs', () => ({
@@ -147,17 +158,14 @@ jest.mock('bcryptjs', () => ({
 
 import { NextRequest } from "next/server";
 
-// Helper to generate valid ObjectId strings
 export function validObjectId(): string {
-  return '507f1f77bcf86cd799439011'; // Fixed valid ObjectId for testing
+  return '507f1f77bcf86cd799439011';
 }
 
 export function makeRequest(body: object, method = 'POST') {
   return new NextRequest('http://localhost:3000/api', {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 }

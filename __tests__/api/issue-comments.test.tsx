@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 jest.mock('@/lib/auth/getCurrentUser', () => ({
   getCurrentUser: jest.fn(),   // ← named export mock
 }));
