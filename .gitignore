@@ -89,3 +89,4 @@ __tests__/
 cypress/
 cypress.config.ts
 lib.zip
+*.zip
