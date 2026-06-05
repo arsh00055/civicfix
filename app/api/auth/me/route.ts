@@ -107,9 +107,10 @@ export async function GET(request: NextRequest) {
     // Citizen specific fields
     if (role === 'citizen') {
       formattedUser.address = user.address || null
-      formattedUser.city = user.city || null
-      formattedUser.state = user.state || null
+      formattedUser.city    = user.city    || null
+      formattedUser.state   = user.state   || null
       formattedUser.zipCode = user.zipCode || null
+      formattedUser.bio     = user.bio     || null  // ← ADD THIS
     }
 
     // Volunteer specific fields

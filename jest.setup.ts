@@ -16,6 +16,17 @@ if (!globalThis.Request) {
   globalThis.Request = Request as any;
 }
 
+let consoleSpy: jest.SpyInstance | null = null;
+
+beforeEach(() => {
+  consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  consoleSpy?.mockRestore();
+  consoleSpy = null;
+});
+
 // eslint-disable-next-line no-secrets
 process.env.JWT_SECRET = 'test-secret-do-not-use-in-production';
 

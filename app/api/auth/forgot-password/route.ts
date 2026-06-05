@@ -14,6 +14,14 @@ export async function POST(request: NextRequest){
             }, { status: 400});
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json({
+                success: false,
+                message: "Please enter a valid email address"
+            }, { status: 400 });
+        }
+
         const { db } = await connectToDatabase();
 
         const citizen = await db.collection('citizens').findOne({ email });
@@ -24,8 +32,8 @@ export async function POST(request: NextRequest){
         let userType = '';
 
         if (citizen) userType = 'citizen';
-    else if (volunteer) userType = 'volunteer';
-    else if (admin) userType = 'admin';
+        else if (volunteer) userType = 'volunteer';
+        else if (admin) userType = 'admin';
 
 
     if (!user) {

@@ -246,6 +246,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("❌ Login error:", error);
-    return NextResponse.json({ success: false, message: "Server error. Please try again." });
+    return NextResponse.json({ success: false, message: "Server error. Please try again." },
+      { status : 500 }
+    );
   }
 }

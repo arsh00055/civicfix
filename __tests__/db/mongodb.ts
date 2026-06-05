@@ -156,6 +156,7 @@ jest.mock('bcryptjs', () => ({
   compare: jest.fn().mockResolvedValue(true),
 }));
 
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { NextRequest } from "next/server";
 
 export function validObjectId(): string {
@@ -173,3 +174,18 @@ export function makeRequest(body: object, method = 'POST') {
 export function makeGetRequest(url: string): NextRequest {
   return new (NextRequest as any)(url, { method: 'GET' });
 }
+
+export function makePost(body: object): NextRequest {
+  return new NextRequest('http://localhost:3000/api/issues', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body),
+  });
+}
+
+export function makeGet(queryString = ''): NextRequest {
+  return new NextRequest(`http://localhost:3000/api/issues${queryString}`);
+}
+
+export const ISSUE_ID = '507f1f77bcf86cd799439011';
+export const USER_ID  = '507f1f77bcf86cd799439020';

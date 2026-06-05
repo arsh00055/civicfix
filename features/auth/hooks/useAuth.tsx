@@ -43,22 +43,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Single writer ────────────────────────────────────────────────────────
   const updateAuthState = useCallback(
     (userData: User, authToken: string) => {
-      const userDataStr = JSON.stringify(userData);
-
-      setUserState(userData);
-      setUserRole(userData.role);
-
+      // Strip undefined values so they don't overwrite good data in storage
+      const cleanUser = Object.fromEntries(
+        Object.entries(userData).filter(([_, v]) => v !== undefined)
+      ) as User;
+  
+      const userDataStr = JSON.stringify(cleanUser);
+  
+      setUserState(cleanUser);
+      setUserRole(cleanUser.role);
+  
       Cookies.set('auth_token', authToken, COOKIE_CONFIG);
-      Cookies.set('user_role', userData.role, COOKIE_CONFIG);
+      Cookies.set('user_role', cleanUser.role, COOKIE_CONFIG);
       Cookies.set('user_data', userDataStr, COOKIE_CONFIG);
-
+  
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_token', authToken);
-        localStorage.setItem('user_role', userData.role);
+        localStorage.setItem('user_role', cleanUser.role);
         localStorage.setItem('user_data', userDataStr);
       }
-
-      dispatch(setUser({ user: userData, token: authToken, role: userData.role }));
+  
+      dispatch(setUser({ user: cleanUser, token: authToken, role: cleanUser.role }));
     },
     [dispatch]
   );
@@ -207,32 +212,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const u = response.user;
 
+      const existingUser = user; // current state
+
       const formattedUser: User = {
-        id:             u.id || u._id,
-        _id:            u.id || u._id,
-        firstName:      u.firstName || '',
-        lastName:       u.lastName  || '',
-        name:           u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim(),
-        email:          u.email,
-        role:           u.role,
-        avatar:         u.avatar,
-        phone:          u.phone,
-        isActive:       u.isActive,
-        isEmailVerified:u.isEmailVerified,
-        createdAt:      u.createdAt,
-        updatedAt:      u.updatedAt,
-        isVerified:     u.isEmailVerified,
-        skills:         u.skills,
-        availability:   u.availability,
-        experienceLevel:u.experienceLevel,
-        approvalStatus: u.approvalStatus,
-        department:     u.department,
-        permissions:    u.permissions,
-        bio:            u.bio,
-        city:           u.city,
-        address:        u.address,
-        state:          u.state,
-        zipCode:        u.zipCode,
+        // spread existing first so nothing gets lost
+        ...existingUser,
+
+        // then overwrite with fresh data from API
+        id:              u.id || u._id,
+        _id:             u.id || u._id,
+        firstName:       u.firstName       ?? existingUser?.firstName       ?? '',
+        lastName:        u.lastName        ?? existingUser?.lastName        ?? '',
+        name:            u.name            ?? existingUser?.name            ?? '',
+        email:           u.email           ?? existingUser?.email           ?? '',
+        role:            u.role            ?? existingUser?.role,
+        avatar:          u.avatar          ?? existingUser?.avatar          ?? null,
+        phone:           u.phone           ?? existingUser?.phone           ?? null,
+        bio:             u.bio             ?? existingUser?.bio             ?? null,
+        city:            u.city            ?? existingUser?.city            ?? null,
+        address:         u.address         ?? existingUser?.address         ?? null,
+        state:           u.state           ?? existingUser?.state           ?? null,
+        zipCode:         u.zipCode         ?? existingUser?.zipCode         ?? null,
+        isActive:        u.isActive        ?? existingUser?.isActive,
+        isEmailVerified: u.isEmailVerified ?? existingUser?.isEmailVerified,
+        createdAt:       u.createdAt       ?? existingUser?.createdAt,
+        updatedAt:       u.updatedAt       ?? existingUser?.updatedAt,
+        isVerified:      u.isEmailVerified ?? existingUser?.isVerified,
+        skills:          u.skills          ?? existingUser?.skills,
+        availability:    u.availability    ?? existingUser?.availability,
+        experienceLevel: u.experienceLevel ?? existingUser?.experienceLevel,
+        approvalStatus:  u.approvalStatus  ?? existingUser?.approvalStatus,
+        department:      u.department      ?? existingUser?.department,
+        permissions:     u.permissions     ?? existingUser?.permissions,
       } as User;
 
       const existingToken =

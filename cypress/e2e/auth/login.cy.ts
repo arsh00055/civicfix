@@ -46,7 +46,7 @@ describe('Citizen Login', () => {
             cy.contains('button', /sign in/i).click();
             cy.contains(/Email is required.|required.*email/i).should('be.visible');
             cy.then(() => {
-                expect(loginRequestMade, 'login API should not be called').to.be.false;
+                expect(loginRequestMade).to.be.false;
             });
         });
     })

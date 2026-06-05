@@ -33,6 +33,7 @@ Cypress.Commands.add('loginAsCitizen', (
         role: 'citizen',
     }).then((response) => {
         expect(response.status).to.eq(200);
+        cy.log(JSON.stringify(response.body));
         const { token, user} = response.body.data;
         window.localStorage.setItem('auth_token', token);
         window.localStorage.setItem('user_data', JSON.stringify(user));

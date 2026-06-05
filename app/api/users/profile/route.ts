@@ -184,7 +184,7 @@ export async function PUT(req: NextRequest) {
     if (body.name !== undefined && body.firstName === undefined && body.lastName === undefined) {
       updateData.name = body.name.trim()
     }
-    
+    console.log('PHONE VALUE RECEIVED:', JSON.stringify(body.phone))
     if (body.phone !== undefined) updateData.phone = body.phone
     if (body.bio !== undefined) updateData.bio = body.bio
     if (body.avatar !== undefined) updateData.avatar = body.avatar

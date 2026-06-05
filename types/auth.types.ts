@@ -2,6 +2,24 @@
 import type { BaseUser } from './base.types';
 
 export interface User extends BaseUser {
+  bio?: string;
+  city?: string;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  }; 
+  skills?: string[];
+  availability?: string[];
+  experienceLevel?: string;
+  approvalStatus?: string;
+  department?: string;
+  permissions?: string[];
+  isEmailVerified?: boolean;
+  state?: string;
+  zipCode?: string;
   lastLogin?: string;
   metadata?: Record<string, any>;
 }

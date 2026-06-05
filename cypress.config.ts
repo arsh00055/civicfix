@@ -1,7 +1,7 @@
 import { defineConfig } from "cypress";
 
 export default defineConfig({
-  allowCypressEnv: false,
+  allowCypressEnv: true,
 
   env: {
     CITIZEN_EMAIL: process.env.CYPRESS_CITIZEN_EMAIL,
@@ -13,7 +13,7 @@ export default defineConfig({
   },
 
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL ?? 'http://localhost:3000',
+    baseUrl: process.env.CYPRESS_BASE_URL ?? 'https://civicfix-alpha.vercel.app/',
     specPattern: 'cypress/e2e/**/*.cy.ts',
     screenshotsFolder: 'cypress/screenshots',
     videosFolder: 'cypress/videos',

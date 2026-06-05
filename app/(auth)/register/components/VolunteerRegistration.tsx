@@ -205,7 +205,7 @@ export default function VolunteerRegistration({
 
         {/* Skills */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label aria-placeholder="skills" className="block text-sm font-medium text-gray-700 mb-2">
             Skills *
             {errors.skills && (
               <span className="text-red-600 text-sm ml-2">{errors.skills.message as string}</span>

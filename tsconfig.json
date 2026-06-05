@@ -1,9 +1,19 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "types": ["jest", "node", "cypress", "@testing-library/jest-dom"],
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": [
+      "jest",
+      "node",
+      "@testing-library/jest-dom"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -35,13 +45,14 @@
     "__tests__/**/*.ts",
     "__tests__/**/*.tsx",
     "hooks/**/*.ts",
-    "cypress",
     "lib/**/*.ts",
     "components/**/*.ts",
     "components/**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "cypress"
   ]
 }
