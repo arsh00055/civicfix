@@ -205,20 +205,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshUser = async (): Promise<void> => {
     try {
       const response = await authApi.getCurrentUser();
-
-      if (!response.success) {
+      
+      // Handle different response structures
+      let u;
+      if (response.data?.user) {
+        u = response.data.user;
+      } else if (response.user) {
+        u = response.user;
+      } else if (response.data) {
+        u = response.data;
+      } else {
+        u = response;
+      }
+      
+      if (!u) {
+        throw new Error('Failed to refresh user — no user data in response');
+      }
+      
+      if (!response.success && response.success !== undefined) {
         throw new Error('Failed to refresh user — API returned success: false');
       }
-
-      const u = response.user;
-
-      const existingUser = user; // current state
-
+      
+      const existingUser = user;
+      
       const formattedUser: User = {
-        // spread existing first so nothing gets lost
         ...existingUser,
-
-        // then overwrite with fresh data from API
         id:              u.id || u._id,
         _id:             u.id || u._id,
         firstName:       u.firstName       ?? existingUser?.firstName       ?? '',
@@ -245,14 +256,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         department:      u.department      ?? existingUser?.department,
         permissions:     u.permissions     ?? existingUser?.permissions,
       } as User;
-
+      
       const existingToken =
         Cookies.get('auth_token') ||
         (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : '') ||
         '';
-
+      
       updateAuthState(formattedUser, existingToken);
     } catch (error) {
+      console.error('Refresh user failed:', error);
       throw error;
     }
   };

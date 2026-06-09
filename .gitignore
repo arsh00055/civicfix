@@ -91,3 +91,4 @@ cypress/
 cypress.config.ts
 lib.zip
 *.zip
+cypress.env.json

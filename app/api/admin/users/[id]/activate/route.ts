@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     return NextResponse.json({
       success: true,
-      message: `${foundUser.name} (${userRole}) da account deactivate kar dita gaya.`
+      message: `${foundUser.name}'s (${userRole}) account has been activated.`
     })
 
   } catch (error: any) {

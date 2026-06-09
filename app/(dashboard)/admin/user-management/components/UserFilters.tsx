@@ -29,7 +29,7 @@ export default function UserFilters({
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
       <div className="grid grid-cols-3 lg:grid-cols-1 gap-4">
         <div>
-          <label className="block text-black text-sm font-medium text-gray-700 mb-2">Search Users</label>
+          <label className="block text-black text-sm font-medium text-gray-700 mb-2" aria-label='Search Users'>Search Users</label>
           <SearchBox
             onSearch={onSearchChange}
             placeholder="Search by name or email..."
@@ -40,7 +40,7 @@ export default function UserFilters({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Role</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2" aria-label="Filter by Role">Filter by Role</label>
           <select
             value={roleFilter}
             onChange={(e) => onRoleFilterChange(e.target.value as UserRole | '')}
@@ -53,7 +53,7 @@ export default function UserFilters({
             <option value="admin">Admin</option>
           </select>
         </div>
-        <div className="flex items-end">
+        <div className="flex items-end" aria-label="Clear Filters">
           <button
             onClick={handleClear}
             className="w-full bg-gray-600 cursor-pointer text-black text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-1"

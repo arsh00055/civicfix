@@ -39,6 +39,7 @@ const fetchAvailableTasks = async () => {
     
   } catch (err) {
     console.error('Failed to fetch tasks:', err);
+    toast.error('Failed to load tasks')
     setError('Failed to load available tasks. Please try again.');
   } finally {
     setLoading(false);
@@ -58,6 +59,7 @@ const handleClaimTask = async (taskId: string) => {
     toast.success('Task claimed successfully!');
     
   } catch (err) {
+    toast.error('Failed to claim task');
     console.error('Failed to claim task:', err);
     setError('Failed to claim task. Please try again.');
   } finally {

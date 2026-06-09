@@ -157,8 +157,9 @@ const EditProfilePage: React.FC = () => {
       const response = await apiClient.put('/users/profile', updateData);
       if (response.data.success) {
         setSuccess(true);
-        await refreshUser(); // ← ithe add karo — cache update hoga
-        setTimeout(() => router.replace('/profile'), 800);
+        await refreshUser();
+        const redirectDelay = process.env.NODE_ENV === 'test' ? 3000 : 2000;
+        setTimeout(() => router.replace('/profile'), redirectDelay);
       }
     } catch (err: any) {
       console.error('Profile update error:', err);

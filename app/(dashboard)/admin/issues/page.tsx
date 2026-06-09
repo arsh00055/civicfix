@@ -163,7 +163,7 @@ const AdminIssuesPage: React.FC = () => {
   }, []);
 
   const pendingCount = useMemo(
-    () => issues.filter(i => i.status === 'in_review' ).length,
+    () => issues.filter(i => i.status === 'pending_review' ).length,
     [issues]
   );
 
@@ -422,7 +422,7 @@ const AdminIssuesPage: React.FC = () => {
                       {/* Action buttons */}
                       <div className="grid grid-cols-2 lg:grid-cols-1 flex-shrink-0">
                         {/* Review button — for pending_review / in_review */}
-                        {issue.status === 'in_review' && (
+                        {issue.status === 'pending_review' && (
                           <button
                             onClick={() => { setSelectedIssue(issue); setShowReviewModal(true); }}
                             className="px-5 py-2 cursor-pointer bg-purple-600 text-white text-sm font-medium rounded-xl hover:bg-purple-700 transition-all shadow-sm flex items-center gap-2"

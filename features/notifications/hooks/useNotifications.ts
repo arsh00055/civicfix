@@ -139,8 +139,9 @@ export const useNotifications = (): UseNotificationsReturn => {
               `${notificationToUpdate.title} marked as read`
             );
           }
-        } catch (notifErr) {
-          console.warn('Failed to show browser notification:', notifErr);
+        } catch (error) {
+          console.warn('Failed to show browser notification:', error);
+          throw error;
         }
       }
       

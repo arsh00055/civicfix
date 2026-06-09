@@ -4,7 +4,7 @@ export interface Issue {
   description: string;
   category: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'reported' | 'in_review' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
+  status: 'reported' | 'pending_review' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
   severity?: 'minor' | 'moderate' | 'severe' | 'emergency';
   location: string;
   address?: string;

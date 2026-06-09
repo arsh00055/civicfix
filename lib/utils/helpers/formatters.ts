@@ -1,23 +1,25 @@
-export const formatDate = (date: string | Date, options: Intl.DateTimeFormatOptions = {}): string => {
-  try {
-    const defaultOptions: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      ...options,
-    };
+// In lib/utils/helpers/formatters.ts
 
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
-    if (isNaN(dateObj.getTime())) {
-      return 'Invalid date';
-    }
-
-    return dateObj.toLocaleDateString('en-US', defaultOptions);
-  } catch (error) {
-    console.error('Error formatting date:', error);
+export const formatDate = (date: string | Date | null | undefined): string => {
+  // ✅ Add defensive check at the beginning
+  if (!date) {
+    return 'Date not available';
+  }
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  // ✅ Check if dateObj is valid before calling getTime
+  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
     return 'Invalid date';
   }
+  
+  // Your existing formatting logic here
+  // For example:
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 };
 
 export const formatDateTime = (date: string | Date): string => {

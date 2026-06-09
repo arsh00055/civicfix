@@ -299,6 +299,7 @@ export default function UserManagementPage() {
                 onClick={() => {
                   setDeactivateModalUserId(null)
                   setDeactivateReason('')
+                  handleDeactivateConfirm()
                 }}
                 disabled={deactivating}
                 className="px-4 py-2 text-sm font-medium cursor-pointer text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"

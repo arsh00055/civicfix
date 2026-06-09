@@ -161,7 +161,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     placeholder="Why is this being rejected? What needs to be improved?"
                   />
                 </div>

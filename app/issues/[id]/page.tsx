@@ -97,15 +97,6 @@ export default function IssueDetailPage() {
 
   if (loading) return <Loading />
 
-  if (error) {
-    return (
-      <Error
-        error={error as unknown as Error & { digest?: string }}
-        reset={fetchIssue}
-      />
-    )
-  }
-
   if (!issue) {
     return (
       <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 text-center">
@@ -123,6 +114,15 @@ export default function IssueDetailPage() {
           </button>
         </div>
       </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Error
+        error={error as unknown as Error & { digest?: string }}
+        reset={fetchIssue}
+      />
     )
   }
 

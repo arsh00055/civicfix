@@ -191,7 +191,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, stats }) => {
           <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
-              Joined {formatDate(user.joinDate)}
+              Joined {formatDate(user.createdAt || user.joinDate)}
             </span>
             {(user as any).phone && (
               <span className="flex items-center gap-1.5">
