@@ -13,11 +13,28 @@ import { useRegistrationSettings } from '@/lib/hooks/useRegistrationSettings'
 
 const volunteerSchema = z.object({
   email:           z.string().email('Invalid email address'),
-  password:        z.string().min(8, 'Password must be at least 8 characters'),
+  password:        z.string().superRefine((val, ctx) => {
+    if (val.length < 8)
+      ctx.addIssue({ code: 'custom', message: 'Min 8 characters required' })
+    if (!/[A-Z]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One uppercase letter required' })
+    if (!/[a-z]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One lowercase letter required' })
+    if (!/[0-9]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One number required' })
+    if (!/[@$!%*?&]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One special character required (@$!%*?&)' })
+  }),
   confirmPassword: z.string(),
   firstName:       z.string().min(2, 'First name must be at least 2 characters'),
   lastName:        z.string().min(2, 'Last name must be at least 2 characters'),
-  phone:           z.string().optional(),
+  phone: z.union([
+    z.string().refine(val => /^\d{10}$/.test(val.replace(/[\s\-()]/g, '')), {
+      message: 'Phone number must be exactly 10 digits',
+    }),
+    z.literal(''),
+    z.undefined(),
+  ]),
   skills:          z.array(z.string()).min(1, 'Select at least one skill'),
   availability:    z.array(z.string()).min(1, 'Select at least one availability'),
   experienceLevel: z.enum(['beginner', 'intermediate', 'expert']),
@@ -28,7 +45,6 @@ const volunteerSchema = z.object({
   path:    ['confirmPassword'],
 })
 
-
 const SKILLS_OPTIONS = Object.freeze([
   'Cleaning', 'Gardening', 'Construction', 'Teaching', 'Medical',
   'Technical', 'Cooking', 'Driving', 'Organization', 'Leadership',
@@ -38,12 +54,54 @@ const AVAILABILITY_OPTIONS = Object.freeze([
   'Weekdays', 'Weekends', 'Mornings', 'Afternoons', 'Evenings', 'Flexible',
 ])
 
+function PasswordField({ registration, error }: { registration: any, error: string | undefined }) {
+  const [password, setPassword] = useState('')
+
+  const rules = [
+    { label: 'Min 8 characters',               met: password.length >= 8 },
+    { label: 'One uppercase letter (A-Z)',      met: /[A-Z]/.test(password) },
+    { label: 'One lowercase letter (a-z)',      met: /[a-z]/.test(password) },
+    { label: 'One number (0-9)',                met: /[0-9]/.test(password) },
+    { label: 'One special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
+  ]
+
+  const unmetRules = rules.filter(r => !r.met)
+
+  return (
+    <div>
+      <RHFInputField
+        label="Password"
+        type="password"
+        registration={{
+          ...registration,
+          onChange: (e: any) => {
+            setPassword(e.target.value)
+            registration.onChange(e)
+          },
+        }}
+        className="text-black"
+        error={error}
+        required
+        placeholder="At least 8 characters"
+      />
+      {password && unmetRules.length > 0 && (
+        <ul className="mt-1.5 text-xs space-y-0.5 pl-1">
+          {unmetRules.map(r => (
+            <li key={r.label} className="text-red-400">✗ {r.label}</li>
+          ))}
+        </ul>
+      )}
+      {password && unmetRules.length === 0 && (
+        <p className="mt-1.5 text-xs text-green-500 pl-1">✓ Password looks strong!</p>
+      )}
+    </div>
+  )
+}
 
 interface VolunteerRegistrationProps {
   onSuccess:       () => void
   onSwitchToLogin: () => void
 }
-
 
 export default function VolunteerRegistration({
   onSuccess,
@@ -80,9 +138,7 @@ export default function VolunteerRegistration({
       setRegisteredEmail(data.email)
       setShowSuccess(true)
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || err.message || 'Registration failed. Please try again.'
-      )
+      setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -113,12 +169,10 @@ export default function VolunteerRegistration({
     onSwitchToLogin()
   }
 
-  // Success screen
   if (showSuccess) {
     return <VolunteerSuccess email={registeredEmail} onContinue={onSuccess} />
   }
 
-  // Loading settings
   if (settingsLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -127,17 +181,13 @@ export default function VolunteerRegistration({
     )
   }
 
-  // Registration closed
   if (registrationClosed) {
     return (
       <div className="py-6 px-2">
-        <button
-          onClick={onSwitchToLogin}
-          className="flex items-center cursor-pointer text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors"
-        >
+        <button onClick={onSwitchToLogin}
+          className="flex items-center cursor-pointer text-sm text-gray-500 hover:text-gray-700 mb-8 transition-colors">
           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           Back to Login
         </button>
@@ -164,10 +214,8 @@ export default function VolunteerRegistration({
               {supportEmail}
             </a>
           </div>
-          <button
-            onClick={onSwitchToLogin}
-            className="w-full bg-green-600 cursor-pointer text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-sm"
-          >
+          <button onClick={onSwitchToLogin}
+            className="w-full bg-green-600 cursor-pointer text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-colors font-medium text-sm">
             Back to Login
           </button>
         </div>
@@ -175,7 +223,6 @@ export default function VolunteerRegistration({
     )
   }
 
-  // Normal registration form
   return (
     <div>
       <div className="text-center mb-6">
@@ -200,19 +247,27 @@ export default function VolunteerRegistration({
         <RHFInputField label="Email" type="email" registration={register('email')}
           className="text-black" error={errors.email?.message as string} required />
 
-        <RHFInputField label="Phone (Optional)" type="tel" registration={register('phone')}
-          className="text-black" error={errors.phone?.message as string} placeholder="+1 (555) 123-4567" />
+        <RHFInputField
+          label="Phone (Optional)" type="tel" registration={register('phone')}
+          className="text-black" error={errors.phone?.message as string} placeholder="9876543210"
+          maxLength={10}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight']
+            if (allowed.includes(e.key)) return
+            if (!/[0-9]/.test(e.key)) { e.preventDefault(); return }
+            if (e.currentTarget.value.length >= 10) e.preventDefault()
+          }}
+        />
 
         {/* Skills */}
         <div>
-          <label aria-placeholder="skills" className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Skills *
             {errors.skills && (
               <span className="text-red-600 text-sm ml-2">{errors.skills.message as string}</span>
             )}
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {/* FIX: SKILLS_OPTIONS is a frozen module constant — stable reference */}
             {SKILLS_OPTIONS.map(skill => (
               <label key={skill} htmlFor={`skill-${skill}`}
                 className="flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -236,7 +291,6 @@ export default function VolunteerRegistration({
             )}
           </label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {/* FIX: AVAILABILITY_OPTIONS is a frozen module constant — stable reference */}
             {AVAILABILITY_OPTIONS.map(availability => (
               <label key={availability} htmlFor={`availability-${availability}`}
                 className="flex items-center p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
@@ -282,8 +336,10 @@ export default function VolunteerRegistration({
           )}
         </div>
 
-        <RHFInputField label="Password" type="password" registration={register('password')}
-          className="text-black" error={errors.password?.message as string} required placeholder="At least 8 characters" />
+        <PasswordField
+          registration={register('password')}
+          error={errors.password?.message as string | undefined}
+        />
 
         <RHFInputField label="Confirm Password" type="password" registration={register('confirmPassword')}
           className="text-black" error={errors.confirmPassword?.message as string} required placeholder="Confirm your password" />

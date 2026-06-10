@@ -13,35 +13,94 @@ import { useRegistrationSettings } from '@/lib/hooks/useRegistrationSettings'
 
 const citizenSchema = z.object({
   email:           z.string().email('Invalid email address'),
-  password:        z.string().min(8, 'Password must be at least 8 characters'),
+  password:        z.string().superRefine((val, ctx) => {
+    if (val.length < 8)
+      ctx.addIssue({ code: 'custom', message: 'Min 8 characters required' })
+    if (!/[A-Z]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One uppercase letter required' })
+    if (!/[a-z]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One lowercase letter required' })
+    if (!/[0-9]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One number required' })
+    if (!/[@$!%*?&]/.test(val))
+      ctx.addIssue({ code: 'custom', message: 'One special character required (@$!%*?&)' })
+  }),
   confirmPassword: z.string(),
   firstName:       z.string().min(2, 'First name must be at least 2 characters'),
   lastName:        z.string().min(2, 'Last name must be at least 2 characters'),
-  phone:           z.string().optional(),
-  address:         z.string().min(5, 'Address is required'),
-  city:            z.string().min(2, 'City is required'),
-  zipCode:         z.string().min(3, 'ZIP code is required'),
-  avatar:          z.string().optional(),
-  agreeToTerms:    z.boolean().refine(val => val === true, 'You must agree to the terms'),
+  phone: z.union([
+    z.string().refine(val => /^\d{10}$/.test(val.replace(/[\s\-()]/g, '')), {
+      message: 'Phone number must be exactly 10 digits',
+    }),
+    z.literal(''),
+    z.undefined(),
+  ]),
+  address:      z.string().min(5, 'Address is required'),
+  city:         z.string().min(2, 'City is required'),
+  zipCode:      z.string().min(3, 'ZIP code is required'),
+  avatar:       z.string().optional(),
+  agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms'),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path:    ['confirmPassword'],
 })
 
+function PasswordField({ registration, error }: { registration: any, error: string | undefined }) {
+  const [password, setPassword] = useState('')
+
+  const rules = [
+    { label: 'Min 8 characters',               met: password.length >= 8 },
+    { label: 'One uppercase letter (A-Z)',      met: /[A-Z]/.test(password) },
+    { label: 'One lowercase letter (a-z)',      met: /[a-z]/.test(password) },
+    { label: 'One number (0-9)',                met: /[0-9]/.test(password) },
+    { label: 'One special character (@$!%*?&)', met: /[@$!%*?&]/.test(password) },
+  ]
+
+  const unmetRules = rules.filter(r => !r.met)
+
+  return (
+    <div>
+      <RHFInputField
+        label="Password"
+        type="password"
+        registration={{
+          ...registration,
+          onChange: (e: any) => {
+            setPassword(e.target.value)
+            registration.onChange(e)
+          },
+        }}
+        className="text-black"
+        error={error}
+        required
+        placeholder="At least 8 characters"
+      />
+      {password && unmetRules.length > 0 && (
+        <ul className="mt-1.5 text-xs space-y-0.5 pl-1">
+          {unmetRules.map(r => (
+            <li key={r.label} className="text-red-400">✗ {r.label}</li>
+          ))}
+        </ul>
+      )}
+      {password && unmetRules.length === 0 && (
+        <p className="mt-1.5 text-xs text-green-500 pl-1">✓ Password looks strong!</p>
+      )}
+    </div>
+  )
+}
 
 interface CitizenRegistrationProps {
   onSuccess:       () => void
   onSwitchToLogin: () => void
 }
 
-
 export default function CitizenRegistration({
   onSuccess,
   onSwitchToLogin,
 }: CitizenRegistrationProps) {
-  const [isLoading, setIsLoading]           = useState(false)
-  const [error, setError]                   = useState('')
-  const [showSuccess, setShowSuccess]       = useState(false)
+  const [isLoading, setIsLoading]             = useState(false)
+  const [error, setError]                     = useState('')
+  const [showSuccess, setShowSuccess]         = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState('')
 
   const { settings, loading: settingsLoading } = useRegistrationSettings()
@@ -61,9 +120,7 @@ export default function CitizenRegistration({
       setRegisteredEmail(data.email)
       setShowSuccess(true)
     } catch (err: any) {
-      setError(
-        err.response?.data?.message || err.message || 'Registration failed. Please try again.'
-      )
+      setError(err.response?.data?.message || err.message || 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -74,12 +131,10 @@ export default function CitizenRegistration({
     onSwitchToLogin()
   }
 
-  // Success screen
   if (showSuccess) {
     return <RegistrationSuccess email={registeredEmail} onContinue={onSuccess} />
   }
 
-  // Loading settings
   if (settingsLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -88,7 +143,6 @@ export default function CitizenRegistration({
     )
   }
 
-  // Registration closed
   if (registrationClosed) {
     return (
       <div className="py-6 px-2">
@@ -110,17 +164,13 @@ export default function CitizenRegistration({
           </div>
           <div className="bg-gray-50 border border-gray-200 rounded-xl px-5 py-4 inline-block mb-8">
             <p className="text-xs text-gray-500 mb-1">Contact our support team</p>
-            <a
-              href={`mailto:${supportEmail}`}
-              className="text-blue-600 font-semibold cursor-pointer text-sm hover:text-blue-700 hover:underline transition-colors"
-            >
+            <a href={`mailto:${supportEmail}`}
+              className="text-blue-600 font-semibold cursor-pointer text-sm hover:text-blue-700 hover:underline transition-colors">
               {supportEmail}
             </a>
           </div>
-          <button
-            onClick={onSwitchToLogin}
-            className="w-full bg-blue-600 text-white cursor-pointer py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm"
-          >
+          <button onClick={onSwitchToLogin}
+            className="w-full bg-blue-600 text-white cursor-pointer py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-medium text-sm">
             Back to Login
           </button>
         </div>
@@ -128,7 +178,6 @@ export default function CitizenRegistration({
     )
   }
 
-  // Normal registration form
   return (
     <div>
       <div className="text-center mb-6">
@@ -153,8 +202,17 @@ export default function CitizenRegistration({
         <RHFInputField label="Email" placeholder="email" type="email" className="text-black"
           registration={register('email')} error={errors.email?.message as string} required />
 
-        <RHFInputField label="Phone (Optional)" type="tel" registration={register('phone')}
-          error={errors.phone?.message as string} className="text-black" placeholder="+1 (555) 123-4567" />
+        <RHFInputField
+          label="Phone (Optional)" type="tel" registration={register('phone')}
+          className="text-black" error={errors.phone?.message as string} placeholder="9876543210"
+          maxLength={10}
+          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight']
+            if (allowed.includes(e.key)) return
+            if (!/[0-9]/.test(e.key)) { e.preventDefault(); return }
+            if (e.currentTarget.value.length >= 10) e.preventDefault()
+          }}
+        />
 
         <RHFInputField label="Address" type="text" registration={register('address')}
           error={errors.address?.message as string} className="text-black" required placeholder="123 Main Street" />
@@ -166,19 +224,18 @@ export default function CitizenRegistration({
             className="text-black" error={errors.zipCode?.message as string} required placeholder="10001" />
         </div>
 
-        <RHFInputField label="Password" type="password" registration={register('password')}
-          className="text-black" error={errors.password?.message as string} required placeholder="At least 8 characters" />
+        <PasswordField
+          registration={register('password')}
+          error={errors.password?.message as string | undefined}
+        />
 
         <RHFInputField label="Confirm Password" type="password" registration={register('confirmPassword')}
           className="text-black" error={errors.confirmPassword?.message as string} required placeholder="Confirm your password" />
 
         <div className="flex items-start">
-          <input
-            type="checkbox"
-            {...register('agreeToTerms')}
+          <input type="checkbox" {...register('agreeToTerms')}
             className="text-black h-4 w-4 cursor-pointer text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-            id="agreeToTerms"
-          />
+            id="agreeToTerms" />
           <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-900">
             I agree to the{' '}
             <Link href="/terms" className="text-blue-600 hover:text-blue-500">Terms and Conditions</Link>{' '}

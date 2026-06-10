@@ -15,6 +15,8 @@ interface RHFInputFieldProps {
   helperText?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  maxLength?: number;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
@@ -31,13 +33,15 @@ const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
   helperText,
   leftIcon,
   rightIcon,
+  maxLength,
+  onKeyDown,
 }, ref) => {
   const { name, onChange, onBlur, ref: registrationRef } = registration;
 
   return (
     <div className={wrapperClassName}>
       {label && (
-        <label 
+        <label
           htmlFor={id || name}
           className="block text-sm font-medium text-gray-700 mb-2"
         >
@@ -59,10 +63,12 @@ const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
           name={name}
           onChange={onChange}
           onBlur={onBlur}
+          maxLength={maxLength}
+          onKeyDown={onKeyDown}
           className={`
             w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            ${error 
-              ? 'border-red-300 focus:border-red-300 focus:ring-red-200' 
+            ${error
+              ? 'border-red-300 focus:border-red-300 focus:ring-red-200'
               : 'border-gray-300 focus:border-blue-500'
             }
             ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'}
@@ -81,7 +87,7 @@ const RHFInputField = forwardRef<HTMLInputElement, RHFInputFieldProps>(({
         )}
       </div>
       {error && (
-        <p 
+        <p
           id={`${id || name}-error`}
           className="mt-1 text-sm text-red-600"
         >
