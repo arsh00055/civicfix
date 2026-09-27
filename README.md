@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CivicFix
 
-## Getting Started
+CivicFix is a multi-role civic issue reporting and management platform designed to connect citizens, volunteers, and administrators for reporting and managing community issues.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Role-based access for Citizens, Volunteers, and Admins
+- User registration and login
+- JWT-based authentication
+- Password reset flow
+- Create and manage civic issues
+- Browse, filter, and sort reported issues
+- Personal "My Reports" section
+- Map-based issue visualization
+- Volunteer task and assignment management
+- Admin dashboard
+- Notifications and activity tracking
+- Leaderboard and achievements
+- Community bulletin and polls
+- User profile, privacy, location, and statistics
+- Help center, FAQs, and support contact
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Next.js
+- React
+- TypeScript
+- Redux Toolkit
+- MongoDB
+- REST APIs
+- JWT Authentication
+- Tailwind CSS
+- Jest
+- React Testing Library
+- Cypress
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Testing
 
-## Learn More
+The project includes both unit/component testing and end-to-end testing.
 
-To learn more about Next.js, take a look at the following resources:
+### Unit & Component Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Jest
+- React Testing Library
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### End-to-End Testing
 
-## Deploy on Vercel
+- Cypress
+- Authentication flows
+- Issue-related flows
+- Notifications
+- Volunteer/admin flows
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+app/
+├── (auth)/              # Authentication pages
+├── (dashboard)/         # Role-based dashboards
+├── api/                 # API routes
+├── issues/              # Issue management
+├── map/                 # Map-based issue view
+├── notifications/       # Notifications
+├── profile/             # User profile
+├── tasks/               # Volunteer tasks
+├── help/                # Help and support
+└── polls/               # Community polls
+
+components/              # Reusable UI components
+hooks/                   # Custom React hooks
+lib/                     # Services and utilities
+cypress/                 # Cypress E2E tests
+__tests__/               # Jest/RTL tests
