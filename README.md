@@ -34,6 +34,25 @@ CivicFix is a multi-role civic issue reporting and management platform designed 
 - React Testing Library
 - Cypress
 
+
+## Screenshots
+
+### Admin Dashboard
+
+![Admin Dashboard](./public/screenshots/admin-dashboard.png)
+
+### Citizen Dashboard
+
+![Citizen Dashboard](./public/screenshots/citizen-dashboard.png)
+
+### Report an Issue
+
+![Report an Issue](./public/screenshots/report-issue1.png)
+
+### Volunteer Dashboard
+
+![Volunteer Dashboard](./public/screenshots/volunteer-dashboard.png)
+
 ## Testing
 
 The project includes both unit/component testing and end-to-end testing.
